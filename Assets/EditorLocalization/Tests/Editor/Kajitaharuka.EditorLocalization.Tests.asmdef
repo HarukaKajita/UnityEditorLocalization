@@ -2,7 +2,7 @@
     "name": "Kajitaharuka.EditorLocalization.Tests",
     "rootNamespace": "Kajitaharuka.EditorLocalization.Tests",
     "references": [
-        "GUID:f0c6545b2f9d45b28962b628dd24d56c",
+        "Kajitaharuka.EditorLocalization",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],
