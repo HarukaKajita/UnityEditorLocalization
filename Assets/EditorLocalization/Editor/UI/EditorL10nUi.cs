@@ -84,22 +84,41 @@ namespace Kajitaharuka.EditorLocalization
                 activeIndex = 0;
 
             var dropdown = new DropdownField(label, choices, activeIndex);
-            dropdown.RegisterValueChangedCallback(evt =>
+            dropdown.RegisterValueChangedCallback(_ =>
             {
-                var index = choices.IndexOf(evt.newValue);
-                if (index < 0 || index >= locales.Length)
+                var currentLocales = EditorL10n.GetLocales(scope);
+                var index = dropdown.index;
+                if (index < 0 || index >= currentLocales.Count)
                     return;
-                EditorL10n.SetActiveLocale(scope, locales[index].Tag);
+                EditorL10n.SetActiveLocale(scope, currentLocales[index].Tag);
             });
 
             void Apply()
             {
+                locales = EditorL10n.GetLocales(scope).ToArray();
+                choices = locales.Select(locale => locale.DisplayName).ToList();
+                dropdown.choices = choices;
+
                 var currentLocale = EditorL10n.GetActiveLocale(scope);
                 var index = Array.FindIndex(locales, locale => locale.Tag == currentLocale);
-                if (index >= 0 && index < choices.Count)
+                if (index < 0 && choices.Count == 0)
+                {
+                    dropdown.SetValueWithoutNotify("");
+                    return;
+                }
+
+                if (index < 0)
+                {
+                    index = 0;
                     dropdown.SetValueWithoutNotify(choices[index]);
+                    EditorL10n.SetActiveLocale(scope, locales[index].Tag);
+                    return;
+                }
+
+                dropdown.SetValueWithoutNotify(choices[index]);
             }
 
+            Apply();
             RegisterLocaleCallback(dropdown, Apply);
             return dropdown;
         }
