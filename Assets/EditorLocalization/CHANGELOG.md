@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Added
+- Validator で placeholder 番号の連番欠落と、defaultLocale と同値の未翻訳疑いを警告する検査を追加。
 - 未知 scope / 未解決 key を開発時だけ警告できる診断フラグと Preferences のトグルを追加。
 - l10n manifest と翻訳テーブル JSON の import / delete / move を検知してカタログを自動リロードする AssetPostprocessor を追加。
 - Preferences の scope 個別設定に検索、foldout、defaultLocale と manifest パスの補足表示を追加。

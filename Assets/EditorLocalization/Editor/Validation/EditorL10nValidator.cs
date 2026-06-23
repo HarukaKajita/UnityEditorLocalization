@@ -31,7 +31,7 @@ namespace Kajitaharuka.EditorLocalization
     }
 
     /// <summary>
-    /// 翻訳テーブルの欠落キーとformat placeholderの不一致を検証する。
+    /// 翻訳テーブルの欠落キー、format placeholder、未翻訳の疑いを検証する。
     /// </summary>
     public static class EditorL10nValidator
     {
@@ -68,7 +68,7 @@ namespace Kajitaharuka.EditorLocalization
             return result;
         }
 
-        private static void ValidateScope(EditorL10nScopeCatalog scope, EditorL10nValidationResult result)
+        internal static void ValidateScope(EditorL10nScopeCatalog scope, EditorL10nValidationResult result)
         {
             if (string.IsNullOrEmpty(scope.DefaultLocale))
                 result.AddError($"{scope.Scope}: defaultLocaleが空です。");
@@ -88,17 +88,32 @@ namespace Kajitaharuka.EditorLocalization
                 foreach (var extraKey in table.Keys.Except(defaultKeys).OrderBy(key => key))
                     result.AddWarning($"{scope.Scope}/{locale}: defaultLocaleにないkeyがあります: {extraKey}");
 
-                foreach (var key in defaultKeys.Intersect(table.Keys))
+                foreach (var key in table.Keys.OrderBy(key => key))
+                {
+                    var placeholders = ExtractPlaceholders(table[key]);
+                    var missingNumbers = FindMissingPlaceholderNumbers(placeholders);
+                    if (missingNumbers.Count > 0)
+                    {
+                        var present = FormatPlaceholders(placeholders);
+                        var missing = string.Join(",", missingNumbers);
+                        result.AddWarning($"{scope.Scope}/{locale}: placeholder番号が連続していません: {key} present=[{present}] missing=[{missing}]");
+                    }
+                }
+
+                foreach (var key in defaultKeys.Intersect(table.Keys).OrderBy(key => key))
                 {
                     var expected = ExtractPlaceholders(defaultTable[key]);
                     var actual = ExtractPlaceholders(table[key]);
                     if (!expected.SetEquals(actual))
-                        result.AddError($"{scope.Scope}/{locale}: placeholderが一致しません: {key} expected=[{string.Join(",", expected)}] actual=[{string.Join(",", actual)}]");
+                        result.AddError($"{scope.Scope}/{locale}: placeholderが一致しません: {key} expected=[{FormatPlaceholders(expected)}] actual=[{FormatPlaceholders(actual)}]");
+
+                    if (locale != scope.DefaultLocale && table[key] == defaultTable[key])
+                        result.AddWarning($"{scope.Scope}/{locale}: defaultLocaleと同一の値です（未翻訳の可能性）: {key}");
                 }
             }
         }
 
-        private static HashSet<string> ExtractPlaceholders(string text)
+        internal static HashSet<string> ExtractPlaceholders(string text)
         {
             var placeholders = new HashSet<string>();
             if (string.IsNullOrEmpty(text))
@@ -107,6 +122,43 @@ namespace Kajitaharuka.EditorLocalization
             foreach (Match match in PlaceholderRegex.Matches(text))
                 placeholders.Add(match.Groups[1].Value);
             return placeholders;
+        }
+
+        internal static IReadOnlyList<int> FindMissingPlaceholderNumbers(IEnumerable<string> placeholders)
+        {
+            var numbers = placeholders
+                .Select(ParsePlaceholderNumber)
+                .Where(number => number >= 0)
+                .Distinct()
+                .OrderBy(number => number)
+                .ToArray();
+
+            if (numbers.Length == 0)
+                return Array.Empty<int>();
+
+            var present = new HashSet<int>(numbers);
+            var missing = new List<int>();
+            for (var number = 0; number <= numbers[numbers.Length - 1]; number++)
+            {
+                if (!present.Contains(number))
+                    missing.Add(number);
+            }
+
+            return missing;
+        }
+
+        private static string FormatPlaceholders(IEnumerable<string> placeholders)
+        {
+            return string.Join(",", placeholders
+                .Select(placeholder => new { Raw = placeholder, Number = ParsePlaceholderNumber(placeholder) })
+                .OrderBy(placeholder => placeholder.Number < 0 ? int.MaxValue : placeholder.Number)
+                .ThenBy(placeholder => placeholder.Raw)
+                .Select(placeholder => placeholder.Raw));
+        }
+
+        private static int ParsePlaceholderNumber(string placeholder)
+        {
+            return int.TryParse(placeholder, out var number) ? number : -1;
         }
     }
 }
