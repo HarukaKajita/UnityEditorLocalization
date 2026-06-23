@@ -8,6 +8,7 @@ namespace Kajitaharuka.EditorLocalization
     internal static class EditorL10nSettingsProvider
     {
         private const string UnsetGlobalLocaleLabel = "未設定（各 scope の既定言語）";
+        private const string FollowGlobalLocaleLabel = "グローバル設定に従う";
 
         [SettingsProvider]
         public static SettingsProvider CreateProvider()
@@ -18,7 +19,7 @@ namespace Kajitaharuka.EditorLocalization
                 guiHandler = _ =>
                 {
                     EditorGUILayout.LabelField("Editor Localization", EditorStyles.boldLabel);
-                    EditorGUILayout.HelpBox("表示言語はEditorPrefsへ保存され、プロジェクト資産には書き込まれません。scope 個別設定はグローバル設定より優先されます。", MessageType.Info);
+                    EditorGUILayout.HelpBox("表示言語はEditorPrefsへ保存され、プロジェクト資産には書き込まれません。scope 個別設定はグローバル設定より優先され、「グローバル設定に従う」で解除できます。", MessageType.Info);
 
                     DrawGlobalLocale();
                     EditorGUILayout.Space();
@@ -65,16 +66,31 @@ namespace Kajitaharuka.EditorLocalization
             if (locales.Length == 0)
                 return;
 
-            var labels = locales.Select(locale => locale.DisplayName).ToArray();
-            var activeLocale = EditorL10n.GetActiveLocale(scope);
-            var activeIndex = System.Array.FindIndex(locales, locale => locale.Tag == activeLocale);
+            var optionTags = new List<string> { "" };
+            var labels = new List<string> { FollowGlobalLocaleLabel };
+
+            foreach (var locale in locales)
+            {
+                optionTags.Add(locale.Tag);
+                labels.Add(locale.DisplayName);
+            }
+
+            var activeLocale = EditorL10n.NormalizeLocaleTag(EditorL10nPreferences.GetScopeLocale(scope));
+            var activeIndex = optionTags.IndexOf(activeLocale);
+            if (activeIndex < 0 && !string.IsNullOrEmpty(activeLocale))
+            {
+                optionTags.Add(activeLocale);
+                labels.Add($"{activeLocale}（登録済みカタログ外）");
+                activeIndex = optionTags.Count - 1;
+            }
+
             if (activeIndex < 0)
                 activeIndex = 0;
 
             EditorGUI.BeginChangeCheck();
-            var selectedIndex = EditorGUILayout.Popup(scope, activeIndex, labels);
-            if (EditorGUI.EndChangeCheck() && selectedIndex >= 0 && selectedIndex < locales.Length)
-                EditorL10n.SetActiveLocale(scope, locales[selectedIndex].Tag);
+            var selectedIndex = EditorGUILayout.Popup(scope, activeIndex, labels.ToArray());
+            if (EditorGUI.EndChangeCheck() && selectedIndex >= 0 && selectedIndex < optionTags.Count)
+                EditorL10n.SetActiveLocale(scope, optionTags[selectedIndex]);
         }
 
         private static IEnumerable<EditorL10nLocaleInfo> GetGlobalLocaleOptions()

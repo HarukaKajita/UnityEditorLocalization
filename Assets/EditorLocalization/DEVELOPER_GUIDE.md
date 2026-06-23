@@ -12,7 +12,7 @@ com.example.my-editor-extension
 
 scopeを分けると、利用者は拡張ごとに表示言語を選べます。
 利用者が全拡張をまとめて切り替えたい場合は、`Preferences > Editor Localization`のグローバル設定を使えます。
-解決優先順位は scope 個別設定、グローバル設定、scope の`defaultLocale`の順です。
+解決優先順位は scope 個別設定、グローバル設定、scope の`defaultLocale`の順です。Preferences で「グローバル設定に従う」を選ぶと、scope 個別設定を解除できます。
 
 ## key命名
 

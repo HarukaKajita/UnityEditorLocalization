@@ -120,7 +120,7 @@ scope 個別設定 -> グローバル設定 -> scope の defaultLocale
 選択ロケール -> 親ロケール -> defaultLocale -> key
 ```
 
-グローバル設定は`Preferences > Editor Localization`で変更できます。scope 個別設定がある場合は、その scope では個別設定がグローバル設定より優先されます。
+グローバル設定は`Preferences > Editor Localization`で変更できます。scope 個別設定がある場合は、その scope では個別設定がグローバル設定より優先されます。scope 個別設定は、Preferences で「グローバル設定に従う」を選ぶと解除できます。
 
 例:
 
