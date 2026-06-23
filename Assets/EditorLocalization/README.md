@@ -7,7 +7,7 @@ Unity Editor拡張向けの軽量な多言語化基盤です。Editor上のInspe
 - Editor専用です。ランタイム、Addressables、Unity Localization packageには依存しません。
 - ロケールはC#のenumではなくmanifestの文字列タグで扱います。
 - 新しいロケールはJSONファイルを追加するだけで増やせます。
-- 表示言語はユーザーごとの`EditorPrefs`に保存します。
+- 表示言語はユーザーごとの`EditorPrefs`に保存し、全 scope 共通のグローバル設定と scope 個別設定を使い分けられます。
 - UI Toolkit用のラベル、ボタン、PropertyField、言語選択Dropdown、コンパクトな言語選択メニューの補助APIを含みます。
 - 欠落キーと`string.Format` placeholderの不一致を検証できます。
 
@@ -72,6 +72,13 @@ using Kajitaharuka.EditorLocalization;
 var text = EditorL10n.Tr("com.example.my-editor-extension", "sample.count", 3);
 ```
 
+全 scope 共通の表示言語はグローバル設定として扱えます。空文字を指定すると未設定に戻り、scope ごとの既定言語が使われます。
+
+```csharp
+EditorL10n.SetGlobalLocale("en");
+var globalLocale = EditorL10n.GetGlobalLocale();
+```
+
 UI Toolkitでは次のように使います。
 
 ```csharp
@@ -101,11 +108,19 @@ C#コードの変更は不要です。
 
 ## fallback
 
-文言は次の順で探索します。
+表示言語は次の優先順位で決まります。
+
+```text
+scope 個別設定 -> グローバル設定 -> scope の defaultLocale
+```
+
+そのうえで、文言は次の順で探索します。
 
 ```text
 選択ロケール -> 親ロケール -> defaultLocale -> key
 ```
+
+グローバル設定は`Preferences > Editor Localization`で変更できます。scope 個別設定がある場合は、その scope では個別設定がグローバル設定より優先されます。scope 個別設定は、Preferences で「グローバル設定に従う」を選ぶと解除できます。
 
 例:
 

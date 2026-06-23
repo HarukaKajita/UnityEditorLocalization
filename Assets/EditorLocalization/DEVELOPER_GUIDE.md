@@ -11,6 +11,8 @@ com.example.my-editor-extension
 ```
 
 scopeを分けると、利用者は拡張ごとに表示言語を選べます。
+利用者が全拡張をまとめて切り替えたい場合は、`Preferences > Editor Localization`のグローバル設定を使えます。
+解決優先順位は scope 個別設定、グローバル設定、scope の`defaultLocale`の順です。Preferences で「グローバル設定に従う」を選ぶと、scope 個別設定を解除できます。
 
 ## key命名
 
@@ -80,6 +82,7 @@ zipPacker.error.duplicateEntry
 ## 汎用言語選択コンポーネント
 
 Inspectorヘッダーやツールバーへ言語切り替えUIを置く場合は、`EditorL10nUi.CreateLocalizedCompactLocaleMenu`を使います。`A/文 日本語 ▾`のように、言語を読めなくても用途を推測しやすい視覚記号とネイティブ名を表示し、メニュー項目には`日本語 (ja)`のようにlocale tagを含めます。
+このコンポーネントは特定 scope の個別設定を変更します。全 scope 共通のグローバル設定は、Preferences の導線または`EditorL10n.SetGlobalLocale`で扱います。
 
 ```csharp
 using Kajitaharuka.EditorLocalization;
