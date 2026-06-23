@@ -1,0 +1,134 @@
+# Editor Localization
+
+Unity Editor拡張向けの軽量な多言語化基盤です。Editor上のInspector、HelpBox、Button、Consoleログ、進捗表示などの文言を、scopeごとの翻訳カタログから取得します。
+
+## 特徴
+
+- Editor専用です。ランタイム、Addressables、Unity Localization packageには依存しません。
+- ロケールはC#のenumではなくmanifestの文字列タグで扱います。
+- 新しいロケールはJSONファイルを追加するだけで増やせます。
+- 表示言語はユーザーごとの`EditorPrefs`に保存します。
+- UI Toolkit用のラベル、ボタン、PropertyField、言語選択Dropdown、コンパクトな言語選択メニューの補助APIを含みます。
+- 欠落キーと`string.Format` placeholderの不一致を検証できます。
+
+## 最小構成
+
+利用側パッケージにmanifestと翻訳テーブルを置きます。
+
+```text
+Assets/MyEditorExtension/Editor/Localization/
+  my-extension.l10n-manifest.json
+  Locales/
+    ja.json
+    en.json
+```
+
+manifestの例:
+
+```json
+{
+  "scope": "com.example.my-editor-extension",
+  "defaultLocale": "ja",
+  "locales": [
+    {
+      "tag": "ja",
+      "nativeName": "日本語",
+      "englishName": "Japanese",
+      "tablePath": "Locales/ja.json"
+    },
+    {
+      "tag": "en",
+      "nativeName": "English",
+      "englishName": "English",
+      "tablePath": "Locales/en.json"
+    }
+  ]
+}
+```
+
+翻訳テーブルの例:
+
+```json
+{
+  "locale": "ja",
+  "entries": [
+    {
+      "key": "common.locale.label",
+      "value": "表示言語"
+    },
+    {
+      "key": "sample.count",
+      "value": "対象: {0}件"
+    }
+  ]
+}
+```
+
+## 基本API
+
+```csharp
+using Kajitaharuka.EditorLocalization;
+
+var text = EditorL10n.Tr("com.example.my-editor-extension", "sample.count", 3);
+```
+
+UI Toolkitでは次のように使います。
+
+```csharp
+var label = new Label();
+EditorL10nUi.BindText(label, Scope, "sample.count", 3);
+
+var button = new Button(OnClick);
+EditorL10nUi.BindButton(button, Scope, "sample.run", "sample.run.tooltip");
+
+root.Add(EditorL10nUi.CreateLocalizedLocaleDropdown(Scope, "common.locale.label"));
+
+var localeMenu = EditorL10nUi.CreateLocalizedCompactLocaleMenu(Scope, "common.locale.label");
+toolbar.Add(localeMenu);
+```
+
+`CreateLocalizedCompactLocaleMenu`は、`A/文 日本語 ▾`のような短い表示と、`日本語 (ja)`形式のメニュー項目を持つ汎用の言語選択ボタンです。Inspectorヘッダーやツールバーの右上など、常時置いておきたい小さな導線に向いています。フォーム行としてラベル付きで配置したい場合は`CreateLocalizedLocaleDropdown`を使います。
+
+コンパクトメニューには`editor-l10n-compact-locale-menu` USS classが付きます。利用側拡張で独自classを追加して、周囲のInspectorやツールバーに合わせて余白、色、最大幅を調整してください。
+
+## ロケールの追加
+
+1. `Locales/{locale}.json`を追加します。
+2. manifestの`locales`へ`tag`、表示名、`tablePath`を追加します。
+3. `Tools > Editor Localization > Validate Catalogs`を実行します。
+
+C#コードの変更は不要です。
+
+## fallback
+
+文言は次の順で探索します。
+
+```text
+選択ロケール -> 親ロケール -> defaultLocale -> key
+```
+
+例:
+
+- `es-419` -> `es` -> `ja` -> key
+- `zh-Hant` -> `zh` -> `ja` -> key
+- `pt-BR` -> `pt` -> `ja` -> key
+
+## 検証
+
+メニューから実行します。
+
+```text
+Tools > Editor Localization > Validate Catalogs
+```
+
+検証では次を確認します。
+
+- `defaultLocale`のテーブルが存在すること
+- defaultLocaleにあるkeyが各ロケールにも存在すること
+- `string.Format`形式のplaceholder番号が一致すること
+- defaultLocaleにない余分なkeyがないか
+
+## 関連資料
+
+- `DEVELOPER_GUIDE.md`: 利用側拡張での設計指針
+- `UI_TOOLKIT_LOCALIZATION_TIPS.md`: UI Toolkitで言語変更に追従するための実装Tips
