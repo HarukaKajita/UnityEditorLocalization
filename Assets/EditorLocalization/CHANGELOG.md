@@ -9,6 +9,9 @@
 - Preferences の scope 個別設定に検索、foldout、defaultLocale と manifest パスの補足表示を追加。
 - scope の defaultLocale と manifest パスを取得できる `EditorL10n.TryGetScopeInfo` API を追加。
 
+### Changed
+- `EditorL10n.Tr` / `TryTranslate` の fallback chain を `(locale, defaultLocale)` 単位でキャッシュし、繰り返し呼び出し時の chain 構築アロケーションを削減。
+
 ### Fixed
 - UI Toolkit bind helper の `LocaleChanged` 購読を panel attach 中だけに限定し、attach時の再適用、未追加要素の購読リーク、attach/detach 時の多重購読を改善。
 
