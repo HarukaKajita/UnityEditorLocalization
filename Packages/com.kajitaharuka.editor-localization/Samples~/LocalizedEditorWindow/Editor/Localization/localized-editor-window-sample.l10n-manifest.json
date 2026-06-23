@@ -1,0 +1,18 @@
+{
+    "scope": "com.kajitaharuka.editor-localization.samples.localized-window",
+    "defaultLocale": "ja",
+    "locales": [
+        {
+            "tag": "ja",
+            "nativeName": "日本語",
+            "englishName": "Japanese",
+            "tablePath": "Locales/ja.json"
+        },
+        {
+            "tag": "en",
+            "nativeName": "English",
+            "englishName": "English",
+            "tablePath": "Locales/en.json"
+        }
+    ]
+}

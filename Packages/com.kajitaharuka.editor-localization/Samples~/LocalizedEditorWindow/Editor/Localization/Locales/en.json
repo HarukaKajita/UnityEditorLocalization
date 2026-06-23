@@ -1,0 +1,217 @@
+{
+    "locale": "en",
+    "entries": [
+        {
+            "key": "window.title",
+            "value": "Editor Localization Sample"
+        },
+        {
+            "key": "header.title",
+            "value": "Multilingual EditorWindow sample"
+        },
+        {
+            "key": "header.subtitle",
+            "value": "This self-describing window shows the manifest, locale JSON files, scope and keys, fallback behavior, and validation paths used by Editor Localization."
+        },
+        {
+            "key": "locale.compact.tooltip",
+            "value": "Display language for this sample scope"
+        },
+        {
+            "key": "locale.dropdown.label",
+            "value": "Display language"
+        },
+        {
+            "key": "locale.dropdown.tooltip",
+            "value": "Switches the display language for this scope. Clearing a scope override falls back to the global setting or the defaultLocale."
+        },
+        {
+            "key": "overview.section.title",
+            "value": "Overview"
+        },
+        {
+            "key": "overview.help",
+            "value": "When you switch the compact menu in the upper-right corner or the display-language dropdown, Label, Button, HelpBox, Foldout, ProgressBar, DropdownField, tooltip, and placeholder text follow the translations for the same scope."
+        },
+        {
+            "key": "overview.tooltip",
+            "value": "Use this area to compare the standard EditorL10nUi bindings with RegisterLocaleCallback."
+        },
+        {
+            "key": "demo.section.title",
+            "value": "UI Toolkit binding demo"
+        },
+        {
+            "key": "demo.intro",
+            "value": "This section is built with UI Toolkit from C# only, without UXML or USS. Elements with standard helpers use BindText and BindButton, while elements without dedicated helpers update through RegisterLocaleCallback."
+        },
+        {
+            "key": "demo.dropdown.label",
+            "value": "Inspection focus"
+        },
+        {
+            "key": "demo.dropdown.tooltip",
+            "value": "The DropdownField label, choices, and description are rebuilt when the locale changes."
+        },
+        {
+            "key": "demo.mode.design",
+            "value": "UI spacing and layout"
+        },
+        {
+            "key": "demo.mode.docs",
+            "value": "Docs and data structure"
+        },
+        {
+            "key": "demo.mode.validation",
+            "value": "Validation and quality checks"
+        },
+        {
+            "key": "demo.mode.design.summary",
+            "value": "Long descriptions wrap, spacing is intentionally roomy, and the layout is designed to avoid horizontal overflow in a small window."
+        },
+        {
+            "key": "demo.mode.docs.summary",
+            "value": "The manifest stores the scope, defaultLocale, and locale-table paths. Each locale JSON file only stores a list of keys and values."
+        },
+        {
+            "key": "demo.mode.validation.summary",
+            "value": "Validate Catalogs checks missing or extra keys, placeholder numbers, and likely untranslated values. The translation-quality script adds terminology and length checks."
+        },
+        {
+            "key": "demo.input.label",
+            "value": "Sample input"
+        },
+        {
+            "key": "demo.input.tooltip",
+            "value": "This tooltip is updated when the locale changes. The input value is not saved."
+        },
+        {
+            "key": "demo.input.placeholder",
+            "value": "Example: Settings panel heading"
+        },
+        {
+            "key": "demo.input.placeholder.caption",
+            "value": "Placeholder fallback: {0}"
+        },
+        {
+            "key": "demo.progress.title",
+            "value": "Sample readiness {0}%"
+        },
+        {
+            "key": "demo.progress.tooltip",
+            "value": "The ProgressBar title and tooltip are updated through RegisterLocaleCallback."
+        },
+        {
+            "key": "demo.button.reload.text",
+            "value": "Reload catalogs"
+        },
+        {
+            "key": "demo.button.reload.tooltip",
+            "value": "Calls EditorL10n.Reload and reads the manifest and locale tables again."
+        },
+        {
+            "key": "demo.button.validate.text",
+            "value": "Validate catalogs"
+        },
+        {
+            "key": "demo.button.validate.tooltip",
+            "value": "Calls EditorL10nValidator.ValidateAll and shows the result inside this window."
+        },
+        {
+            "key": "status.initial",
+            "value": "Click a button to show the operation result here."
+        },
+        {
+            "key": "status.reloaded",
+            "value": "Catalogs were reloaded at {0}."
+        },
+        {
+            "key": "status.validated",
+            "value": "Validation result: {0} errors, {1} warnings."
+        },
+        {
+            "key": "catalog.section.title",
+            "value": "Sample catalog structure"
+        },
+        {
+            "key": "catalog.scope.label",
+            "value": "scope name"
+        },
+        {
+            "key": "catalog.scope.tooltip",
+            "value": "A scope is the namespace for translation keys. Give each consumer extension a collision-resistant value."
+        },
+        {
+            "key": "catalog.keys.label",
+            "value": "Representative keys"
+        },
+        {
+            "key": "catalog.keys.value",
+            "value": "Examples: header.title, demo.button.reload.text, details.fallback. Name keys by feature area and role, not by display order or literal UI text."
+        },
+        {
+            "key": "catalog.defaultLocale.label",
+            "value": "defaultLocale value"
+        },
+        {
+            "key": "catalog.manifest.label",
+            "value": "manifest file"
+        },
+        {
+            "key": "catalog.manifest.notFound",
+            "value": "The manifest is not visible from AssetDatabase yet. Import the sample and then run Reload Catalogs."
+        },
+        {
+            "key": "catalog.localeJson.label",
+            "value": "locale JSON files"
+        },
+        {
+            "key": "catalog.fallback.label",
+            "value": "fallback chain"
+        },
+        {
+            "key": "catalog.fallback.value",
+            "value": "Editor Localization tries the display locale, then parent locales, and finally falls back to the defaultLocale ja."
+        },
+        {
+            "key": "validation.section.title",
+            "value": "Validation paths"
+        },
+        {
+            "key": "validation.help",
+            "value": "You can run the same catalog validation from Tools > Editor Localization > Validate Catalogs. For static translation quality checks, run validate_locale_quality.py against the sample Locales directory."
+        },
+        {
+            "key": "quality.script.label",
+            "value": "Translation-quality script"
+        },
+        {
+            "key": "details.foldout.title",
+            "value": "Implementation notes"
+        },
+        {
+            "key": "details.foldout.tooltip",
+            "value": "The Foldout title and tooltip also follow locale changes."
+        },
+        {
+            "key": "details.manifest",
+            "value": "The manifest defines the sample scope, defaultLocale, and ja/en locale-table paths. Adding another language should only require manifest and JSON changes, not C# edits."
+        },
+        {
+            "key": "details.localeJson",
+            "value": "Each locale JSON file is an array of { key, value } entries. Placeholders use numbered tokens such as {0} and {1}, and every locale must keep the same placeholder-number set."
+        },
+        {
+            "key": "details.scopeKeys",
+            "value": "Separating scope and key prevents translation-key collisions when multiple consumer Editor extensions are installed in one Unity project."
+        },
+        {
+            "key": "details.fallback",
+            "value": "Fallback tries parent locales in order, such as es-419 to es, and then the defaultLocale. This sample uses ja as the defaultLocale."
+        },
+        {
+            "key": "details.quality",
+            "value": "skills/editor-localization-translation-quality/ contains translation review guidance and validate_locale_quality.py. The same checks can be applied to consumer locale sets."
+        }
+    ]
+}

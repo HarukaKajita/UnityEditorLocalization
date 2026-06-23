@@ -1,0 +1,217 @@
+{
+    "locale": "ja",
+    "entries": [
+        {
+            "key": "window.title",
+            "value": "Editor Localization サンプル"
+        },
+        {
+            "key": "header.title",
+            "value": "多言語 EditorWindow サンプル"
+        },
+        {
+            "key": "header.subtitle",
+            "value": "このウィンドウは、Editor Localization の manifest、locale JSON、scope/key、fallback、検証導線をまとめて確認できる自己説明的なサンプルです。"
+        },
+        {
+            "key": "locale.compact.tooltip",
+            "value": "この sample scope の表示言語"
+        },
+        {
+            "key": "locale.dropdown.label",
+            "value": "表示言語"
+        },
+        {
+            "key": "locale.dropdown.tooltip",
+            "value": "scope ごとの表示言語を切り替えます。空に戻すとグローバル設定または defaultLocale に従います。"
+        },
+        {
+            "key": "overview.section.title",
+            "value": "概要"
+        },
+        {
+            "key": "overview.help",
+            "value": "右上のコンパクトメニュー、または表示言語ドロップダウンを切り替えると、Label、Button、HelpBox、Foldout、ProgressBar、DropdownField、tooltip、placeholder 表示が同じ scope の翻訳に追従します。"
+        },
+        {
+            "key": "overview.tooltip",
+            "value": "EditorL10nUi の標準バインドと RegisterLocaleCallback の使い分けを確認できます。"
+        },
+        {
+            "key": "demo.section.title",
+            "value": "UI Toolkit バインド実演"
+        },
+        {
+            "key": "demo.intro",
+            "value": "このセクションは UXML/USS を使わず、C# の UI Toolkit だけで構築しています。標準バインドがある要素は BindText と BindButton を使い、専用 bind がない要素は RegisterLocaleCallback で更新しています。"
+        },
+        {
+            "key": "demo.dropdown.label",
+            "value": "確認したい観点"
+        },
+        {
+            "key": "demo.dropdown.tooltip",
+            "value": "DropdownField のラベル、候補、説明文もロケール変更に合わせて再構成します。"
+        },
+        {
+            "key": "demo.mode.design",
+            "value": "UI の見た目と余白"
+        },
+        {
+            "key": "demo.mode.docs",
+            "value": "資料とデータ構造"
+        },
+        {
+            "key": "demo.mode.validation",
+            "value": "検証と品質チェック"
+        },
+        {
+            "key": "demo.mode.design.summary",
+            "value": "長い説明は折り返し、行間と余白を広めに取り、小さいウィンドウでも横にはみ出しにくい構成にしています。"
+        },
+        {
+            "key": "demo.mode.docs.summary",
+            "value": "manifest は scope と defaultLocale と locale table の場所を持ち、locale JSON は key と value の一覧だけを持ちます。"
+        },
+        {
+            "key": "demo.mode.validation.summary",
+            "value": "Validate Catalogs は key の過不足、placeholder 番号、未翻訳疑いを検査します。翻訳品質 script では表記や長さも追加で確認できます。"
+        },
+        {
+            "key": "demo.input.label",
+            "value": "サンプル入力"
+        },
+        {
+            "key": "demo.input.tooltip",
+            "value": "tooltip もロケール変更時に更新されます。この入力値は保存されません。"
+        },
+        {
+            "key": "demo.input.placeholder",
+            "value": "例: 設定パネルの見出し"
+        },
+        {
+            "key": "demo.input.placeholder.caption",
+            "value": "placeholder: {0}"
+        },
+        {
+            "key": "demo.progress.title",
+            "value": "サンプル準備度 {0}%"
+        },
+        {
+            "key": "demo.progress.tooltip",
+            "value": "ProgressBar の title と tooltip も RegisterLocaleCallback で更新しています。"
+        },
+        {
+            "key": "demo.button.reload.text",
+            "value": "カタログ再読み込み"
+        },
+        {
+            "key": "demo.button.reload.tooltip",
+            "value": "EditorL10n.Reload を呼び、manifest と locale table を読み直します。"
+        },
+        {
+            "key": "demo.button.validate.text",
+            "value": "カタログ検証"
+        },
+        {
+            "key": "demo.button.validate.tooltip",
+            "value": "EditorL10nValidator.ValidateAll を呼び、検証結果をこのウィンドウに表示します。"
+        },
+        {
+            "key": "status.initial",
+            "value": "ボタンを押すと、ここに処理結果が表示されます。"
+        },
+        {
+            "key": "status.reloaded",
+            "value": "{0} にカタログを再読み込みしました。"
+        },
+        {
+            "key": "status.validated",
+            "value": "検証結果: Errors {0}, Warnings {1}"
+        },
+        {
+            "key": "catalog.section.title",
+            "value": "サンプルのカタログ構成"
+        },
+        {
+            "key": "catalog.scope.label",
+            "value": "scope"
+        },
+        {
+            "key": "catalog.scope.tooltip",
+            "value": "scope は翻訳キーの名前空間です。利用側拡張ごとに衝突しない値を付けます。"
+        },
+        {
+            "key": "catalog.keys.label",
+            "value": "代表的な key"
+        },
+        {
+            "key": "catalog.keys.value",
+            "value": "例: header.title, demo.button.reload.text, details.fallback。key には表示順や表示文そのものを含めず、機能領域と役割で名付けます。"
+        },
+        {
+            "key": "catalog.defaultLocale.label",
+            "value": "defaultLocale"
+        },
+        {
+            "key": "catalog.manifest.label",
+            "value": "manifest"
+        },
+        {
+            "key": "catalog.manifest.notFound",
+            "value": "manifest はまだ AssetDatabase から見つかっていません。サンプルを import した後に Reload Catalogs を実行してください。"
+        },
+        {
+            "key": "catalog.localeJson.label",
+            "value": "locale JSON"
+        },
+        {
+            "key": "catalog.fallback.label",
+            "value": "fallback"
+        },
+        {
+            "key": "catalog.fallback.value",
+            "value": "表示ロケールから親ロケールへ順番に探し、見つからなければ defaultLocale の ja に戻ります。"
+        },
+        {
+            "key": "validation.section.title",
+            "value": "検証導線"
+        },
+        {
+            "key": "validation.help",
+            "value": "Unity のメニュー Tools > Editor Localization > Validate Catalogs でも同じカタログ検証を実行できます。翻訳テキストの静的品質は sample の Locales ディレクトリに対して validate_locale_quality.py を実行して確認します。"
+        },
+        {
+            "key": "quality.script.label",
+            "value": "翻訳品質 script"
+        },
+        {
+            "key": "details.foldout.title",
+            "value": "実装メモ"
+        },
+        {
+            "key": "details.foldout.tooltip",
+            "value": "Foldout のタイトルと tooltip もロケール変更に追従します。"
+        },
+        {
+            "key": "details.manifest",
+            "value": "manifest は sample scope、defaultLocale、ja/en の locale table パスを定義しています。新しい言語を追加する場合も C# ではなく manifest と JSON を追加します。"
+        },
+        {
+            "key": "details.localeJson",
+            "value": "locale JSON は { key, value } の配列です。placeholder は {0}, {1} のように番号を使い、全ロケールで番号集合を一致させます。"
+        },
+        {
+            "key": "details.scopeKeys",
+            "value": "scope と key を分けることで、複数の利用側 Editor 拡張が同じプロジェクトに入っても翻訳キーの衝突を避けられます。"
+        },
+        {
+            "key": "details.fallback",
+            "value": "fallback は es-419 から es、最後に defaultLocale というように親ロケールを順に試す仕組みです。この sample では defaultLocale は ja です。"
+        },
+        {
+            "key": "details.quality",
+            "value": "skills/editor-localization-translation-quality/ には、翻訳レビュー観点と validate_locale_quality.py が含まれています。利用側の locale 群にも同じ検証を適用できます。"
+        }
+    ]
+}
