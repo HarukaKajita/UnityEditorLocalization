@@ -14,6 +14,7 @@ namespace Kajitaharuka.EditorLocalization
     public static class EditorL10n
     {
         private static EditorL10nCatalog _catalog;
+        private static readonly HashSet<string> ReportedDiagnostics = new();
 
         public static event Action LocaleChanged;
 
@@ -117,7 +118,10 @@ namespace Kajitaharuka.EditorLocalization
                 return false;
 
             if (!Catalog.TryGetScope(scope, out var scopeCatalog))
+            {
+                LogMissingScopeOnce(scope, key);
                 return false;
+            }
 
             foreach (var locale in BuildFallbackChain(GetActiveLocale(scope), scopeCatalog.DefaultLocale))
             {
@@ -125,13 +129,43 @@ namespace Kajitaharuka.EditorLocalization
                     return true;
             }
 
+            LogMissingKeyOnce(scope, key);
             return false;
         }
 
         public static void Reload()
         {
             _catalog = EditorL10nCatalog.Load();
+            ReportedDiagnostics.Clear();
             LocaleChanged?.Invoke();
+        }
+
+        private static void LogMissingScopeOnce(string scope, string key)
+        {
+            LogDiagnosticOnce(
+                "scope",
+                scope,
+                key,
+                $"EditorLocalization: 未知の scope です: {scope} (key={key})");
+        }
+
+        private static void LogMissingKeyOnce(string scope, string key)
+        {
+            LogDiagnosticOnce(
+                "key",
+                scope,
+                key,
+                $"EditorLocalization: 未解決の key です: {scope}/{key}");
+        }
+
+        private static void LogDiagnosticOnce(string category, string scope, string key, string message)
+        {
+            if (!EditorL10nPreferences.DiagnosticsEnabled)
+                return;
+
+            var diagnosticKey = $"{category}\u001f{scope}\u001f{key}";
+            if (ReportedDiagnostics.Add(diagnosticKey))
+                Debug.LogWarning(message);
         }
 
         internal static IEnumerable<string> BuildFallbackChain(string locale, string defaultLocale)

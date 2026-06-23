@@ -28,6 +28,14 @@ zipPacker.error.duplicateEntry
 
 文言そのものや表示順をkeyに含めないでください。表示文言を変えてもkeyが変わらないようにします。
 
+## 開発時診断
+
+scope名やkeyのtypoを探すときは、`Preferences > Editor Localization`の「開発時診断」から未解決警告をONにできます。既定はOFFです。
+
+ONの間は、`EditorL10n.Tr` / `TryTranslate`が未知scopeまたは未解決keyを検出したときに、同一scope/keyにつき一度だけConsoleへ警告します。`Tools > Editor Localization > Reload Catalogs`または`EditorL10n.Reload()`でカタログを再読み込みすると、警告済みの記録もリセットされます。
+
+この診断は開発中のtypo検出を助けるためのものです。ON/OFFに関係なく、未解決時にkeyを返す耐障害方針は変わりません。
+
 ## 翻訳対象
 
 翻訳する対象:
