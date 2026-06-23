@@ -16,7 +16,7 @@ Unity Editor拡張向けの軽量な多言語化基盤です。Editor上のInspe
 
 このパッケージはEmbedded UPM packageとして、Unityプロジェクトの
 `Packages/com.kajitaharuka.editor-localization/`配下に配置する構成です。
-`README.md`、`CHANGELOG.md`、`package.json`はpackage rootに置き、補助資料は
+`README.md`、`CHANGELOG.md`、`LICENSE.txt`、`package.json`はpackage rootに置き、補助資料は
 `Documentation~/`配下に置いてUnityのAsset import対象から外します。
 
 現時点でサンプルアセットは同梱していません。サンプルを追加する場合は、UPMの慣例に従って
@@ -168,3 +168,7 @@ Tools > Editor Localization > Validate Catalogs
 - `Documentation~/DEVELOPER_GUIDE.md`: 利用側拡張での設計指針
 - `Documentation~/UI_TOOLKIT_LOCALIZATION_TIPS.md`: UI Toolkitで言語変更に追従するための実装Tips
 - `skills/editor-localization-translation-quality/`: 翻訳品質ワークフロー
+
+## ライセンス
+
+MIT License です。詳細は `LICENSE.txt` を参照してください。

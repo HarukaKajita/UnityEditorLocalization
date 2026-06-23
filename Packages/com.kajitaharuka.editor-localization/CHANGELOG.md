@@ -12,6 +12,7 @@
 ### Changed
 - パッケージ実体を `Packages/com.kajitaharuka.editor-localization/` 配下のEmbedded UPM package構成へ移行。
 - 開発者向け補助資料を `Documentation~/` 配下へ整理し、`package.json` に検索用キーワードとリポジトリ情報を追加。
+- `package.json` に MIT ライセンスの metadata を明示。
 - host project の `Packages/manifest.json` に `testables` を追加し、package 配下のEditModeテストを実行できる導線を維持。
 - `EditorL10n.Tr` / `TryTranslate` の fallback chain を `(locale, defaultLocale)` 単位でキャッシュし、繰り返し呼び出し時の chain 構築アロケーションを削減。
 
