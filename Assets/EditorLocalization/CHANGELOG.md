@@ -4,6 +4,8 @@
 
 ### Added
 - l10n manifest と翻訳テーブル JSON の import / delete / move を検知してカタログを自動リロードする AssetPostprocessor を追加。
+- Preferences の scope 個別設定に検索、foldout、defaultLocale と manifest パスの補足表示を追加。
+- scope の defaultLocale と manifest パスを取得できる `EditorL10n.TryGetScopeInfo` API を追加。
 
 ### Fixed
 - UI Toolkit bind helper の `LocaleChanged` 購読を panel attach 中だけに限定し、attach時の再適用、未追加要素の購読リーク、attach/detach 時の多重購読を改善。

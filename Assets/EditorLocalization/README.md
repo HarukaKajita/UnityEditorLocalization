@@ -78,6 +78,9 @@ var text = EditorL10n.Tr("com.example.my-editor-extension", "sample.count", 3);
 ```csharp
 EditorL10n.SetGlobalLocale("en");
 var globalLocale = EditorL10n.GetGlobalLocale();
+
+if (EditorL10n.TryGetScopeInfo("com.example.my-editor-extension", out var scopeInfo))
+    Debug.Log($"{scopeInfo.Scope}: defaultLocale={scopeInfo.DefaultLocale}, manifest={scopeInfo.ManifestPath}");
 ```
 
 UI Toolkitでは次のように使います。
@@ -122,7 +125,7 @@ scope 個別設定 -> グローバル設定 -> scope の defaultLocale
 選択ロケール -> 親ロケール -> defaultLocale -> key
 ```
 
-グローバル設定は`Preferences > Editor Localization`で変更できます。scope 個別設定がある場合は、その scope では個別設定がグローバル設定より優先されます。scope 個別設定は、Preferences で「グローバル設定に従う」を選ぶと解除できます。
+グローバル設定は`Preferences > Editor Localization`で変更できます。scope 個別設定がある場合は、その scope では個別設定がグローバル設定より優先されます。scope 個別設定は、Preferences で「グローバル設定に従う」を選ぶと解除できます。Preferences では scope 文字列で検索でき、各 scope の現在の解決ロケール、`defaultLocale`、manifest パスを確認できます。
 
 例:
 
