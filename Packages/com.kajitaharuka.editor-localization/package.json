@@ -17,5 +17,12 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/HarukaKajita/UnityEditorLocalization.git"
-  }
+  },
+  "samples": [
+    {
+      "displayName": "Localized Editor Window",
+      "description": "Interactive UI Toolkit editor window demonstrating labels, buttons, tooltips, locale switching, validation, and translation workflow guidance.",
+      "path": "Samples~/LocalizedEditorWindow"
+    }
+  ]
 }

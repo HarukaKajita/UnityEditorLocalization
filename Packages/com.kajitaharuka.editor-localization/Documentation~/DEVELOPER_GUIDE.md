@@ -2,6 +2,10 @@
 
 このガイドは、Editor Localizationを使って他のUnity Editor拡張を多言語化するための設計指針です。
 
+実装前に動作イメージを確認したい場合は、Package Managerから`Localized Editor Window`サンプルを
+importしてください。`Tools > Editor Localization > Samples > Localized Window`で、言語切り替え、
+tooltip、placeholder、Validator、翻訳品質workflowの導線を1つのEditorWindow上で確認できます。
+
 ## scope
 
 scopeは翻訳カタログの名前空間です。Unity package nameと同じ文字列を推奨します。

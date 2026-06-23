@@ -8,6 +8,7 @@
 - l10n manifest と翻訳テーブル JSON の import / delete / move を検知してカタログを自動リロードする AssetPostprocessor を追加。
 - Preferences の scope 個別設定に検索、foldout、defaultLocale と manifest パスの補足表示を追加。
 - scope の defaultLocale と manifest パスを取得できる `EditorL10n.TryGetScopeInfo` API を追加。
+- Editor Localization の使い方を自己説明する `Localized Editor Window` UPM sample を追加。
 
 ### Changed
 - パッケージ実体を `Packages/com.kajitaharuka.editor-localization/` 配下のEmbedded UPM package構成へ移行。

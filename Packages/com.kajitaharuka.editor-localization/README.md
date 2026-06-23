@@ -19,11 +19,27 @@ Unity Editor拡張向けの軽量な多言語化基盤です。Editor上のInspe
 `README.md`、`CHANGELOG.md`、`LICENSE.txt`、`package.json`はpackage rootに置き、補助資料は
 `Documentation~/`配下に置いてUnityのAsset import対象から外します。
 
-現時点でサンプルアセットは同梱していません。サンプルを追加する場合は、UPMの慣例に従って
-`Samples~/`配下へ配置します。
+`Samples~/LocalizedEditorWindow/`には、Editor Localizationを使ってUI ToolkitのEditorWindowを多言語対応させる
+サンプルを同梱しています。Package ManagerのSamplesから`Localized Editor Window`をimportすると、
+`Tools > Editor Localization > Samples > Localized Window`から動作を確認できます。
 
 このリポジトリでpackage内のEditModeテストを実行するため、host projectの`Packages/manifest.json`には
 `testables`として`com.kajitaharuka.editor-localization`を登録しています。
+
+## サンプル
+
+### Localized Editor Window
+
+Package Managerから`Localized Editor Window`サンプルをimportすると、Editor Localizationの主要な使い方を
+1つのEditorWindowで確認できます。
+
+- `CreateLocalizedCompactLocaleMenu`と`CreateLocalizedLocaleDropdown`による表示言語の切り替え
+- `BindText` / `BindButton`によるLabel、Button、tooltipの更新
+- `RegisterLocaleCallback`によるHelpBox、Foldout、ProgressBar、DropdownField、placeholder表示の更新
+- manifest、locale JSON、scope/key、fallback、Validator、翻訳品質workflowの自己説明
+
+サンプルの翻訳テーブルは`ja`と`en`を含みます。新しいロケールを試す場合は、import後の
+`Editor/Localization/Locales/`へJSONを追加し、manifestの`locales`へ登録してください。
 
 ## 最小構成
 
