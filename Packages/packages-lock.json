@@ -1,5 +1,11 @@
 {
   "dependencies": {
+    "com.kajitaharuka.editor-localization": {
+      "version": "file:com.kajitaharuka.editor-localization",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "com.kajitaharuka.exportpackageextension": {
       "version": "file:/Users/kajitaharuka/dev/unity/ExportPackageExtension/Publish/com.kajitaharuka.exportpackageextension-1.0.0.tgz",
       "depth": 0,
