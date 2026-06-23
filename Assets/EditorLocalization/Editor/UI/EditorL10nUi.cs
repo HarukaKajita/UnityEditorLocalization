@@ -76,10 +76,22 @@ namespace Kajitaharuka.EditorLocalization
 
         public static DropdownField CreateLocaleDropdown(string scope, string label)
         {
+            static int FindLocaleIndex(EditorL10nLocaleInfo[] locales, string localeTag)
+            {
+                foreach (var candidate in EditorL10n.EnumerateLocaleAndParents(localeTag))
+                {
+                    var index = Array.FindIndex(locales, locale => locale.Tag == candidate);
+                    if (index >= 0)
+                        return index;
+                }
+
+                return -1;
+            }
+
             var locales = EditorL10n.GetLocales(scope).ToArray();
             var choices = locales.Select(locale => locale.DisplayName).ToList();
             var activeLocale = EditorL10n.GetActiveLocale(scope);
-            var activeIndex = Array.FindIndex(locales, locale => locale.Tag == activeLocale);
+            var activeIndex = FindLocaleIndex(locales, activeLocale);
             if (activeIndex < 0)
                 activeIndex = 0;
 
@@ -100,22 +112,8 @@ namespace Kajitaharuka.EditorLocalization
                 dropdown.choices = choices;
 
                 var currentLocale = EditorL10n.GetActiveLocale(scope);
-                var index = Array.FindIndex(locales, locale => locale.Tag == currentLocale);
-                if (index < 0 && choices.Count == 0)
-                {
-                    dropdown.SetValueWithoutNotify("");
-                    return;
-                }
-
-                if (index < 0)
-                {
-                    index = 0;
-                    dropdown.SetValueWithoutNotify(choices[index]);
-                    EditorL10n.SetActiveLocale(scope, locales[index].Tag);
-                    return;
-                }
-
-                dropdown.SetValueWithoutNotify(choices[index]);
+                var index = FindLocaleIndex(locales, currentLocale);
+                dropdown.SetValueWithoutNotify(index >= 0 ? choices[index] : "");
             }
 
             Apply();
