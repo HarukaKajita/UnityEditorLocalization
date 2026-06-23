@@ -106,8 +106,9 @@ InitTestScene*.unity*
 # Auto-generated scenes by play mode tests
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
 
-# Mac
-*.DS_Store
+# macOS
+.DS_Store
+**/.DS_Store
 
 # Publish
 !Publish/*.unitypackage
