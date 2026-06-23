@@ -19,6 +19,24 @@ namespace Kajitaharuka.EditorLocalization
 
         internal static EditorL10nCatalog Catalog => _catalog ??= EditorL10nCatalog.Load();
 
+        /// <summary>
+        /// 全 scope 共通で使う表示ロケールを返す。未設定の場合は空文字を返す。
+        /// </summary>
+        public static string GetGlobalLocale()
+        {
+            return NormalizeLocaleTag(EditorL10nPreferences.GlobalLocale);
+        }
+
+        /// <summary>
+        /// 全 scope 共通で使う表示ロケールを設定する。空文字を指定すると未設定へ戻す。
+        /// </summary>
+        public static void SetGlobalLocale(string locale)
+        {
+            var normalizedLocale = NormalizeLocaleTag(locale);
+            EditorL10nPreferences.GlobalLocale = normalizedLocale;
+            LocaleChanged?.Invoke();
+        }
+
         public static string GetActiveLocale(string scope)
         {
             var normalizedScope = scope ?? "";
