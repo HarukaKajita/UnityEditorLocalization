@@ -5,6 +5,9 @@
 ### Added
 - l10n manifest と翻訳テーブル JSON の import / delete / move を検知してカタログを自動リロードする AssetPostprocessor を追加。
 
+### Fixed
+- UI Toolkit bind helper の `LocaleChanged` 購読を panel attach 中だけに限定し、attach時の再適用、未追加要素の購読リーク、attach/detach 時の多重購読を改善。
+
 ## [0.1.0] - 2026-06-22
 
 ### Added

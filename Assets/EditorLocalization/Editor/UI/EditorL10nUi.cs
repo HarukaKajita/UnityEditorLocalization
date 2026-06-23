@@ -237,8 +237,35 @@ namespace Kajitaharuka.EditorLocalization
             if (element == null || callback == null)
                 return;
 
-            EditorL10n.LocaleChanged += callback;
-            element.RegisterCallback<DetachFromPanelEvent>(_ => EditorL10n.LocaleChanged -= callback);
+            var subscribed = false;
+
+            void Subscribe()
+            {
+                if (subscribed)
+                    return;
+
+                EditorL10n.LocaleChanged += callback;
+                subscribed = true;
+            }
+
+            void Unsubscribe()
+            {
+                if (!subscribed)
+                    return;
+
+                EditorL10n.LocaleChanged -= callback;
+                subscribed = false;
+            }
+
+            element.RegisterCallback<AttachToPanelEvent>(_ =>
+            {
+                Subscribe();
+                callback();
+            });
+            element.RegisterCallback<DetachFromPanelEvent>(_ => Unsubscribe());
+
+            if (element.panel != null)
+                Subscribe();
         }
     }
 }
