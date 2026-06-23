@@ -24,7 +24,7 @@ root.Add(field);
 
 ## Label、Button、Foldoutはイベントで更新する
 
-開いているInspectorを言語変更に追従させるには、`EditorL10n.LocaleChanged`を購読します。購読解除は`DetachFromPanelEvent`で行います。
+開いているInspectorを言語変更に追従させるには、`EditorL10nUi.RegisterLocaleCallback`で`EditorL10n.LocaleChanged`へ追従させます。このhelperは要素がpanelにattachされている間だけ購読し、attach時にも現在ロケールの表示へ再適用し、`DetachFromPanelEvent`で解除します。一度もrootへ追加しない要素は購読しません。
 
 ```csharp
 void Apply()
