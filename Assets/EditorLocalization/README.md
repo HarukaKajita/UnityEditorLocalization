@@ -9,6 +9,7 @@ Unity Editor拡張向けの軽量な多言語化基盤です。Editor上のInspe
 - 新しいロケールはJSONファイルを追加するだけで増やせます。
 - 表示言語はユーザーごとの`EditorPrefs`に保存し、全 scope 共通のグローバル設定と scope 個別設定を使い分けられます。
 - UI Toolkit用のラベル、ボタン、PropertyField、言語選択Dropdown、コンパクトな言語選択メニューの補助APIを含みます。
+- manifestや翻訳テーブルJSONの変更を検知し、カタログを自動リロードします。
 - 欠落キーと`string.Format` placeholderの不一致を検証できます。
 
 ## 最小構成
@@ -102,9 +103,10 @@ toolbar.Add(localeMenu);
 
 1. `Locales/{locale}.json`を追加します。
 2. manifestの`locales`へ`tag`、表示名、`tablePath`を追加します。
-3. `Tools > Editor Localization > Validate Catalogs`を実行します。
+3. Unity Editorがmanifestと翻訳テーブルJSONをインポートすると、カタログは自動でリロードされます。
+4. `Tools > Editor Localization > Validate Catalogs`を実行します。
 
-C#コードの変更は不要です。
+C#コードの変更は不要です。必要に応じて`Tools > Editor Localization > Reload Catalogs`から手動で再読み込みすることもできます。
 
 ## fallback
 
