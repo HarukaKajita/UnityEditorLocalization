@@ -146,6 +146,8 @@ Tools > Editor Localization > Validate Catalogs
 - `defaultLocale`のテーブルが存在すること
 - defaultLocaleにあるkeyが各ロケールにも存在すること
 - `string.Format`形式のplaceholder番号が一致すること
+- placeholder番号が`0`から連続していること
+- defaultLocaleと同一の値が残っていないか
 - defaultLocaleにない余分なkeyがないか
 
 ## 関連資料
