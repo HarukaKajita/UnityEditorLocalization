@@ -22,6 +22,13 @@ namespace Kajitaharuka.EditorLocalization
             return catalog;
         }
 
+        internal static bool IsManifestPath(string path)
+        {
+            return !string.IsNullOrEmpty(path)
+                && path.EndsWith(".json", StringComparison.OrdinalIgnoreCase)
+                && Path.GetFileName(path).Contains("l10n-manifest");
+        }
+
         internal bool TryGetScope(string scope, out EditorL10nScopeCatalog scopeCatalog)
         {
             return _scopes.TryGetValue(scope ?? "", out scopeCatalog);
@@ -31,8 +38,7 @@ namespace Kajitaharuka.EditorLocalization
         {
             return AssetDatabase.FindAssets("l10n-manifest")
                 .Select(AssetDatabase.GUIDToAssetPath)
-                .Where(path => path.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
-                .Where(path => Path.GetFileName(path).Contains("l10n-manifest"))
+                .Where(IsManifestPath)
                 .Distinct()
                 .OrderBy(path => path)
                 .ToArray();
@@ -66,7 +72,7 @@ namespace Kajitaharuka.EditorLocalization
                 var tablePath = NormalizeAssetPath(Path.Combine(manifestDirectory, locale.tablePath));
                 var tableAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(tablePath);
                 var entries = LoadEntries(tableAsset, tag);
-                scopeCatalog.AddLocale(new EditorL10nLocaleInfo(tag, locale.nativeName, locale.englishName), entries);
+                scopeCatalog.AddLocale(new EditorL10nLocaleInfo(tag, locale.nativeName, locale.englishName), entries, tablePath);
             }
 
             _scopes.Add(scope, scopeCatalog);
@@ -106,12 +112,14 @@ namespace Kajitaharuka.EditorLocalization
     {
         private readonly List<EditorL10nLocaleInfo> _locales = new();
         private readonly Dictionary<string, Dictionary<string, string>> _tablesByLocale = new();
+        private readonly HashSet<string> _tablePaths = new();
 
         internal string Scope { get; }
         internal string DefaultLocale { get; }
         internal string ManifestPath { get; }
         internal IReadOnlyList<EditorL10nLocaleInfo> Locales => _locales;
         internal IReadOnlyDictionary<string, Dictionary<string, string>> TablesByLocale => _tablesByLocale;
+        internal IReadOnlyCollection<string> TablePaths => _tablePaths;
 
         internal EditorL10nScopeCatalog(string scope, string defaultLocale, string manifestPath)
         {
@@ -120,7 +128,7 @@ namespace Kajitaharuka.EditorLocalization
             ManifestPath = manifestPath;
         }
 
-        internal void AddLocale(EditorL10nLocaleInfo locale, Dictionary<string, string> entries)
+        internal void AddLocale(EditorL10nLocaleInfo locale, Dictionary<string, string> entries, string tablePath)
         {
             if (locale == null || string.IsNullOrEmpty(locale.Tag))
                 return;
@@ -130,6 +138,8 @@ namespace Kajitaharuka.EditorLocalization
 
             _locales.Add(locale);
             _tablesByLocale.Add(locale.Tag, entries ?? new Dictionary<string, string>());
+            if (!string.IsNullOrEmpty(tablePath))
+                _tablePaths.Add(tablePath);
         }
 
         internal bool HasLocale(string locale)
