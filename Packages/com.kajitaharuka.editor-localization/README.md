@@ -12,6 +12,19 @@ Unity Editor拡張向けの軽量な多言語化基盤です。Editor上のInspe
 - manifestや翻訳テーブルJSONの変更を検知し、カタログを自動リロードします。
 - 欠落キーと`string.Format` placeholderの不一致を検証できます。
 
+## パッケージ構成
+
+このパッケージはEmbedded UPM packageとして、Unityプロジェクトの
+`Packages/com.kajitaharuka.editor-localization/`配下に配置する構成です。
+`README.md`、`CHANGELOG.md`、`package.json`はpackage rootに置き、補助資料は
+`Documentation~/`配下に置いてUnityのAsset import対象から外します。
+
+現時点でサンプルアセットは同梱していません。サンプルを追加する場合は、UPMの慣例に従って
+`Samples~/`配下へ配置します。
+
+このリポジトリでpackage内のEditModeテストを実行するため、host projectの`Packages/manifest.json`には
+`testables`として`com.kajitaharuka.editor-localization`を登録しています。
+
 ## 最小構成
 
 利用側パッケージにmanifestと翻訳テーブルを置きます。
@@ -152,5 +165,6 @@ Tools > Editor Localization > Validate Catalogs
 
 ## 関連資料
 
-- `DEVELOPER_GUIDE.md`: 利用側拡張での設計指針
-- `UI_TOOLKIT_LOCALIZATION_TIPS.md`: UI Toolkitで言語変更に追従するための実装Tips
+- `Documentation~/DEVELOPER_GUIDE.md`: 利用側拡張での設計指針
+- `Documentation~/UI_TOOLKIT_LOCALIZATION_TIPS.md`: UI Toolkitで言語変更に追従するための実装Tips
+- `skills/editor-localization-translation-quality/`: 翻訳品質ワークフロー
