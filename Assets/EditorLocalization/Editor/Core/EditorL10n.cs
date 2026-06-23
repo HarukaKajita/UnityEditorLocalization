@@ -15,6 +15,8 @@ namespace Kajitaharuka.EditorLocalization
     {
         private static EditorL10nCatalog _catalog;
         private static readonly HashSet<string> ReportedDiagnostics = new();
+        // Editor UI からの利用はメインスレッド前提のため、キャッシュ操作にロックは設けない。
+        private static readonly Dictionary<(string Locale, string DefaultLocale), string[]> FallbackChainCache = new();
 
         public static event Action LocaleChanged;
 
@@ -123,7 +125,7 @@ namespace Kajitaharuka.EditorLocalization
                 return false;
             }
 
-            foreach (var locale in BuildFallbackChain(GetActiveLocale(scope), scopeCatalog.DefaultLocale))
+            foreach (var locale in GetFallbackChain(GetActiveLocale(scope), scopeCatalog.DefaultLocale))
             {
                 if (scopeCatalog.TryGetText(locale, key, out text))
                     return true;
@@ -136,6 +138,7 @@ namespace Kajitaharuka.EditorLocalization
         public static void Reload()
         {
             _catalog = EditorL10nCatalog.Load();
+            FallbackChainCache.Clear();
             ReportedDiagnostics.Clear();
             LocaleChanged?.Invoke();
         }
@@ -166,6 +169,17 @@ namespace Kajitaharuka.EditorLocalization
             var diagnosticKey = $"{category}\u001f{scope}\u001f{key}";
             if (ReportedDiagnostics.Add(diagnosticKey))
                 Debug.LogWarning(message);
+        }
+
+        internal static string[] GetFallbackChain(string locale, string defaultLocale)
+        {
+            var key = (locale ?? "", defaultLocale ?? "");
+            if (FallbackChainCache.TryGetValue(key, out var cachedChain))
+                return cachedChain;
+
+            var chain = BuildFallbackChain(locale, defaultLocale).ToArray();
+            FallbackChainCache.Add(key, chain);
+            return chain;
         }
 
         internal static IEnumerable<string> BuildFallbackChain(string locale, string defaultLocale)
