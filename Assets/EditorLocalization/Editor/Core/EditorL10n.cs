@@ -67,6 +67,24 @@ namespace Kajitaharuka.EditorLocalization
                 : Array.Empty<EditorL10nLocaleInfo>();
         }
 
+        /// <summary>
+        /// scopeのdefaultLocaleやmanifestパスなど、表示補助用のメタ情報を取得する。
+        /// </summary>
+        public static bool TryGetScopeInfo(string scope, out EditorL10nScopeInfo info)
+        {
+            if (Catalog.TryGetScope(scope ?? "", out var scopeCatalog))
+            {
+                info = new EditorL10nScopeInfo(
+                    scopeCatalog.Scope,
+                    scopeCatalog.DefaultLocale,
+                    scopeCatalog.ManifestPath);
+                return true;
+            }
+
+            info = null;
+            return false;
+        }
+
         public static IReadOnlyList<string> GetScopes()
         {
             return Catalog.Scopes.Select(scope => scope.Scope).OrderBy(scope => scope).ToArray();
