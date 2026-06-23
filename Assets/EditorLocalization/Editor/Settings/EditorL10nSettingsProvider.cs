@@ -32,9 +32,28 @@ namespace Kajitaharuka.EditorLocalization
                     GUILayout.Space(8f);
                     DrawGlobalLocale();
                     GUILayout.Space(8f);
+                    DrawDiagnostics();
+                    GUILayout.Space(8f);
                     DrawScopeLocales();
                 },
             };
+        }
+
+        private static void DrawDiagnostics()
+        {
+            using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+            {
+                EditorGUILayout.LabelField("開発時診断", EditorStyles.boldLabel);
+                using (new LabelWidthScope(LocaleLabelWidth))
+                {
+                    EditorGUI.BeginChangeCheck();
+                    var enabled = EditorGUILayout.Toggle(
+                        new GUIContent("未解決警告", "未知 scope や未解決 key を検出したときに、同一 scope/key につき一度だけ Console へ警告します。"),
+                        EditorL10nPreferences.DiagnosticsEnabled);
+                    if (EditorGUI.EndChangeCheck())
+                        EditorL10nPreferences.DiagnosticsEnabled = enabled;
+                }
+            }
         }
 
         private static void DrawGlobalLocale()
