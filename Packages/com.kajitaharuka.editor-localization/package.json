@@ -4,6 +4,9 @@
   "displayName": "Editor Localization",
   "description": "Lightweight localization utilities for Unity Editor extensions.",
   "license": "MIT",
+  "documentationUrl": "https://kajitaharuka.com/editor-localization/",
+  "changelogUrl": "https://kajitaharuka.com/editor-localization/changelog/",
+  "licensesUrl": "https://kajitaharuka.com/editor-localization/licenses/",
   "unity": "2022.3",
   "keywords": [
     "editor",
