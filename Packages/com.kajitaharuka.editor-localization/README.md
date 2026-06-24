@@ -211,6 +211,7 @@ Tools > Editor Localization > Validate Catalogs
 
 - `Documentation~/DEVELOPER_GUIDE.md`: 利用側拡張での設計指針
 - `Documentation~/UI_TOOLKIT_LOCALIZATION_TIPS.md`: UI Toolkitで言語変更に追従するための実装Tips
+- `Documentation~/OPTIONAL_INTEGRATION.md`: Editor Localizationを任意依存（optional）として組み込む2アセンブリ方式（基盤が無くても単一言語で動作し、導入時に多言語化が点灯）。雛形生成は`editor-localization-optional-integration`スキル
 - `skills/editor-localization-translation-quality/`: 翻訳品質ワークフロー
 
 ## ライセンス

@@ -99,8 +99,10 @@ Assets/<利用側拡張>/Editor/Localization/
 - [Packages/com.kajitaharuka.editor-localization/README.md](Packages/com.kajitaharuka.editor-localization/README.md): 利用者向け概要・最小構成・API・fallback・検証
 - [Packages/com.kajitaharuka.editor-localization/Documentation~/DEVELOPER_GUIDE.md](Packages/com.kajitaharuka.editor-localization/Documentation~/DEVELOPER_GUIDE.md): 利用側拡張での scope/key 設計指針・レビュー観点
 - [Packages/com.kajitaharuka.editor-localization/Documentation~/UI_TOOLKIT_LOCALIZATION_TIPS.md](Packages/com.kajitaharuka.editor-localization/Documentation~/UI_TOOLKIT_LOCALIZATION_TIPS.md): 言語変更に追従させる UI Toolkit 実装 Tips
+- [Packages/com.kajitaharuka.editor-localization/Documentation~/OPTIONAL_INTEGRATION.md](Packages/com.kajitaharuka.editor-localization/Documentation~/OPTIONAL_INTEGRATION.md): Editor Localization を **任意依存（optional）** として組み込むための 2 アセンブリ方式・命名規約・version define の注意・チェックリスト（リファレンス実装: ExportPackageExtension）
 - [Packages/com.kajitaharuka.editor-localization/CHANGELOG.md](Packages/com.kajitaharuka.editor-localization/CHANGELOG.md): リリースごとの変更（`package.json` の version と整合）
 - [Packages/com.kajitaharuka.editor-localization/skills/editor-localization-translation-quality/](Packages/com.kajitaharuka.editor-localization/skills/editor-localization-translation-quality/): 翻訳品質ワークフロー（用語・スタイル・言語別注意・品質検証スクリプト）
+- [Packages/com.kajitaharuka.editor-localization/skills/editor-localization-optional-integration/](Packages/com.kajitaharuka.editor-localization/skills/editor-localization-optional-integration/): 任意依存連携の雛形生成スキル（本体ブリッジ seam ＋連携 assembly を scaffold。テンプレート同梱。`OPTIONAL_INTEGRATION.md` と整合）
 
 
 ## 備考
