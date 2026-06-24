@@ -62,9 +62,20 @@ namespace Kajitaharuka.EditorLocalization
             void Apply()
             {
                 var label = EditorL10n.Tr(scope, labelKey);
-                var labelElement = field.Q<Label>(className: BaseField<string>.labelUssClassName);
-                if (labelElement != null)
-                    labelElement.text = label;
+                // 配列/リストはFoldoutで描画され、タイトルはBaseFieldのラベル(labelUssClassName)ではない。
+                // そのためFoldout時はFoldout.textを更新する。スカラー時のみBaseFieldのラベルを更新し、
+                // 配列の要素ラベル(Element 0等)を誤って書き換えないよう分岐する。
+                var foldout = field.Q<Foldout>();
+                if (foldout != null)
+                {
+                    foldout.text = label;
+                }
+                else
+                {
+                    var labelElement = field.Q<Label>(className: BaseField<string>.labelUssClassName);
+                    if (labelElement != null)
+                        labelElement.text = label;
+                }
                 if (!string.IsNullOrEmpty(tooltipKey))
                     field.tooltip = EditorL10n.Tr(scope, tooltipKey);
             }

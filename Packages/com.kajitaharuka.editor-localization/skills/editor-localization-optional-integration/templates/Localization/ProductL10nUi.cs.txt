@@ -58,9 +58,21 @@ namespace {{ROOT_NAMESPACE}}
 
             void Apply()
             {
-                var labelElement = field.Q<Label>(className: BaseField<string>.labelUssClassName);
-                if (labelElement != null)
-                    labelElement.text = Bridge.Tr(scope, labelKey, Array.Empty<object>());
+                var text = Bridge.Tr(scope, labelKey, Array.Empty<object>());
+                // 配列/リストはFoldoutで描画され、タイトルはBaseFieldのラベル(labelUssClassName)ではない。
+                // そのためFoldout時はFoldout.textを更新する。スカラー時のみBaseFieldのラベルを更新し、
+                // 配列の要素ラベル(Element 0等)を誤って書き換えないよう分岐する。
+                var foldout = field.Q<Foldout>();
+                if (foldout != null)
+                {
+                    foldout.text = text;
+                }
+                else
+                {
+                    var labelElement = field.Q<Label>(className: BaseField<string>.labelUssClassName);
+                    if (labelElement != null)
+                        labelElement.text = text;
+                }
                 if (!string.IsNullOrEmpty(tooltipKey))
                     field.tooltip = Bridge.Tr(scope, tooltipKey, Array.Empty<object>());
             }

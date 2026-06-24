@@ -22,6 +22,8 @@ root.Add(field);
 
 `EditorL10nUi.BindPropertyField`は`GeometryChangedEvent`後にlabelを再適用し、ロケール変更時にも更新します。
 
+配列やリストの`PropertyField`は`Foldout`で描画され、そのタイトルは`BaseField`のラベル(`labelUssClassName`)ではありません。`BindPropertyField`は`Foldout`を検出した場合に`Foldout.text`を更新します（スカラー時のみ`BaseField`のラベルを更新し、配列の要素ラベルを誤って書き換えません）。自前でラベルを差し替える場合も、対象が配列フィールドなら`Foldout.text`を更新してください。
+
 ## Label、Button、Foldoutはイベントで更新する
 
 開いているInspectorを言語変更に追従させるには、`EditorL10nUi.RegisterLocaleCallback`で`EditorL10n.LocaleChanged`へ追従させます。このhelperは要素がpanelにattachされている間だけ購読し、attach時にも現在ロケールの表示へ再適用し、`DetachFromPanelEvent`で解除します。一度もrootへ追加しない要素は購読しません。
