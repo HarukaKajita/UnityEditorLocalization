@@ -24,9 +24,9 @@
       "dependencies": {}
     },
     "com.kajitaharuka.export-package-extension": {
-      "version": "file:/Users/kajitaharuka/dev/unity/ExportPackageExtension/Publish/com.kajitaharuka.export-package-extension-1.0.0.tgz",
+      "version": "file:/Users/kajitaharuka/dev/unity/ExportPackageExtension/Packages/com.kajitaharuka.export-package-extension",
       "depth": 0,
-      "source": "local-tarball",
+      "source": "local",
       "dependencies": {}
     },
     "com.unity.collab-proxy": {
