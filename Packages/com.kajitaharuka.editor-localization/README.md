@@ -12,6 +12,34 @@ Unity Editor拡張向けの軽量な多言語化基盤です。Editor上のInspe
 - manifestや翻訳テーブルJSONの変更を検知し、カタログを自動リロードします。
 - 欠落キーと`string.Format` placeholderの不一致を検証できます。
 
+## インストール
+
+このパッケージはリポジトリの`Packages/com.kajitaharuka.editor-localization/`配下にあるため、git URLでインストールする際は`?path=`でサブフォルダを指定します。
+
+Package Managerの`Add package from git URL...`に次を入力します。
+
+```text
+https://github.com/HarukaKajita/UnityEditorLocalization.git?path=Packages/com.kajitaharuka.editor-localization
+```
+
+`Packages/manifest.json`の`dependencies`へ直接記述することもできます。
+
+```json
+{
+  "dependencies": {
+    "com.kajitaharuka.editor-localization": "https://github.com/HarukaKajita/UnityEditorLocalization.git?path=Packages/com.kajitaharuka.editor-localization"
+  }
+}
+```
+
+バージョンを固定する場合は、末尾にリリースタグを付けます。
+
+```text
+https://github.com/HarukaKajita/UnityEditorLocalization.git?path=Packages/com.kajitaharuka.editor-localization#1.0.0
+```
+
+このリポジトリ自体をUnityプロジェクトとして開く場合は、Embedded UPM packageとして`Packages/`配下にすでに配置されているため、追加のインストールは不要です。
+
 ## パッケージ構成
 
 このパッケージはEmbedded UPM packageとして、Unityプロジェクトの

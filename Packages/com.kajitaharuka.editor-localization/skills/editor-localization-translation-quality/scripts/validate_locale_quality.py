@@ -14,7 +14,9 @@ import sys
 from pathlib import Path
 
 
-PLACEHOLDER_RE = re.compile(r"\{(\d+)\}")
+# C# 側の EditorL10nValidator と同じ抽出規則に揃える。
+# エスケープされた {{0}} は除外し、{0:N2} のような書式指定子付きでも番号だけを取り出す。
+PLACEHOLDER_RE = re.compile(r"(?<!\{)\{(\d+)[^}]*\}(?!\})")
 
 
 def load_table(path: Path) -> tuple[str, dict[str, str]]:
