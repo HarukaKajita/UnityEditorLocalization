@@ -12,9 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7497f43d65d04c908b819a675989e426, type: 3}
   m_Name: EditorLocalization_Zip
   m_EditorClassIdentifier: 
-  exportFileNameExpression: ./Publish/<Name>_1.0.0
+  exportFileNameExpression: ./Publish/<Name>-1.0.0
   pathInputMode: 0
   entries:
   - exporter: {fileID: 11400000, guid: 725091923e11c4e01b5665133b38b28c, type: 2}
     format: 0
+    deleteArtifactAfterPack: 0
+  - exporter: {fileID: 11400000, guid: 725091923e11c4e01b5665133b38b28c, type: 2}
+    format: 2
     deleteArtifactAfterPack: 0
