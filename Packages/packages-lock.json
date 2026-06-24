@@ -23,8 +23,8 @@
       "source": "embedded",
       "dependencies": {}
     },
-    "com.kajitaharuka.exportpackageextension": {
-      "version": "file:/Users/kajitaharuka/dev/unity/ExportPackageExtension/Publish/com.kajitaharuka.exportpackageextension-1.0.0.tgz",
+    "com.kajitaharuka.export-package-extension": {
+      "version": "file:/Users/kajitaharuka/dev/unity/ExportPackageExtension/Publish/com.kajitaharuka.export-package-extension-1.0.0.tgz",
       "depth": 0,
       "source": "local-tarball",
       "dependencies": {}
