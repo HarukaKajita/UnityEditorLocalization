@@ -1,0 +1,27 @@
+{
+    "name": "{{INTEGRATION_ASMDEF}}",
+    "rootNamespace": "{{INTEGRATION_NAMESPACE}}",
+    "references": [
+        "{{MAIN_ASMDEF}}",
+        "Kajitaharuka.EditorLocalization"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "KAJITAHARUKA_EDITOR_L10N"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.kajitaharuka.editor-localization",
+            "expression": "{{MIN_VERSION}}",
+            "define": "KAJITAHARUKA_EDITOR_L10N"
+        }
+    ],
+    "noEngineReferences": false
+}

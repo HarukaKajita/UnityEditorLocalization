@@ -1,0 +1,20 @@
+#if UNITY_EDITOR
+namespace {{ROOT_NAMESPACE}}
+{
+    /// <summary>
+    /// このパッケージの翻訳scopeを隠蔽する薄いラッパー。
+    /// 各Editor実装は多言語基盤へ直接依存せず、このクラス経由で文言を取得する。
+    /// 実体は<see cref="EditorL10nRuntime.Bridge"/>へ委譲し、基盤(Editor Localization)の
+    /// 有無を吸収する。基盤が無い場合はdefaultLocaleの単一言語で文言を返す。
+    /// </summary>
+    internal static class {{PREFIX}}L10n
+    {
+        internal const string Scope = "{{SCOPE}}";
+
+        internal static string Tr(string key, params object[] args)
+        {
+            return EditorL10nRuntime.Bridge.Tr(Scope, key, args);
+        }
+    }
+}
+#endif

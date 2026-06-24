@@ -1,0 +1,183 @@
+#if UNITY_EDITOR
+using System;
+using System.Collections.Generic;
+using System.IO;
+using UnityEditor;
+using UnityEngine;
+using UnityEngine.UIElements;
+
+namespace {{ROOT_NAMESPACE}}
+{
+    /// <summary>
+    /// Editor Localizationが無い環境向けの既定ブリッジ。
+    /// 同梱manifestのdefaultLocaleテーブルのみを直接読み、単一言語で文言を提供する。
+    /// fallback連鎖やロケール解決・EditorPrefs参照は持たない（基盤が有る場合は連携assemblyが
+    /// このブリッジを置き換える）。表示文言のデータ源はJSONテーブル一本に保ち、基盤の有無で
+    /// 文言がぶれないようにするのが狙い。
+    /// </summary>
+    internal sealed class DefaultEditorL10nBridge : IEditorL10nBridge
+    {
+        // scope -> (key -> value)。defaultLocaleテーブルのみを保持する。
+        private readonly Dictionary<string, Dictionary<string, string>> _tablesByScope = new();
+
+        public string Tr(string scope, string key, object[] args)
+        {
+            var table = GetTable(scope);
+            if (table != null && table.TryGetValue(key, out var value))
+                return Format(value, args, key);
+            return key;
+        }
+
+        public void RegisterLocaleCallback(VisualElement element, Action callback)
+        {
+            if (element == null || callback == null)
+                return;
+
+            // ロケール変更イベントは無いが、基盤有り時(EditorL10nUi)とアタッチ時の挙動を揃えるため
+            // パネルへのアタッチ時に一度だけ適用する。
+            element.RegisterCallback<AttachToPanelEvent>(_ => callback());
+            if (element.panel != null)
+                callback();
+        }
+
+        public VisualElement CreateCompactLocaleMenu(string scope, string tooltipLabelKey)
+        {
+            // 単一言語のため言語切替メニューは出さない。
+            return null;
+        }
+
+        private Dictionary<string, string> GetTable(string scope)
+        {
+            if (string.IsNullOrEmpty(scope))
+                return null;
+            if (_tablesByScope.TryGetValue(scope, out var cached))
+                return cached;
+
+            var table = LoadDefaultLocaleTable(scope);
+            // 成功時のみキャッシュする。AssetDatabaseの準備前など一時的な失敗で
+            // nullを恒久キャッシュしてしまうと、以後ずっとkeyが生表示される事故になるため、
+            // 失敗時はキャッシュせず次回Tr呼び出しで再試行する。
+            if (table != null)
+                _tablesByScope[scope] = table;
+            return table;
+        }
+
+        private static Dictionary<string, string> LoadDefaultLocaleTable(string scope)
+        {
+            foreach (var guid in AssetDatabase.FindAssets("l10n-manifest"))
+            {
+                var manifestPath = AssetDatabase.GUIDToAssetPath(guid);
+                if (!manifestPath.EndsWith(".l10n-manifest.json", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                var manifestAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(manifestPath);
+                if (manifestAsset == null)
+                    continue;
+
+                ManifestDto manifest;
+                try
+                {
+                    manifest = JsonUtility.FromJson<ManifestDto>(manifestAsset.text);
+                }
+                catch
+                {
+                    continue;
+                }
+
+                if (manifest == null || manifest.scope != scope)
+                    continue;
+
+                var tablePath = FindTablePath(manifest, manifest.defaultLocale);
+                if (string.IsNullOrEmpty(tablePath))
+                    return null;
+
+                var dir = Path.GetDirectoryName(manifestPath)?.Replace('\\', '/');
+                var tableAssetPath = string.IsNullOrEmpty(dir) ? tablePath : dir + "/" + tablePath;
+                var tableAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(tableAssetPath);
+                if (tableAsset == null)
+                    return null;
+
+                TableDto tableDoc;
+                try
+                {
+                    tableDoc = JsonUtility.FromJson<TableDto>(tableAsset.text);
+                }
+                catch
+                {
+                    return null;
+                }
+
+                var table = new Dictionary<string, string>();
+                if (tableDoc?.entries != null)
+                {
+                    foreach (var entry in tableDoc.entries)
+                    {
+                        if (entry != null && !string.IsNullOrEmpty(entry.key))
+                            table[entry.key] = entry.value;
+                    }
+                }
+                return table;
+            }
+
+            return null;
+        }
+
+        private static string FindTablePath(ManifestDto manifest, string localeTag)
+        {
+            if (manifest.locales == null)
+                return null;
+            foreach (var locale in manifest.locales)
+            {
+                if (locale != null && locale.tag == localeTag)
+                    return locale.tablePath;
+            }
+            return null;
+        }
+
+        private static string Format(string value, object[] args, string fallbackKey)
+        {
+            if (args == null || args.Length == 0)
+                return value;
+            try
+            {
+                return string.Format(value, args);
+            }
+            catch (FormatException e)
+            {
+                Debug.LogError($"[{{LOG_TAG}}] 文言のstring.Formatに失敗しました: key={fallbackKey} / {e.Message}");
+                return value;
+            }
+        }
+
+        // JsonUtility用の最小DTO。基盤assemblyのDTOには依存しない。
+        [Serializable]
+        private sealed class ManifestDto
+        {
+            public string scope;
+            public string defaultLocale;
+            public LocaleDto[] locales;
+        }
+
+        [Serializable]
+        private sealed class LocaleDto
+        {
+            public string tag;
+            public string tablePath;
+        }
+
+        [Serializable]
+        private sealed class TableDto
+        {
+            public string locale;
+            public EntryDto[] entries;
+        }
+
+        [Serializable]
+        private sealed class EntryDto
+        {
+            public string key;
+            public string value;
+        }
+    }
+}
+#endif

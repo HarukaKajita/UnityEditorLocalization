@@ -1,0 +1,33 @@
+#if UNITY_EDITOR
+using System;
+using Kajitaharuka.EditorLocalization;
+using {{ROOT_NAMESPACE}};
+using UnityEngine.UIElements;
+
+namespace {{INTEGRATION_NAMESPACE}}
+{
+    /// <summary>
+    /// Editor Localizationが存在する環境向けのブリッジ実装。
+    /// 文言取得・ロケール変更追従・言語切替メニューを基盤API(EditorL10n / EditorL10nUi)へ委譲する。
+    /// このassemblyはdefineConstraint(KAJITAHARUKA_EDITOR_L10N)により、基盤が無い環境では
+    /// コンパイル対象から除外される（=基盤への参照エラーにならない）。
+    /// </summary>
+    internal sealed class EditorL10nBridge : IEditorL10nBridge
+    {
+        public string Tr(string scope, string key, object[] args)
+        {
+            return EditorL10n.Tr(scope, key, args);
+        }
+
+        public void RegisterLocaleCallback(VisualElement element, Action callback)
+        {
+            EditorL10nUi.RegisterLocaleCallback(element, callback);
+        }
+
+        public VisualElement CreateCompactLocaleMenu(string scope, string tooltipLabelKey)
+        {
+            return EditorL10nUi.CreateLocalizedCompactLocaleMenu(scope, tooltipLabelKey);
+        }
+    }
+}
+#endif

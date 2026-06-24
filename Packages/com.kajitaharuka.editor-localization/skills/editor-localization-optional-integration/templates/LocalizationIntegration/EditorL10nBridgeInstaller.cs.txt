@@ -1,0 +1,21 @@
+#if UNITY_EDITOR
+using {{ROOT_NAMESPACE}};
+using UnityEditor;
+
+namespace {{INTEGRATION_NAMESPACE}}
+{
+    /// <summary>
+    /// Editor Localizationが存在する場合に、基盤連携ブリッジを起動時へ登録する。
+    /// このassembly自体がdefineConstraintで基盤の存在を条件にコンパイルされるため、
+    /// 基盤が無い環境ではこの登録処理ごと存在しない（=既定ブリッジのまま単一言語で動く）。
+    /// </summary>
+    internal static class EditorL10nBridgeInstaller
+    {
+        [InitializeOnLoadMethod]
+        private static void Install()
+        {
+            EditorL10nRuntime.SetBridge(new EditorL10nBridge());
+        }
+    }
+}
+#endif

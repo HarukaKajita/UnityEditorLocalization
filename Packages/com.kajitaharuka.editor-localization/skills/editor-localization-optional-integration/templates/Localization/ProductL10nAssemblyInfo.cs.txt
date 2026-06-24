@@ -1,0 +1,6 @@
+#if UNITY_EDITOR
+using System.Runtime.CompilerServices;
+
+// 連携assembly(基盤が存在する時のみコンパイルされる)へ、内部のブリッジseamを公開する。
+[assembly: InternalsVisibleTo("{{INTEGRATION_ASMDEF}}")]
+#endif

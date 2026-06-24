@@ -1,0 +1,33 @@
+#if UNITY_EDITOR
+using System;
+using UnityEngine.UIElements;
+
+namespace {{ROOT_NAMESPACE}}
+{
+    /// <summary>
+    /// 多言語基盤(Editor Localization)への依存を抽象化するブリッジ。
+    /// 本体assemblyは基盤を直接参照せず、このブリッジ越しに文言取得とロケール変更追従を行う。
+    /// 基盤が無い場合は<see cref="DefaultEditorL10nBridge"/>が、有る場合は連携assemblyが
+    /// 起動時に登録する実装が使われる（<see cref="EditorL10nRuntime"/>）。
+    /// </summary>
+    internal interface IEditorL10nBridge
+    {
+        /// <summary>
+        /// scope内のkeyを現在の表示ロケールで翻訳する。未解決時はkeyを返す（例外で落とさない）。
+        /// </summary>
+        string Tr(string scope, string key, object[] args);
+
+        /// <summary>
+        /// ロケール変更時に再適用したいコールバックを要素へ紐づける。
+        /// 基盤が無い場合は変更イベントが存在しないため、アタッチ時に一度だけ実行する。
+        /// </summary>
+        void RegisterLocaleCallback(VisualElement element, Action callback);
+
+        /// <summary>
+        /// ヘッダー等へ置くコンパクトな言語切替メニューを生成する。
+        /// 基盤が無い場合（=単一言語）はnullを返し、メニュー自体を出さない。
+        /// </summary>
+        VisualElement CreateCompactLocaleMenu(string scope, string tooltipLabelKey);
+    }
+}
+#endif
