@@ -3,7 +3,7 @@
     "entries": [
         {
             "key": "window.title",
-            "value": "Editor Localization Sample"
+            "value": "UnityEditorLocalization Sample"
         },
         {
             "key": "header.title",
@@ -11,7 +11,7 @@
         },
         {
             "key": "header.subtitle",
-            "value": "This self-describing window shows the manifest, locale JSON files, scope and keys, fallback behavior, and validation paths used by Editor Localization."
+            "value": "This self-describing window shows the manifest, locale JSON files, scope and keys, fallback behavior, and validation paths used by UnityEditorLocalization."
         },
         {
             "key": "locale.compact.tooltip",
@@ -171,7 +171,7 @@
         },
         {
             "key": "catalog.fallback.value",
-            "value": "Editor Localization tries the display locale, then parent locales, and finally falls back to the defaultLocale ja."
+            "value": "UnityEditorLocalization tries the display locale, then parent locales, and finally falls back to the defaultLocale ja."
         },
         {
             "key": "validation.section.title",
@@ -179,7 +179,7 @@
         },
         {
             "key": "validation.help",
-            "value": "You can run the same catalog validation from Tools > Editor Localization > Validate Catalogs. For static translation quality checks, run validate_locale_quality.py against the sample Locales directory."
+            "value": "You can run the same catalog validation from Tools > UnityEditorLocalization > Validate Catalogs. For static translation quality checks, run validate_locale_quality.py against the sample Locales directory."
         },
         {
             "key": "quality.script.label",

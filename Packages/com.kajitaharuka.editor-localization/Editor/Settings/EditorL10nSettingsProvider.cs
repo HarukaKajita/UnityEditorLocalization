@@ -21,12 +21,12 @@ namespace Kajitaharuka.EditorLocalization
         [SettingsProvider]
         public static SettingsProvider CreateProvider()
         {
-            return new SettingsProvider("Preferences/Editor Localization", SettingsScope.User)
+            return new SettingsProvider("Preferences/UnityEditorLocalization", SettingsScope.User)
             {
-                label = "Editor Localization",
+                label = "UnityEditorLocalization",
                 guiHandler = _ =>
                 {
-                    EditorGUILayout.LabelField("Editor Localization", EditorStyles.boldLabel);
+                    EditorGUILayout.LabelField("UnityEditorLocalization", EditorStyles.boldLabel);
                     EditorGUILayout.HelpBox("表示言語はEditorPrefsへ保存され、プロジェクト資産には書き込まれません。scope 個別設定はグローバル設定より優先され、「グローバル設定に従う」で解除できます。", MessageType.Info);
 
                     GUILayout.Space(8f);

@@ -3,7 +3,7 @@ name: editor-localization-translation-quality
 description: Maintain high-quality translations for Unity EditorLocalization-based editor extensions and tools. Use when Codex needs to review, add, edit, or validate locale JSON files, improve untranslated or unnatural UI text, establish project-specific terminology, check placeholders, or keep multilingual Inspector/UI wording consistent and usable across any EditorLocalization consumer.
 ---
 
-# Editor Localization Translation Quality
+# UnityEditorLocalization Translation Quality
 
 Use this skill for EditorLocalization locale work, especially `*.l10n-manifest.json` and `Locales/{locale}.json` files used by Unity editor extensions or other Unity tooling. Do not assume any specific target product; derive terminology and UI intent from the current project.
 

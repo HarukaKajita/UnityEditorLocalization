@@ -3,7 +3,11 @@
 ## [Unreleased]
 
 ### Added
-- 任意依存（optional）として Editor Localization を組み込むための規約ドキュメント `Documentation~/OPTIONAL_INTEGRATION.md` と、雛形生成スキル `skills/editor-localization-optional-integration/`（テンプレート同梱）を追加。本体 assembly が基盤を参照せず、基盤が無ければ defaultLocale の単一言語で動作し、基盤導入時に多言語化と言語切替 UI が点灯する 2 アセンブリ方式（Version Define + Define Constraint）を提供する。リファレンス実装は ExportPackageExtension。
+- 任意依存（optional）として UnityEditorLocalization を組み込むための規約ドキュメント `Documentation~/OPTIONAL_INTEGRATION.md` と、雛形生成スキル `skills/editor-localization-optional-integration/`（テンプレート同梱）を追加。本体 assembly が基盤を参照せず、基盤が無ければ defaultLocale の単一言語で動作し、基盤導入時に多言語化と言語切替 UI が点灯する 2 アセンブリ方式（Version Define + Define Constraint）を提供する。リファレンス実装は ExportPackageExtension。
+
+### Changed
+- 表示名（`package.json` の `displayName`）と Preferences / メニューのラベル・パスを `Editor Localization` から `UnityEditorLocalization` へ統一（`Preferences > UnityEditorLocalization`、`Tools > UnityEditorLocalization > …`）。配布物の displayName・VCC/ALCOM 表示・利用側ドキュメントの表記を揃えるための変更で、package 名 `com.kajitaharuka.editor-localization`・namespace・公開 API は不変。
+- 同梱サンプル（`Localized Editor Window`）の表示文言とメニュー導線も新表示名へ更新。
 
 ### Fixed
 - `EditorL10nUi.BindPropertyField` で、配列/リスト（Foldout で描画される PropertyField）のラベルが言語切替に追従せず生成時の言語のまま固定されていた問題を修正。Foldout のタイトルは `BaseField` のラベル（`labelUssClassName`）ではないため、Foldout 時は `Foldout.text` を更新する経路を追加した。
@@ -16,7 +20,7 @@
 - l10n manifest と翻訳テーブル JSON の import / delete / move を検知してカタログを自動リロードする AssetPostprocessor を追加。
 - Preferences の scope 個別設定に検索、foldout、defaultLocale と manifest パスの補足表示を追加。
 - scope の defaultLocale と manifest パスを取得できる `EditorL10n.TryGetScopeInfo` API を追加。
-- Editor Localization の使い方を自己説明する `Localized Editor Window` UPM sample を追加。
+- UnityEditorLocalization の使い方を自己説明する `Localized Editor Window` UPM sample を追加。
 
 ### Changed
 - パッケージ実体を `Packages/com.kajitaharuka.editor-localization/` 配下のEmbedded UPM package構成へ移行。

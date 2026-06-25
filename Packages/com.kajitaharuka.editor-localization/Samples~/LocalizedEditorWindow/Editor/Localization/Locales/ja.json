@@ -3,7 +3,7 @@
     "entries": [
         {
             "key": "window.title",
-            "value": "Editor Localization サンプル"
+            "value": "UnityEditorLocalization サンプル"
         },
         {
             "key": "header.title",
@@ -11,7 +11,7 @@
         },
         {
             "key": "header.subtitle",
-            "value": "このウィンドウは、Editor Localization の manifest、locale JSON、scope/key、fallback、検証導線をまとめて確認できる自己説明的なサンプルです。"
+            "value": "このウィンドウは、UnityEditorLocalization の manifest、locale JSON、scope/key、fallback、検証導線をまとめて確認できる自己説明的なサンプルです。"
         },
         {
             "key": "locale.compact.tooltip",
@@ -179,7 +179,7 @@
         },
         {
             "key": "validation.help",
-            "value": "Unity のメニュー Tools > Editor Localization > Validate Catalogs でも同じカタログ検証を実行できます。翻訳テキストの静的品質は sample の Locales ディレクトリに対して validate_locale_quality.py を実行して確認します。"
+            "value": "Unity のメニュー Tools > UnityEditorLocalization > Validate Catalogs でも同じカタログ検証を実行できます。翻訳テキストの静的品質は sample の Locales ディレクトリに対して validate_locale_quality.py を実行して確認します。"
         },
         {
             "key": "quality.script.label",

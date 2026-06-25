@@ -1,17 +1,17 @@
 ---
 name: editor-localization-optional-integration
-description: Scaffold optional Editor Localization integration into a consuming Unity editor package. Use when a package (for example a paid asset) must compile and run standalone in a single default language and then automatically light up multi-language UI plus a locale switcher when Editor Localization (com.kajitaharuka.editor-localization) is installed, without any hard assembly reference. Generates the bridge seam in the main assembly and a define-constrained integration assembly.
+description: Scaffold optional UnityEditorLocalization integration into a consuming Unity editor package. Use when a package (for example a paid asset) must compile and run standalone in a single default language and then automatically light up multi-language UI plus a locale switcher when UnityEditorLocalization (com.kajitaharuka.editor-localization) is installed, without any hard assembly reference. Generates the bridge seam in the main assembly and a define-constrained integration assembly.
 ---
 
-# Editor Localization Optional Integration
+# UnityEditorLocalization Optional Integration
 
 Scaffold the two-assembly optional-dependency pattern described in `Documentation~/OPTIONAL_INTEGRATION.md`. The reference implementation is ExportPackageExtension (`Kajitaharuka.ExportPackageExtension`).
 
-The result: the consuming package works standalone in its `defaultLocale`, and—only when Editor Localization is present—an integration assembly compiles and swaps in multi-language behaviour with a locale switcher. No hard `asmdef` reference and no `dependencies` entry on the base package.
+The result: the consuming package works standalone in its `defaultLocale`, and—only when UnityEditorLocalization is present—an integration assembly compiles and swaps in multi-language behaviour with a locale switcher. No hard `asmdef` reference and no `dependencies` entry on the base package.
 
 ## When to use
 
-- A package that must build and run without Editor Localization (single language) and gain multi-language + locale switching when it is installed.
+- A package that must build and run without UnityEditorLocalization (single language) and gain multi-language + locale switching when it is installed.
 - The integration must not add a hard dependency: integration code compiles only when the base package is present (via Version Define + Define Constraint).
 
 ## Inputs (gather before generating)
@@ -77,5 +77,5 @@ Replace every `{{TOKEN}}` occurrence (in file contents and in output file names)
 ## Verify
 
 - **Base absent**: main assembly compiles; UI shows `defaultLocale` text; no locale switcher.
-- **Base present**: the integration assembly compiles (no red mark on Define Constraints; `Version Defines` `Expression outcome` is not `Invalid`); the locale switcher appears and the UI follows locale changes; `Tools > Editor Localization > Validate Catalogs` passes.
+- **Base present**: the integration assembly compiles (no red mark on Define Constraints; `Version Defines` `Expression outcome` is not `Invalid`); the locale switcher appears and the UI follows locale changes; `Tools > UnityEditorLocalization > Validate Catalogs` passes.
 - If the switcher does not appear, check that the base package version satisfies `{{MIN_VERSION}}` (a stale git cache can resolve an older version below the minimum).

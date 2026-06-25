@@ -36,7 +36,7 @@ namespace Kajitaharuka.EditorLocalization.Samples.LocalizedEditorWindow
         private object[] _statusArgs = Array.Empty<object>();
         private int _selectedDemoModeIndex;
 
-        [MenuItem("Tools/Editor Localization/Samples/Localized Window")]
+        [MenuItem("Tools/UnityEditorLocalization/Samples/Localized Window")]
         private static void Open()
         {
             var window = GetWindow<LocalizedEditorWindowSample>();

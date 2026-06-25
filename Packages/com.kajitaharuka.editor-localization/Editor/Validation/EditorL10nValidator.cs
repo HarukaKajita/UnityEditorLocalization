@@ -37,14 +37,14 @@ namespace Kajitaharuka.EditorLocalization
     {
         private static readonly Regex PlaceholderRegex = new(@"(?<!\{)\{(\d+)(?:[^}]*)\}(?!\})", RegexOptions.Compiled);
 
-        [MenuItem("Tools/Editor Localization/Reload Catalogs")]
+        [MenuItem("Tools/UnityEditorLocalization/Reload Catalogs")]
         public static void ReloadCatalogs()
         {
             EditorL10n.Reload();
             Debug.Log("EditorLocalization: カタログを再読み込みしました。");
         }
 
-        [MenuItem("Tools/Editor Localization/Validate Catalogs")]
+        [MenuItem("Tools/UnityEditorLocalization/Validate Catalogs")]
         public static void ValidateCatalogsMenu()
         {
             var result = ValidateAll();

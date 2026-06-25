@@ -1,4 +1,4 @@
-# Editor Localization
+# UnityEditorLocalization
 
 Unity Editor拡張向けの軽量な多言語化基盤です。Editor上のInspector、HelpBox、Button、Consoleログ、進捗表示などの文言を、scopeごとの翻訳カタログから取得します。
 
@@ -47,9 +47,9 @@ https://github.com/HarukaKajita/UnityEditorLocalization.git?path=Packages/com.ka
 `README.md`、`CHANGELOG.md`、`LICENSE.txt`、`package.json`はpackage rootに置き、補助資料は
 `Documentation~/`配下に置いてUnityのAsset import対象から外します。
 
-`Samples~/LocalizedEditorWindow/`には、Editor Localizationを使ってUI ToolkitのEditorWindowを多言語対応させる
+`Samples~/LocalizedEditorWindow/`には、UnityEditorLocalizationを使ってUI ToolkitのEditorWindowを多言語対応させる
 サンプルを同梱しています。Package ManagerのSamplesから`Localized Editor Window`をimportすると、
-`Tools > Editor Localization > Samples > Localized Window`から動作を確認できます。
+`Tools > UnityEditorLocalization > Samples > Localized Window`から動作を確認できます。
 
 このリポジトリでpackage内のEditModeテストを実行するため、host projectの`Packages/manifest.json`には
 `testables`として`com.kajitaharuka.editor-localization`を登録しています。
@@ -58,7 +58,7 @@ https://github.com/HarukaKajita/UnityEditorLocalization.git?path=Packages/com.ka
 
 ### Localized Editor Window
 
-Package Managerから`Localized Editor Window`サンプルをimportすると、Editor Localizationの主要な使い方を
+Package Managerから`Localized Editor Window`サンプルをimportすると、UnityEditorLocalizationの主要な使い方を
 1つのEditorWindowで確認できます。
 
 - `CreateLocalizedCompactLocaleMenu`と`CreateLocalizedLocaleDropdown`による表示言語の切り替え
@@ -164,9 +164,9 @@ toolbar.Add(localeMenu);
 1. `Locales/{locale}.json`を追加します。
 2. manifestの`locales`へ`tag`、表示名、`tablePath`を追加します。
 3. Unity Editorがmanifestと翻訳テーブルJSONをインポートすると、カタログは自動でリロードされます。
-4. `Tools > Editor Localization > Validate Catalogs`を実行します。
+4. `Tools > UnityEditorLocalization > Validate Catalogs`を実行します。
 
-C#コードの変更は不要です。必要に応じて`Tools > Editor Localization > Reload Catalogs`から手動で再読み込みすることもできます。
+C#コードの変更は不要です。必要に応じて`Tools > UnityEditorLocalization > Reload Catalogs`から手動で再読み込みすることもできます。
 
 ## fallback
 
@@ -182,7 +182,7 @@ scope 個別設定 -> グローバル設定 -> scope の defaultLocale
 選択ロケール -> 親ロケール -> defaultLocale -> key
 ```
 
-グローバル設定は`Preferences > Editor Localization`で変更できます。scope 個別設定がある場合は、その scope では個別設定がグローバル設定より優先されます。scope 個別設定は、Preferences で「グローバル設定に従う」を選ぶと解除できます。Preferences では scope 文字列で検索でき、各 scope の現在の解決ロケール、`defaultLocale`、manifest パスを確認できます。
+グローバル設定は`Preferences > UnityEditorLocalization`で変更できます。scope 個別設定がある場合は、その scope では個別設定がグローバル設定より優先されます。scope 個別設定は、Preferences で「グローバル設定に従う」を選ぶと解除できます。Preferences では scope 文字列で検索でき、各 scope の現在の解決ロケール、`defaultLocale`、manifest パスを確認できます。
 
 例:
 
@@ -195,7 +195,7 @@ scope 個別設定 -> グローバル設定 -> scope の defaultLocale
 メニューから実行します。
 
 ```text
-Tools > Editor Localization > Validate Catalogs
+Tools > UnityEditorLocalization > Validate Catalogs
 ```
 
 検証では次を確認します。
@@ -211,7 +211,7 @@ Tools > Editor Localization > Validate Catalogs
 
 - `Documentation~/DEVELOPER_GUIDE.md`: 利用側拡張での設計指針
 - `Documentation~/UI_TOOLKIT_LOCALIZATION_TIPS.md`: UI Toolkitで言語変更に追従するための実装Tips
-- `Documentation~/OPTIONAL_INTEGRATION.md`: Editor Localizationを任意依存（optional）として組み込む2アセンブリ方式（基盤が無くても単一言語で動作し、導入時に多言語化が点灯）。雛形生成は`editor-localization-optional-integration`スキル
+- `Documentation~/OPTIONAL_INTEGRATION.md`: UnityEditorLocalizationを任意依存（optional）として組み込む2アセンブリ方式（基盤が無くても単一言語で動作し、導入時に多言語化が点灯）。雛形生成は`editor-localization-optional-integration`スキル
 - `skills/editor-localization-translation-quality/`: 翻訳品質ワークフロー
 
 ## ライセンス

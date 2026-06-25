@@ -1,12 +1,12 @@
-# Editor Localization 任意依存（Optional Integration）ガイド
+# UnityEditorLocalization 任意依存（Optional Integration）ガイド
 
-このガイドは、販売パッケージなど他の Unity Editor 拡張が **Editor Localization を「任意の依存」として組み込む**ための設計指針です。基盤（Editor Localization）が無くても**単一言語（defaultLocale）で成立**し、基盤を追加すると**多言語表示と言語切替 UI が点灯**する構成を、C# のハード依存なしで実現します。
+このガイドは、販売パッケージなど他の Unity Editor 拡張が **UnityEditorLocalization を「任意の依存」として組み込む**ための設計指針です。基盤（UnityEditorLocalization）が無くても**単一言語（defaultLocale）で成立**し、基盤を追加すると**多言語表示と言語切替 UI が点灯**する構成を、C# のハード依存なしで実現します。
 
 利用者（購入者）が「基盤を入れる／入れない」のどちらでも、コンパイルも表示も壊れないようにするのが目的です。リファレンス実装は ExportPackageExtension（`Kajitaharuka.ExportPackageExtension`）です。スキャフォールドには `editor-localization-optional-integration` スキルを使えます。
 
 ## 基本方針
 
-- 本体 assembly は Editor Localization を**参照しない**。
+- 本体 assembly は UnityEditorLocalization を**参照しない**。
 - 連携コードを**別 assembly** に分け、Unity の Version Define + Define Constraint で「基盤がある時だけコンパイル」する。基盤が無ければその assembly ごとコンパイル対象から除外され、**参照エラーにならない**（エラーではなく非コンパイル）。
 - 本体は「ブリッジ（seam）」越しに文言取得とロケール追従を行う。既定は基盤非依存の単一言語実装、基盤がある時は連携 assembly が基盤連携実装へ差し替える。
 
@@ -78,7 +78,7 @@
 ## 検証
 
 - **基盤なし**: コンパイル通過・defaultLocale で表示・言語切替 UI が出ないこと。
-- **基盤あり**: 言語切替 UI が点灯・切替が即追従すること。`Tools > Editor Localization > Validate Catalogs` が通ること。
+- **基盤あり**: 言語切替 UI が点灯・切替が即追従すること。`Tools > UnityEditorLocalization > Validate Catalogs` が通ること。
 - 連携 asmdef の Inspector で **Define Constraints の赤マークが消え**、`Version Defines` の `Expression outcome` が `Invalid` でないこと。
 
 ## トラブルシュート
