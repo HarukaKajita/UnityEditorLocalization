@@ -9,10 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c4fe1c4e496bd80459bbb07aaf90f4a0, type: 3}
-  m_Name: EditorLocalization_Tarball
+  m_Script: {fileID: 11500000, guid: 79607600432444505bfdf5288572b728, type: 3}
+  m_Name: UnityEditorLocalization_VPM
   m_EditorClassIdentifier: 
-  exportFolderPathExpression: ./Publish/
+  exportFolderPathExpression: ./Publish/vpm/
   pathInputMode: 0
   packageJsonAsset: {fileID: 8385607101436470782, guid: 88b92f01d00944c88bb7fbc258ec76ad, type: 3}
   packageParentFolder: {fileID: 102900000, guid: 4338cc2db76cd8e179f3356688afbcb5, type: 3}
