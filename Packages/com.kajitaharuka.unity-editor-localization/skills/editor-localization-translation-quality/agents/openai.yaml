@@ -1,4 +1,4 @@
 interface:
-  display_name: "Editor Localization Translation Quality"
+  display_name: "UnityEditorLocalization Translation Quality"
   short_description: "Keep EditorLocalization translations consistent"
   default_prompt: "Use $editor-localization-translation-quality to review and improve EditorLocalization locale JSON files."

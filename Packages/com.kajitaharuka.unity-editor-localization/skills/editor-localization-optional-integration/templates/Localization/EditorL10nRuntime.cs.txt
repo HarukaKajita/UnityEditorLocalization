@@ -4,7 +4,7 @@ namespace {{ROOT_NAMESPACE}}
     /// <summary>
     /// 使用中の<see cref="IEditorL10nBridge"/>を保持する差し替え点。
     /// 既定は基盤非依存の<see cref="DefaultEditorL10nBridge"/>。
-    /// Editor Localizationが存在する場合のみ、連携assemblyが起動時に
+    /// UnityEditorLocalizationが存在する場合のみ、連携assemblyが起動時に
     /// <see cref="SetBridge"/>で基盤連携実装へ差し替える。
     /// </summary>
     internal static class EditorL10nRuntime

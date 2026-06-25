@@ -7,7 +7,7 @@ using UnityEngine.UIElements;
 namespace {{INTEGRATION_NAMESPACE}}
 {
     /// <summary>
-    /// Editor Localizationが存在する環境向けのブリッジ実装。
+    /// UnityEditorLocalizationが存在する環境向けのブリッジ実装。
     /// 文言取得・ロケール変更追従・言語切替メニューを基盤API(EditorL10n / EditorL10nUi)へ委譲する。
     /// このassemblyはdefineConstraint(KAJITAHARUKA_EDITOR_L10N)により、基盤が無い環境では
     /// コンパイル対象から除外される（=基盤への参照エラーにならない）。

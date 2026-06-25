@@ -5,7 +5,7 @@ using UnityEngine.UIElements;
 namespace {{ROOT_NAMESPACE}}
 {
     /// <summary>
-    /// 多言語基盤(Editor Localization)への依存を抽象化するブリッジ。
+    /// 多言語基盤(UnityEditorLocalization)への依存を抽象化するブリッジ。
     /// 本体assemblyは基盤を直接参照せず、このブリッジ越しに文言取得とロケール変更追従を行う。
     /// 基盤が無い場合は<see cref="DefaultEditorL10nBridge"/>が、有る場合は連携assemblyが
     /// 起動時に登録する実装が使われる（<see cref="EditorL10nRuntime"/>）。

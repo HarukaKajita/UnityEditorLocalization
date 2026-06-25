@@ -9,7 +9,7 @@ using UnityEngine.UIElements;
 namespace {{ROOT_NAMESPACE}}
 {
     /// <summary>
-    /// Editor Localizationが無い環境向けの既定ブリッジ。
+    /// UnityEditorLocalizationが無い環境向けの既定ブリッジ。
     /// 同梱manifestのdefaultLocaleテーブルのみを直接読み、単一言語で文言を提供する。
     /// fallback連鎖やロケール解決・EditorPrefs参照は持たない（基盤が有る場合は連携assemblyが
     /// このブリッジを置き換える）。表示文言のデータ源はJSONテーブル一本に保ち、基盤の有無で
