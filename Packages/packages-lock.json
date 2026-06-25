@@ -17,16 +17,16 @@
       },
       "hash": "85c101f5329ec1b0c6f70cba44614166dd78f53c"
     },
-    "com.kajitaharuka.editor-localization": {
-      "version": "file:com.kajitaharuka.editor-localization",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
     "com.kajitaharuka.export-package-extension": {
       "version": "file:/Users/kajitaharuka/dev/unity/ExportPackageExtension/Packages/com.kajitaharuka.export-package-extension",
       "depth": 0,
       "source": "local",
+      "dependencies": {}
+    },
+    "com.kajitaharuka.unity-editor-localization": {
+      "version": "file:com.kajitaharuka.editor-localization",
+      "depth": 0,
+      "source": "embedded",
       "dependencies": {}
     },
     "com.unity.collab-proxy": {
