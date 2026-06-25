@@ -11,7 +11,7 @@ namespace Kajitaharuka.EditorLocalization.Samples.LocalizedEditorWindow
 {
     public sealed class LocalizedEditorWindowSample : EditorWindow
     {
-        private const string Scope = "com.kajitaharuka.editor-localization.samples.localized-window";
+        private const string Scope = "com.kajitaharuka.unity-editor-localization.samples.localized-window";
 
         private static readonly string[] DemoModeKeys =
         {
@@ -249,7 +249,7 @@ namespace Kajitaharuka.EditorLocalization.Samples.LocalizedEditorWindow
                 helpBox.text = EditorL10n.Tr(Scope, "validation.help");
             });
             section.Add(helpBox);
-            section.Add(CreateInfoBlock("quality.script.label", "Packages/com.kajitaharuka.editor-localization/skills/editor-localization-translation-quality/scripts/validate_locale_quality.py"));
+            section.Add(CreateInfoBlock("quality.script.label", "Packages/com.kajitaharuka.unity-editor-localization/skills/editor-localization-translation-quality/scripts/validate_locale_quality.py"));
             return section;
         }
 

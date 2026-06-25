@@ -14,12 +14,12 @@ Unity Editor拡張向けの軽量な多言語化基盤です。Editor上のInspe
 
 ## インストール
 
-このパッケージはリポジトリの`Packages/com.kajitaharuka.editor-localization/`配下にあるため、git URLでインストールする際は`?path=`でサブフォルダを指定します。
+このパッケージはリポジトリの`Packages/com.kajitaharuka.unity-editor-localization/`配下にあるため、git URLでインストールする際は`?path=`でサブフォルダを指定します。
 
 Package Managerの`Add package from git URL...`に次を入力します。
 
 ```text
-https://github.com/HarukaKajita/UnityEditorLocalization.git?path=Packages/com.kajitaharuka.editor-localization
+https://github.com/HarukaKajita/UnityEditorLocalization.git?path=Packages/com.kajitaharuka.unity-editor-localization
 ```
 
 `Packages/manifest.json`の`dependencies`へ直接記述することもできます。
@@ -27,7 +27,7 @@ https://github.com/HarukaKajita/UnityEditorLocalization.git?path=Packages/com.ka
 ```json
 {
   "dependencies": {
-    "com.kajitaharuka.editor-localization": "https://github.com/HarukaKajita/UnityEditorLocalization.git?path=Packages/com.kajitaharuka.editor-localization"
+    "com.kajitaharuka.unity-editor-localization": "https://github.com/HarukaKajita/UnityEditorLocalization.git?path=Packages/com.kajitaharuka.unity-editor-localization"
   }
 }
 ```
@@ -35,7 +35,7 @@ https://github.com/HarukaKajita/UnityEditorLocalization.git?path=Packages/com.ka
 バージョンを固定する場合は、末尾にリリースタグを付けます。
 
 ```text
-https://github.com/HarukaKajita/UnityEditorLocalization.git?path=Packages/com.kajitaharuka.editor-localization#1.0.0
+https://github.com/HarukaKajita/UnityEditorLocalization.git?path=Packages/com.kajitaharuka.unity-editor-localization#1.0.0
 ```
 
 このリポジトリ自体をUnityプロジェクトとして開く場合は、Embedded UPM packageとして`Packages/`配下にすでに配置されているため、追加のインストールは不要です。
@@ -43,7 +43,7 @@ https://github.com/HarukaKajita/UnityEditorLocalization.git?path=Packages/com.ka
 ## パッケージ構成
 
 このパッケージはEmbedded UPM packageとして、Unityプロジェクトの
-`Packages/com.kajitaharuka.editor-localization/`配下に配置する構成です。
+`Packages/com.kajitaharuka.unity-editor-localization/`配下に配置する構成です。
 `README.md`、`CHANGELOG.md`、`LICENSE.txt`、`package.json`はpackage rootに置き、補助資料は
 `Documentation~/`配下に置いてUnityのAsset import対象から外します。
 
@@ -52,7 +52,7 @@ https://github.com/HarukaKajita/UnityEditorLocalization.git?path=Packages/com.ka
 `Tools > UnityEditorLocalization > Samples > Localized Window`から動作を確認できます。
 
 このリポジトリでpackage内のEditModeテストを実行するため、host projectの`Packages/manifest.json`には
-`testables`として`com.kajitaharuka.editor-localization`を登録しています。
+`testables`として`com.kajitaharuka.unity-editor-localization`を登録しています。
 
 ## サンプル
 

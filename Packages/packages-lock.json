@@ -24,7 +24,7 @@
       "dependencies": {}
     },
     "com.kajitaharuka.unity-editor-localization": {
-      "version": "file:com.kajitaharuka.editor-localization",
+      "version": "file:com.kajitaharuka.unity-editor-localization",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}

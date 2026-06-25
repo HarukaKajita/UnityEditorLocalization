@@ -16,7 +16,7 @@ MonoBehaviour:
   pathInputMode: 0
   packageJsonAsset: {fileID: 8385607101436470782, guid: 88b92f01d00944c88bb7fbc258ec76ad, type: 3}
   packageParentFolder: {fileID: 102900000, guid: 4338cc2db76cd8e179f3356688afbcb5, type: 3}
-  packageParentFolderPath: Packages/com.kajitaharuka.editor-localization
+  packageParentFolderPath: Packages/com.kajitaharuka.unity-editor-localization
   isValid: 1
   excludeAssets: []
   excludeAssetPaths: []

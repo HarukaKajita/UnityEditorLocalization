@@ -1,6 +1,6 @@
 ---
 name: editor-localization-optional-integration
-description: Scaffold optional UnityEditorLocalization integration into a consuming Unity editor package. Use when a package (for example a paid asset) must compile and run standalone in a single default language and then automatically light up multi-language UI plus a locale switcher when UnityEditorLocalization (com.kajitaharuka.editor-localization) is installed, without any hard assembly reference. Generates the bridge seam in the main assembly and a define-constrained integration assembly.
+description: Scaffold optional UnityEditorLocalization integration into a consuming Unity editor package. Use when a package (for example a paid asset) must compile and run standalone in a single default language and then automatically light up multi-language UI plus a locale switcher when UnityEditorLocalization (com.kajitaharuka.unity-editor-localization) is installed, without any hard assembly reference. Generates the bridge seam in the main assembly and a define-constrained integration assembly.
 ---
 
 # UnityEditorLocalization Optional Integration
@@ -30,7 +30,7 @@ Derived automatically:
 - `{{INTEGRATION_ASMDEF}}` = `{{MAIN_ASMDEF}}.EditorLocalizationIntegration`
 - `{{INTEGRATION_NAMESPACE}}` = `{{ROOT_NAMESPACE}}.LocalizationIntegration`
 - Shared define symbol = `KAJITAHARUKA_EDITOR_L10N` (fixed; do not rename per package)
-- Base package id = `com.kajitaharuka.editor-localization` (fixed)
+- Base package id = `com.kajitaharuka.unity-editor-localization` (fixed)
 
 ## Workflow
 
@@ -43,7 +43,7 @@ Derived automatically:
    - `EditorL10n.Tr(scope, ...)` → `{{PREFIX}}L10n.Tr(...)`
    - `EditorL10nUi.CreateLocalizedCompactLocaleMenu(...)` → `{{PREFIX}}L10nUi.CreateCompactLocaleMenu(...)`; treat the result as a nullable `VisualElement` (it is `null` when the base package is absent).
    - Remove `using Kajitaharuka.EditorLocalization;` from every main-assembly file.
-6. Do **not** add `com.kajitaharuka.editor-localization` to the main `package.json` `dependencies`. Document it as a recommended optional add-on in the README instead.
+6. Do **not** add `com.kajitaharuka.unity-editor-localization` to the main `package.json` `dependencies`. Document it as a recommended optional add-on in the README instead.
 7. Verify (see below).
 
 ## File mapping (templates → output)

@@ -41,6 +41,6 @@
     "com.unity.modules.xr": "1.0.0"
   },
   "testables": [
-    "com.kajitaharuka.editor-localization"
+    "com.kajitaharuka.unity-editor-localization"
   ]
 }

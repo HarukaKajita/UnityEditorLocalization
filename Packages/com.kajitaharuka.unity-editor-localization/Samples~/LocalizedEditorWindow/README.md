@@ -30,6 +30,6 @@ UnityEditorLocalization を使った、自己説明的な多言語 `EditorWindow
 利用側の locale table を静的に確認したい場合は、対象の `Locales` ディレクトリに対して次を実行します。
 
 ```bash
-python3 Packages/com.kajitaharuka.editor-localization/skills/editor-localization-translation-quality/scripts/validate_locale_quality.py \
+python3 Packages/com.kajitaharuka.unity-editor-localization/skills/editor-localization-translation-quality/scripts/validate_locale_quality.py \
   Assets/Samples/<package-name>/<version>/LocalizedEditorWindow/Editor/Localization/Locales --default-locale ja
 ```
