@@ -35,9 +35,12 @@
     --eui-err-bg: #f2d4d0;
 }
 
+/* 描画領域の端に内容が張り付かないよう、画面全体に外周の余白を与える（端に padding を取る）。 */
 .eui-root {
-    padding-top: 4px;
-    padding-bottom: 4px;
+    padding-top: 6px;
+    padding-right: 12px;
+    padding-bottom: 10px;
+    padding-left: 8px;
 }
 
 /* ===== ヘッダー（2 ゾーン: 左=アイデンティティ, 右=汎用chrome）===== */
