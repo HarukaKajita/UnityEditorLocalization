@@ -1,0 +1,254 @@
+/* UnityEditorLocalization の Editor UI 用デザイントークン＋再利用コンポーネントスタイル。
+   色はスキンクラス（eui-dark / eui-light）配下のトークンとして定義し、Unity 内部の
+   --unity-* 変数には依存しない（バージョン更新に強い）。ルート/スキンクラスは
+   EditorL10nUiKit.ApplyTheme がコード側から付与する。USS は名前で解決される。 */
+
+.eui-dark {
+    --eui-card-bg: #3a3a3a;
+    --eui-inset-bg: #2c2c2c;
+    --eui-border: #232323;
+    --eui-text: #d4d4d4;
+    --eui-text-muted: #9a9a9a;
+    --eui-accent: #7ba7ff;
+    --eui-accent-bg: #2e3a55;
+    --eui-ok: #79d08a;
+    --eui-ok-bg: #26402b;
+    --eui-warn: #e6c15c;
+    --eui-warn-bg: #43391c;
+    --eui-err: #f08c82;
+    --eui-err-bg: #4a2725;
+}
+
+.eui-light {
+    --eui-card-bg: #e6e6e6;
+    --eui-inset-bg: #d8d8d8;
+    --eui-border: #b6b6b6;
+    --eui-text: #1f1f1f;
+    --eui-text-muted: #5a5a5a;
+    --eui-accent: #2c5fd0;
+    --eui-accent-bg: #d2def7;
+    --eui-ok: #256a2c;
+    --eui-ok-bg: #cde6cf;
+    --eui-warn: #8a6d10;
+    --eui-warn-bg: #f0e4bf;
+    --eui-err: #b23026;
+    --eui-err-bg: #f2d4d0;
+}
+
+.eui-root {
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+
+/* ===== ヘッダー（2 ゾーン: 左=アイデンティティ, 右=汎用chrome）===== */
+.eui-header {
+    flex-direction: row;
+    align-items: flex-start;
+    margin-bottom: 8px;
+}
+
+.eui-header__texts {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+}
+
+.eui-header__title-row {
+    flex-direction: row;
+    align-items: center;
+}
+
+.eui-header__title {
+    -unity-font-style: bold;
+    font-size: 13px;
+    color: var(--eui-text);
+    flex-shrink: 1;
+}
+
+.eui-header__title-row .eui-badge {
+    margin-left: 8px;
+    flex-shrink: 0;
+}
+
+.eui-header__subtitle {
+    font-size: 11px;
+    color: var(--eui-text-muted);
+    white-space: normal;
+    margin-top: 2px;
+}
+
+.eui-header__actions {
+    flex-direction: row;
+    align-items: center;
+    flex-grow: 0;
+    flex-shrink: 0;
+    margin-left: 8px;
+}
+
+/* アイコンのみのリンク/メタ操作ボタン（汎用chrome）。枠・背景なし、ホバーで背景。
+   組み込みアイコン（_Help 等）はスキン別画像が返るため tint しない。 */
+.eui-icon-link {
+    width: 22px;
+    height: 22px;
+    padding: 1px;
+    margin: 0 0 0 4px;
+    flex-grow: 0;
+    flex-shrink: 0;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 4px;
+}
+
+.eui-icon-link:hover {
+    background-color: var(--eui-inset-bg);
+}
+
+.eui-icon-link__icon {
+    width: 16px;
+    height: 16px;
+}
+
+/* ===== セクションカード ===== */
+.eui-section {
+    background-color: var(--eui-card-bg);
+    border-width: 1px;
+    border-color: var(--eui-border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    margin-bottom: 8px;
+}
+
+.eui-section__title {
+    -unity-font-style: bold;
+    font-size: 11px;
+    color: var(--eui-text-muted);
+    margin-bottom: 6px;
+}
+
+/* 段落の補足ノート（永続表示の説明文。認識>想起・説明性） */
+.eui-note {
+    color: var(--eui-text-muted);
+    font-size: 11px;
+    white-space: normal;
+    margin-bottom: 6px;
+}
+
+/* 入力欄補足の常時ヒント行 */
+.eui-hint {
+    color: var(--eui-text-muted);
+    font-size: 10px;
+    white-space: normal;
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+.eui-separator {
+    height: 1px;
+    background-color: var(--eui-border);
+    margin-top: 6px;
+    margin-bottom: 4px;
+}
+
+/* クリックできるアセット/パス行（選択＋Ping）。長いパスは折り返す */
+.eui-asset-row {
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 3px;
+    -unity-text-align: middle-left;
+    padding: 2px 4px;
+    margin: 2px 0 0 0;
+    color: var(--eui-accent);
+    font-size: 11px;
+    white-space: normal;
+}
+
+.eui-asset-row:hover {
+    background-color: var(--eui-inset-bg);
+}
+
+/* ===== 状態バッジ / ピル ===== */
+.eui-badge {
+    border-radius: 4px;
+    padding: 1px 7px;
+    font-size: 10px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.eui-badge--ok { background-color: var(--eui-ok-bg); color: var(--eui-ok); }
+.eui-badge--warn { background-color: var(--eui-warn-bg); color: var(--eui-warn); }
+.eui-badge--err { background-color: var(--eui-err-bg); color: var(--eui-err); }
+.eui-badge--neutral { background-color: var(--eui-inset-bg); color: var(--eui-text-muted); }
+.eui-badge--accent { background-color: var(--eui-accent-bg); color: var(--eui-accent); }
+
+/* ===== 「カタログ」操作行（Reload / Validate / 説明アイコン）===== */
+.l10n-catalogs {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.l10n-catalogs .unity-button {
+    margin: 0 6px 0 0;
+}
+
+.l10n-catalogs__result {
+    font-size: 11px;
+    margin: 4px 0 0 0;
+    white-space: normal;
+    flex-basis: 100%;
+}
+
+/* ===== scope 個別設定の各カード ===== */
+.l10n-scope-card {
+    background-color: var(--eui-inset-bg);
+    border-width: 1px;
+    border-color: var(--eui-border);
+    border-radius: 5px;
+    padding: 6px 8px;
+    margin-bottom: 6px;
+}
+
+.l10n-scope-card__head {
+    flex-direction: row;
+    align-items: center;
+}
+
+/* Foldout のタイトル（scope 名）。長い識別子を折り返す */
+.l10n-scope-card__head .unity-foldout {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+}
+
+.l10n-scope-card__head .unity-foldout > .unity-foldout__toggle .unity-label {
+    white-space: normal;
+    font-size: 12px;
+    color: var(--eui-text);
+}
+
+.l10n-scope-card__pills {
+    flex-direction: row;
+    flex-shrink: 0;
+    align-items: center;
+}
+
+.l10n-scope-card__pills .eui-badge {
+    margin-left: 4px;
+}
+
+/* scope の状態メタ行（current / source / default / manifest）。淡色・折り返し */
+.l10n-scope-meta {
+    color: var(--eui-text-muted);
+    font-size: 11px;
+    white-space: normal;
+    margin: 2px 0 0 14px;
+}
+
+.l10n-scope-body {
+    margin: 4px 0 2px 14px;
+}
