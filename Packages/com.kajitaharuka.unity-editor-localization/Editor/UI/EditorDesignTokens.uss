@@ -203,15 +203,6 @@
     flex-basis: 100%;
 }
 
-/* 説明用の info アイコン（クリック不可・ホバーtooltip専用） */
-.eui-info-icon {
-    width: 16px;
-    height: 16px;
-    margin: 0 0 0 2px;
-    flex-grow: 0;
-    flex-shrink: 0;
-}
-
 /* ===== scope 個別設定の各カード ===== */
 .l10n-scope-card {
     background-color: var(--eui-inset-bg);

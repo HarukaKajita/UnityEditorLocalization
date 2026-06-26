@@ -39,7 +39,6 @@
         { "key": "scope.fallbackNote", "value": "Requested {0} is unavailable; fell back." },
         { "key": "scope.outOfCatalogNote", "value": "Requested {0} is outside the loaded catalogs." },
         { "key": "scope.manifest.tooltip", "value": "Click to select the manifest asset." },
-        { "key": "scope.manifest.unknown", "value": "unknown" },
         { "key": "dev.title", "value": "Developer" },
         { "key": "diagnostics.label", "value": "Unresolved-key warnings" },
         { "key": "diagnostics.tooltip", "value": "Warn in the Console once per scope/key when an unknown scope or unresolved key is detected." },

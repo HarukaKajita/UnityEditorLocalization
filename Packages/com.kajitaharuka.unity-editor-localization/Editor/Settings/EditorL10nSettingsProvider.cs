@@ -100,6 +100,8 @@ namespace Kajitaharuka.EditorLocalization
             // ===== カタログ操作（Reload / Validate / 説明）=====
             private VisualElement BuildCatalogs()
             {
+                var container = new VisualElement();
+
                 var row = new VisualElement();
                 row.AddToClassList("l10n-catalogs");
 
@@ -124,21 +126,27 @@ namespace Kajitaharuka.EditorLocalization
                 }, Tr("catalogs.validate.tooltip"));
                 BindButtonText(validate, "catalogs.validate", "catalogs.validate.tooltip");
 
-                // 説明アイコン（ⓘ）。クリックさせず、ホバーの tooltip で両操作の意味を常時確認できる（説明性）。
-                var help = new Image
+                // 両操作の意味を説明する HelpBox（既定は非表示）。下の ⓘ ボタンで開閉する。
+                var help = EditorL10nUiKit.InfoBox(Tr("catalogs.help.tooltip"));
+                help.style.display = DisplayStyle.None;
+                EditorL10nUi.RegisterLocaleCallback(help, () => help.text = Tr("catalogs.help.tooltip"));
+
+                // 説明トグル（ⓘ）。クリック/キーボードで上の HelpBox を開閉でき（キーボード到達可）、
+                // ホバーの tooltip でも要約を確認できる（マウス）。これで説明性を入力手段に依らず確保する。
+                var helpToggle = EditorL10nUiKit.IconLinkButton("console.infoicon", Tr("catalogs.help.tooltip"), () =>
                 {
-                    image = EditorGUIUtility.IconContent("console.infoicon").image,
-                    scaleMode = ScaleMode.ScaleToFit,
-                    tooltip = Tr("catalogs.help.tooltip"),
-                };
-                help.AddToClassList("eui-info-icon");
-                BindTooltip(help, "catalogs.help.tooltip");
+                    help.style.display = help.style.display == DisplayStyle.None ? DisplayStyle.Flex : DisplayStyle.None;
+                });
+                BindTooltip(helpToggle, "catalogs.help.tooltip");
 
                 row.Add(reload);
                 row.Add(validate);
-                row.Add(help);
+                row.Add(helpToggle);
                 row.Add(result);
-                return row;
+
+                container.Add(row);
+                container.Add(help);
+                return container;
             }
 
             private static void SetResult(Label result, string text, EditorL10nBadgeKind kind)
