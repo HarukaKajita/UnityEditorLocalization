@@ -203,6 +203,15 @@
     flex-basis: 100%;
 }
 
+/* 説明用の info アイコン（クリック不可・ホバーtooltip専用） */
+.eui-info-icon {
+    width: 16px;
+    height: 16px;
+    margin: 0 0 0 2px;
+    flex-grow: 0;
+    flex-shrink: 0;
+}
+
 /* ===== scope 個別設定の各カード ===== */
 .l10n-scope-card {
     background-color: var(--eui-inset-bg);
@@ -218,14 +227,32 @@
     align-items: center;
 }
 
-/* Foldout のタイトル（scope 名）。長い識別子を折り返す */
-.l10n-scope-card__head .unity-foldout {
+/* 展開トグル（チェブロン）。小さく控えめ、ホバーで背景。Button なのでキーボード操作可。 */
+.l10n-chevron {
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    margin: 0 2px 0 0;
+    flex-grow: 0;
+    flex-shrink: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 3px;
+    color: var(--eui-text-muted);
+    font-size: 10px;
+    -unity-text-align: middle-center;
+}
+
+.l10n-chevron:hover {
+    color: var(--eui-text);
+    background-color: var(--eui-card-bg);
+}
+
+/* scope 名（長い識別子を折り返す） */
+.l10n-scope-card__name {
     flex-grow: 1;
     flex-shrink: 1;
     min-width: 0;
-}
-
-.l10n-scope-card__head .unity-foldout > .unity-foldout__toggle .unity-label {
     white-space: normal;
     font-size: 12px;
     color: var(--eui-text);
@@ -247,6 +274,11 @@
     font-size: 11px;
     white-space: normal;
     margin: 2px 0 0 14px;
+}
+
+/* fallback/カタログ外の補足。警告色で注意を促す（色だけでなく文言でも伝わる） */
+.l10n-scope-meta--warn {
+    color: var(--eui-warn);
 }
 
 .l10n-scope-body {

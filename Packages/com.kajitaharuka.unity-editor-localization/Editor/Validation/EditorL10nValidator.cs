@@ -47,6 +47,15 @@ namespace Kajitaharuka.EditorLocalization
         [MenuItem("Tools/UnityEditorLocalization/Validate Catalogs")]
         public static void ValidateCatalogsMenu()
         {
+            ValidateAndLog();
+        }
+
+        /// <summary>
+        /// 全カタログを検証し、各 warning/error と総括を Console へ出力したうえで結果を返す。
+        /// メニューと Preferences の検証ボタンの双方から使う共通入口。
+        /// </summary>
+        public static EditorL10nValidationResult ValidateAndLog()
+        {
             var result = ValidateAll();
             foreach (var warning in result.Warnings)
                 Debug.LogWarning(warning);
@@ -57,6 +66,8 @@ namespace Kajitaharuka.EditorLocalization
                 Debug.Log($"EditorLocalization: 検証に成功しました。Warnings: {result.Warnings.Count}");
             else
                 Debug.LogError($"EditorLocalization: 検証に失敗しました。Errors: {result.Errors.Count}, Warnings: {result.Warnings.Count}");
+
+            return result;
         }
 
         public static EditorL10nValidationResult ValidateAll()
