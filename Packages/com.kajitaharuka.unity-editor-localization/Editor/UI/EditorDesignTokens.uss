@@ -216,9 +216,16 @@
     margin-bottom: 6px;
 }
 
+/* head 行はクリックで開閉できる。ホバーで背景を出してクリック可能を示す。 */
 .l10n-scope-card__head {
     flex-direction: row;
     align-items: center;
+    border-radius: 4px;
+    padding: 1px 2px;
+}
+
+.l10n-scope-card__head:hover {
+    background-color: var(--eui-card-bg);
 }
 
 /* 展開トグル（チェブロン）。小さく控えめ、ホバーで背景。Button なのでキーボード操作可。 */

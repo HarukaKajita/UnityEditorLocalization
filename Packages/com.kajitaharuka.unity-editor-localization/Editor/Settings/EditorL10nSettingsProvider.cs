@@ -389,18 +389,23 @@ namespace Kajitaharuka.EditorLocalization
                 var head = new VisualElement();
                 head.AddToClassList("l10n-scope-card__head");
 
+                // 既定は展開（主要操作＝言語ドロップダウンを最初から見せる）。body は display 未指定で可視。
                 var body = new VisualElement();
                 body.AddToClassList("l10n-scope-body");
-                body.style.display = DisplayStyle.None;
 
-                var chevron = new Button { text = "▸" };
+                var chevron = new Button { text = "▾" };
                 chevron.AddToClassList("l10n-chevron");
-                chevron.clicked += () =>
+
+                // 展開/折りたたみの切替。チェブロン（キーボード操作可）と head 行全体のクリック（広いヒット領域）の
+                // 双方から呼べるよう単一メソッドにまとめる。
+                var expanded = true;
+                void SetExpanded(bool value)
                 {
-                    var expanded = body.style.display == DisplayStyle.None;
-                    body.style.display = expanded ? DisplayStyle.Flex : DisplayStyle.None;
-                    chevron.text = expanded ? "▾" : "▸";
-                };
+                    expanded = value;
+                    body.style.display = value ? DisplayStyle.Flex : DisplayStyle.None;
+                    chevron.text = value ? "▾" : "▸";
+                }
+                chevron.clicked += () => SetExpanded(!expanded);
 
                 var name = new Label(EditorL10nUiKit.InsertWrapOpportunities(scope));
                 name.AddToClassList("l10n-scope-card__name");
@@ -416,6 +421,14 @@ namespace Kajitaharuka.EditorLocalization
                 head.Add(chevron);
                 head.Add(name);
                 head.Add(pills);
+                // head 行のどこをクリックしても開閉できる（ヒット領域拡大・発見性向上）。
+                // チェブロン自身のクリックは chevron.clicked が処理するため、二重トグルを避けて除外する。
+                head.RegisterCallback<ClickEvent>(evt =>
+                {
+                    if (evt.target == chevron)
+                        return;
+                    SetExpanded(!expanded);
+                });
 
                 _meta = new Label();
                 _meta.AddToClassList("l10n-scope-meta");
