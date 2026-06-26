@@ -182,7 +182,7 @@ scope 個別設定 -> グローバル設定 -> scope の defaultLocale
 選択ロケール -> 親ロケール -> defaultLocale -> key
 ```
 
-グローバル設定は`Preferences > UnityEditorLocalization`で変更できます。scope 個別設定がある場合は、その scope では個別設定がグローバル設定より優先されます。scope 個別設定は、Preferences で「グローバル設定に従う」を選ぶと解除できます。Preferences では scope 文字列で検索でき、各 scope の現在の解決ロケール、`defaultLocale`、manifest パスを確認できます。
+グローバル設定は`Preferences > UnityEditorLocalization`で変更できます。scope 個別設定がある場合は、その scope では個別設定がグローバル設定より優先されます。scope 個別設定は、Preferences で「グローバル設定に従う」を選ぶと解除できます。Preferences では scope 文字列で検索でき、各 scope の現在の解決ロケール（override / fallback はバッジで表示）・`defaultLocale`・manifest パス（クリックで選択）を確認できます。ヘッダー右上のアイコンからオンラインドキュメントを開け、カタログの再読み込み（Reload）・検証（Validate）も実行できます。Preferences 画面自身も多言語化されており、表示言語の変更に追従します。
 
 例:
 
