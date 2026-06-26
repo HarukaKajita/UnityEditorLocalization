@@ -1,0 +1,18 @@
+{
+    "scope": "com.kajitaharuka.unity-editor-localization",
+    "defaultLocale": "en",
+    "locales": [
+        {
+            "tag": "en",
+            "nativeName": "English",
+            "englishName": "English",
+            "tablePath": "Locales/en.json"
+        },
+        {
+            "tag": "ja",
+            "nativeName": "日本語",
+            "englishName": "Japanese",
+            "tablePath": "Locales/ja.json"
+        }
+    ]
+}
