@@ -228,19 +228,20 @@
     background-color: var(--eui-card-bg);
 }
 
-/* 展開トグル（チェブロン）。小さく控えめ、ホバーで背景。Button なのでキーボード操作可。 */
+/* 展開トグル（チェブロン）。折りたたみ可能と一目で分かる大きさのグリフにしつつ、色は
+   控えめ・ホバーで背景。Button なのでキーボード操作可。 */
 .l10n-chevron {
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
     padding: 0;
-    margin: 0 2px 0 0;
+    margin: 0 4px 0 0;
     flex-grow: 0;
     flex-shrink: 0;
     background-color: rgba(0, 0, 0, 0);
     border-width: 0;
     border-radius: 3px;
     color: var(--eui-text-muted);
-    font-size: 10px;
+    font-size: 14px;
     -unity-text-align: middle-center;
 }
 
