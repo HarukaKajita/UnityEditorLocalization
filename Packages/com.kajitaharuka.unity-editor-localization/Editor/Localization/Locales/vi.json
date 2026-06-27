@@ -39,7 +39,7 @@
         { "key": "wizard.error.scopeDuplicate", "value": "Scope này đã tồn tại." },
         { "key": "wizard.error.folderInvalid", "value": "Hãy chọn một thư mục hợp lệ trong dự án." },
         { "key": "wizard.error.defaultLocaleEmpty", "value": "Hãy nhập locale mặc định." },
-        { "key": "wizard.error.alreadyExists", "value": "Đã có manifest ở vị trí đó." },
+        { "key": "wizard.error.alreadyExists", "value": "Đã có tệp ở vị trí đó." },
         { "key": "wizard.error.writeFailed", "value": "Ghi tệp thất bại. Xem Console." },
         { "key": "wizard.result.created", "value": "Đã tạo danh mục: {0}" },
         { "key": "quickfix.addKey.tooltip", "value": "Thêm key này vào locale này (sao chép giá trị của defaultLocale)" },

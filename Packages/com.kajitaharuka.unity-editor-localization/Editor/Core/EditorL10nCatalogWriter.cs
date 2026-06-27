@@ -94,8 +94,9 @@ namespace Kajitaharuka.EditorLocalization
                 return "";
 
             var sb = new StringBuilder(value.Length + 8);
-            foreach (var c in value)
+            for (var i = 0; i < value.Length; i++)
             {
+                var c = value[i];
                 switch (c)
                 {
                     case '"': sb.Append("\\\""); break;
@@ -105,9 +106,25 @@ namespace Kajitaharuka.EditorLocalization
                     case '\t': sb.Append("\\t"); break;
                     default:
                         if (c < 0x20)
+                        {
                             sb.Append("\\u").Append(((int)c).ToString("x4"));
+                        }
+                        else if (char.IsHighSurrogate(c) && i + 1 < value.Length && char.IsLowSurrogate(value[i + 1]))
+                        {
+                            // 有効なサロゲートペア（絵文字など）はそのまま出す（UTF-8 で正しく書ける）。
+                            sb.Append(c).Append(value[i + 1]);
+                            i++;
+                        }
+                        else if (char.IsSurrogate(c))
+                        {
+                            // 対になっていないサロゲートは \uXXXX でエスケープし、不正な UTF-8/JSON を防ぐ。
+                            sb.Append("\\u").Append(((int)c).ToString("x4"));
+                        }
                         else
+                        {
                             sb.Append(c);
+                        }
+
                         break;
                 }
             }

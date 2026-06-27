@@ -39,7 +39,7 @@
         { "key": "wizard.error.scopeDuplicate", "value": "该 scope 已存在。" },
         { "key": "wizard.error.folderInvalid", "value": "请选择项目中的有效文件夹。" },
         { "key": "wizard.error.defaultLocaleEmpty", "value": "请输入默认 locale。" },
-        { "key": "wizard.error.alreadyExists", "value": "该位置已存在 manifest。" },
+        { "key": "wizard.error.alreadyExists", "value": "该位置已存在文件。" },
         { "key": "wizard.error.writeFailed", "value": "写入文件失败。请查看 Console。" },
         { "key": "wizard.result.created", "value": "已创建目录：{0}" },
         { "key": "quickfix.addKey.tooltip", "value": "将该 key 添加到此 locale（复制 defaultLocale 的值）" },

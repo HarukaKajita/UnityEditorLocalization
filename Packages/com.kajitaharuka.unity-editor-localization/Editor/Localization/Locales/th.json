@@ -39,7 +39,7 @@
         { "key": "wizard.error.scopeDuplicate", "value": "scope นี้มีอยู่แล้ว" },
         { "key": "wizard.error.folderInvalid", "value": "เลือกโฟลเดอร์ที่ถูกต้องในโปรเจกต์" },
         { "key": "wizard.error.defaultLocaleEmpty", "value": "กรุณากรอก locale เริ่มต้น" },
-        { "key": "wizard.error.alreadyExists", "value": "ตำแหน่งนี้มี manifest อยู่แล้ว" },
+        { "key": "wizard.error.alreadyExists", "value": "ตำแหน่งนี้มีไฟล์อยู่แล้ว" },
         { "key": "wizard.error.writeFailed", "value": "เขียนไฟล์ไม่สำเร็จ ดูที่ Console" },
         { "key": "wizard.result.created", "value": "สร้างแคตตาล็อกแล้ว: {0}" },
         { "key": "quickfix.addKey.tooltip", "value": "เพิ่ม key นี้ลงใน locale นี้ (คัดลอกค่าจาก defaultLocale)" },

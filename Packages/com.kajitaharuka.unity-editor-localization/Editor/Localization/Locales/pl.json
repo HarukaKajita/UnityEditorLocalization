@@ -39,7 +39,7 @@
         { "key": "wizard.error.scopeDuplicate", "value": "Taki scope już istnieje." },
         { "key": "wizard.error.folderInvalid", "value": "Wybierz prawidłowy folder w projekcie." },
         { "key": "wizard.error.defaultLocaleEmpty", "value": "Wprowadź domyślny locale." },
-        { "key": "wizard.error.alreadyExists", "value": "W tym miejscu już istnieje manifest." },
+        { "key": "wizard.error.alreadyExists", "value": "W tym miejscu już istnieją pliki." },
         { "key": "wizard.error.writeFailed", "value": "Nie udało się zapisać plików. Zobacz Console." },
         { "key": "wizard.result.created", "value": "Utworzono katalog: {0}" },
         { "key": "quickfix.addKey.tooltip", "value": "Dodaj ten key do tego locale (kopiuje wartość defaultLocale)" },

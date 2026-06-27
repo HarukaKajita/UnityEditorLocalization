@@ -39,7 +39,7 @@
         { "key": "wizard.error.scopeDuplicate", "value": "その scope は既に存在します。" },
         { "key": "wizard.error.folderInvalid", "value": "プロジェクト内の有効なフォルダを選択してください。" },
         { "key": "wizard.error.defaultLocaleEmpty", "value": "既定ロケールを入力してください。" },
-        { "key": "wizard.error.alreadyExists", "value": "その場所には既に manifest があります。" },
+        { "key": "wizard.error.alreadyExists", "value": "その出力先には既にファイルがあります。" },
         { "key": "wizard.error.writeFailed", "value": "ファイルの書き込みに失敗しました。Console を確認してください。" },
         { "key": "wizard.result.created", "value": "カタログを作成しました: {0}" },
         { "key": "quickfix.addKey.tooltip", "value": "この locale にこの key を追加（defaultLocale の値をコピー）" },

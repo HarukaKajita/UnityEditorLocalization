@@ -39,7 +39,7 @@
         { "key": "wizard.error.scopeDuplicate", "value": "Bu scope zaten var." },
         { "key": "wizard.error.folderInvalid", "value": "Projede geçerli bir klasör seçin." },
         { "key": "wizard.error.defaultLocaleEmpty", "value": "Bir varsayılan locale girin." },
-        { "key": "wizard.error.alreadyExists", "value": "Bu konumda zaten bir manifest var." },
+        { "key": "wizard.error.alreadyExists", "value": "Bu konumda zaten dosyalar var." },
         { "key": "wizard.error.writeFailed", "value": "Dosyalar yazılamadı. Console'a bakın." },
         { "key": "wizard.result.created", "value": "Katalog oluşturuldu: {0}" },
         { "key": "quickfix.addKey.tooltip", "value": "Bu key'i bu locale'e ekle (defaultLocale değerini kopyalar)" },

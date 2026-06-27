@@ -39,7 +39,7 @@
         { "key": "wizard.error.scopeDuplicate", "value": "이미 존재하는 scope입니다." },
         { "key": "wizard.error.folderInvalid", "value": "프로젝트 내의 유효한 폴더를 선택하세요." },
         { "key": "wizard.error.defaultLocaleEmpty", "value": "기본 locale을 입력하세요." },
-        { "key": "wizard.error.alreadyExists", "value": "해당 위치에 이미 manifest가 있습니다." },
+        { "key": "wizard.error.alreadyExists", "value": "해당 위치에 이미 파일이 있습니다." },
         { "key": "wizard.error.writeFailed", "value": "파일 쓰기에 실패했습니다. Console을 확인하세요." },
         { "key": "wizard.result.created", "value": "카탈로그를 생성했습니다: {0}" },
         { "key": "quickfix.addKey.tooltip", "value": "이 locale에 이 key를 추가합니다(defaultLocale 값을 복사)" },

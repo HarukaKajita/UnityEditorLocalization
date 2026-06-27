@@ -123,7 +123,7 @@ namespace Kajitaharuka.EditorLocalization.Tests
             var entries = new List<KeyValuePair<string, string>>
             {
                 new KeyValuePair<string, string>("a.key", "plain"),
-                new KeyValuePair<string, string>("b.quote", "He said \"hi\"\nline2\tx"),
+                new KeyValuePair<string, string>("b.quote", "He said \"hi\" \U0001F600\nline2\tx"),
             };
 
             var json = EditorL10nCatalogWriter.WriteTable("ja", entries);
@@ -132,7 +132,8 @@ namespace Kajitaharuka.EditorLocalization.Tests
             Assert.That(doc.locale, Is.EqualTo("ja"));
             Assert.That(doc.entries.Length, Is.EqualTo(2));
             Assert.That(doc.entries[1].key, Is.EqualTo("b.quote"));
-            Assert.That(doc.entries[1].value, Is.EqualTo("He said \"hi\"\nline2\tx"));
+            // 引用符・改行・タブに加え、絵文字（有効なサロゲートペア）も往復することを確認。
+            Assert.That(doc.entries[1].value, Is.EqualTo("He said \"hi\" \U0001F600\nline2\tx"));
             // compact フォーマット（1 エントリ 1 行）を維持していること。
             Assert.That(json, Does.Contain("        { \"key\": \"a.key\", \"value\": \"plain\" },"));
         }

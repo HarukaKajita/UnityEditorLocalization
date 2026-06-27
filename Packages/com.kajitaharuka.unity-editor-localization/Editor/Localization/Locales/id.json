@@ -39,7 +39,7 @@
         { "key": "wizard.error.scopeDuplicate", "value": "Scope itu sudah ada." },
         { "key": "wizard.error.folderInvalid", "value": "Pilih folder yang valid di proyek." },
         { "key": "wizard.error.defaultLocaleEmpty", "value": "Masukkan locale default." },
-        { "key": "wizard.error.alreadyExists", "value": "Sudah ada manifest di lokasi itu." },
+        { "key": "wizard.error.alreadyExists", "value": "Sudah ada file di lokasi itu." },
         { "key": "wizard.error.writeFailed", "value": "Gagal menulis file. Lihat Console." },
         { "key": "wizard.result.created", "value": "Katalog dibuat: {0}" },
         { "key": "quickfix.addKey.tooltip", "value": "Tambahkan key ini ke locale ini (menyalin nilai defaultLocale)" },

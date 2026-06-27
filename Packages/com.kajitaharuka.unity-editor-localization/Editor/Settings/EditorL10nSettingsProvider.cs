@@ -389,6 +389,9 @@ namespace Kajitaharuka.EditorLocalization
                     }
 
                     EditorL10n.Reload();
+                    // 再検証して結果表示を更新する。RenderValidationGroups はこの行ボタン自身も作り直すが、
+                    // 上の書き込み〜Reload は同期完了しており、このコールバックは既に return 済みなので安全
+                    // （いずれかの工程を非同期化する場合は detach 済み要素の使用に注意）。
                     _lastValidation = EditorL10nValidator.ValidateAll();
                     UpdateCatalogsResultLine();
                     RenderValidationGroups(_lastValidation);

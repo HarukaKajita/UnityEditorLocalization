@@ -39,7 +39,7 @@
         { "key": "wizard.error.scopeDuplicate", "value": "Ce scope existe déjà." },
         { "key": "wizard.error.folderInvalid", "value": "Sélectionnez un dossier valide dans le projet." },
         { "key": "wizard.error.defaultLocaleEmpty", "value": "Saisissez une locale par défaut." },
-        { "key": "wizard.error.alreadyExists", "value": "Un manifest existe déjà à cet emplacement." },
+        { "key": "wizard.error.alreadyExists", "value": "Des fichiers existent déjà à cet emplacement." },
         { "key": "wizard.error.writeFailed", "value": "Échec de l'écriture des fichiers. Voir la Console." },
         { "key": "wizard.result.created", "value": "Catalogue créé : {0}" },
         { "key": "quickfix.addKey.tooltip", "value": "Ajouter cette key à cette locale (copie la valeur de la defaultLocale)" },

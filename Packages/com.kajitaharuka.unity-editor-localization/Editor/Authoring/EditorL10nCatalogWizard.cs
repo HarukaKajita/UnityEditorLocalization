@@ -144,10 +144,22 @@ namespace Kajitaharuka.EditorLocalization
 
             var manifestName = SanitizeFileName(scope.Split('.').LastOrDefault());
             if (string.IsNullOrEmpty(manifestName)) manifestName = "catalog";
-            var manifestPath = folderPath + "/" + manifestName + ".l10n-manifest.json";
-            var localesFolder = folderPath + "/Locales";
+            var assetManifestPath = folderPath + "/" + manifestName + ".l10n-manifest.json";
 
-            if (File.Exists(manifestPath)) { ShowMessage("wizard.error.alreadyExists", HelpBoxMessageType.Error); return; }
+            // ローカル/組み込みどのパッケージでも正しく書けるよう物理パスで扱う。
+            var physicalFolder = FileUtil.GetPhysicalPath(folderPath);
+            var physicalLocales = physicalFolder + "/Locales";
+            var physicalManifest = physicalFolder + "/" + manifestName + ".l10n-manifest.json";
+
+            // manifest だけでなく各テーブルの出力先も先に存在チェックし、既存ファイルを絶対に上書きしない。
+            var targets = new List<string> { physicalManifest };
+            foreach (var tag in tags)
+                targets.Add(physicalLocales + "/" + tag + ".json");
+            if (targets.Any(File.Exists))
+            {
+                ShowMessage("wizard.error.alreadyExists", HelpBoxMessageType.Error);
+                return;
+            }
 
             var document = new EditorL10nManifestDocument
             {
@@ -167,17 +179,25 @@ namespace Kajitaharuka.EditorLocalization
                 }).ToArray(),
             };
 
+            var written = new List<string>();
             try
             {
-                Directory.CreateDirectory(localesFolder);
-                File.WriteAllText(manifestPath, EditorL10nCatalogWriter.WriteManifest(document));
+                Directory.CreateDirectory(physicalLocales);
+                File.WriteAllText(physicalManifest, EditorL10nCatalogWriter.WriteManifest(document));
+                written.Add(physicalManifest);
                 foreach (var tag in tags)
-                    File.WriteAllText(localesFolder + "/" + tag + ".json",
-                        EditorL10nCatalogWriter.WriteTable(tag, Array.Empty<KeyValuePair<string, string>>()));
+                {
+                    var path = physicalLocales + "/" + tag + ".json";
+                    File.WriteAllText(path, EditorL10nCatalogWriter.WriteTable(tag, Array.Empty<KeyValuePair<string, string>>()));
+                    written.Add(path);
+                }
             }
             catch (Exception exception)
             {
                 Debug.LogError($"EditorLocalization: カタログ生成に失敗しました: {exception}");
+                // 途中失敗で半端なカタログを残さないよう、書いたファイルを巻き戻す。
+                foreach (var path in written)
+                    try { File.Delete(path); } catch { /* 巻き戻し失敗は握りつぶす */ }
                 ShowMessage("wizard.error.writeFailed", HelpBoxMessageType.Error);
                 return;
             }
@@ -185,14 +205,14 @@ namespace Kajitaharuka.EditorLocalization
             AssetDatabase.Refresh();
             EditorL10n.Reload();
 
-            var manifestAsset = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(manifestPath);
+            var manifestAsset = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(assetManifestPath);
             if (manifestAsset != null)
             {
                 Selection.activeObject = manifestAsset;
                 EditorGUIUtility.PingObject(manifestAsset);
             }
 
-            _message.text = Tr("wizard.result.created", manifestPath);
+            _message.text = Tr("wizard.result.created", assetManifestPath);
             _message.messageType = HelpBoxMessageType.Info;
             _message.style.display = DisplayStyle.Flex;
         }

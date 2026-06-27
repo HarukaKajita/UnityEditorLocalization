@@ -39,7 +39,7 @@
         { "key": "wizard.error.scopeDuplicate", "value": "Такой scope уже существует." },
         { "key": "wizard.error.folderInvalid", "value": "Выберите допустимую папку в проекте." },
         { "key": "wizard.error.defaultLocaleEmpty", "value": "Введите locale по умолчанию." },
-        { "key": "wizard.error.alreadyExists", "value": "В этом месте уже есть manifest." },
+        { "key": "wizard.error.alreadyExists", "value": "В этом месте уже есть файлы." },
         { "key": "wizard.error.writeFailed", "value": "Не удалось записать файлы. См. Console." },
         { "key": "wizard.result.created", "value": "Каталог создан: {0}" },
         { "key": "quickfix.addKey.tooltip", "value": "Добавить этот key в этот locale (копирует значение defaultLocale)" },
