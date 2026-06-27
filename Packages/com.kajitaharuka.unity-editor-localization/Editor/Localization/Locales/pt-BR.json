@@ -9,11 +9,11 @@
         { "key": "catalogs.reload", "value": "Recarregar" },
         { "key": "catalogs.reload.tooltip", "value": "Reescanear os manifests l10n e recarregar todas as tabelas de tradução." },
         { "key": "catalogs.validate", "value": "Validar" },
-        { "key": "catalogs.validate.tooltip", "value": "Verificar chaves ausentes, números de placeholder e entradas não traduzidas. Os resultados vão para a Console." },
+        { "key": "catalogs.validate.tooltip", "value": "Verificar chaves ausentes, números de placeholder e entradas não traduzidas. Os resultados vão para o Console." },
         { "key": "catalogs.help.tooltip", "value": "“Recarregar” reescaneia os manifests e recarrega as tabelas. “Validar” verifica chaves, placeholders e fallbacks de cada locale." },
         { "key": "catalogs.reloaded", "value": "Catálogos recarregados." },
         { "key": "catalogs.result.ok", "value": "Validação aprovada · {0} avisos." },
-        { "key": "catalogs.result.issues", "value": "Validação: {0} erros · {1} avisos. Veja a Console." },
+        { "key": "catalogs.result.issues", "value": "Validação: {0} erros · {1} avisos. Veja o Console." },
         { "key": "catalogs.title", "value": "Catálogos" },
         { "key": "catalogs.count.errors", "value": "{0} erros" },
         { "key": "catalogs.count.warnings", "value": "{0} avisos" },
@@ -92,11 +92,11 @@
         { "key": "skills.cli.note", "value": "Para registrar via CLI, execute o comando abaixo." },
         { "key": "skills.cli.copy", "value": "Copiar" },
         { "key": "skills.cli.copy.tooltip", "value": "Copiar o comando acima para a área de transferência." },
-        { "key": "skills.result.installed", "value": "Instalado. Veja a Console para detalhes." },
+        { "key": "skills.result.installed", "value": "Instalado. Veja o Console para detalhes." },
         { "key": "skills.result.copied", "value": "Comando copiado para a área de transferência." },
         { "key": "dev.title", "value": "Desenvolvedor" },
         { "key": "diagnostics.label", "value": "Avisos de chaves não resolvidas" },
-        { "key": "diagnostics.tooltip", "value": "Avisa na Console uma vez por scope/chave quando um scope desconhecido ou uma chave não resolvida é detectado." },
+        { "key": "diagnostics.tooltip", "value": "Avisa no Console uma vez por scope/chave quando um scope desconhecido ou uma chave não resolvida é detectado." },
         { "key": "locale.unset", "value": "não definido" }
     ]
 }
