@@ -184,11 +184,21 @@ namespace Kajitaharuka.EditorLocalization
         /// </summary>
         public static void ValidateForCI()
         {
-            var result = ValidateAndLog();
-            var failOnWarnings = HasCommandLineFlag("-l10nFailOnWarnings");
-            var exitCode = ComputeExitCode(result.ErrorCount, result.WarningCount, failOnWarnings);
-
-            Debug.Log($"EditorLocalization: CI 検証の終了コード = {exitCode}（errors={result.ErrorCount}, warnings={result.WarningCount}, failOnWarnings={failOnWarnings}）");
+            int exitCode;
+            try
+            {
+                var result = ValidateAndLog();
+                var failOnWarnings = HasCommandLineFlag("-l10nFailOnWarnings");
+                exitCode = ComputeExitCode(result.ErrorCount, result.WarningCount, failOnWarnings);
+                Debug.Log($"EditorLocalization: CI 検証の終了コード = {exitCode}（errors={result.ErrorCount}, warnings={result.WarningCount}, failOnWarnings={failOnWarnings}）");
+            }
+            catch (Exception exception)
+            {
+                // 検証中の例外で CI を「成功」のまま素通りさせない。-executeMethod の未捕捉例外の終了コードは
+                // Unity バージョン依存で当てにできないため、ここで握って必ず失敗（非 0）扱いにする。
+                Debug.LogError($"EditorLocalization: CI 検証が例外で失敗しました: {exception}");
+                exitCode = 1;
+            }
 
             if (Application.isBatchMode)
                 EditorApplication.Exit(exitCode);

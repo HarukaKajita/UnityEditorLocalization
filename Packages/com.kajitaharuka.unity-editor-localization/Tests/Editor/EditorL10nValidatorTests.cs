@@ -109,6 +109,15 @@ namespace Kajitaharuka.EditorLocalization.Tests
         }
 
         [Test]
+        public void TryGetLocaleTablePath_NormalizesLocaleTag()
+        {
+            // 公開 API は入力タグを正規化してから解決する（パッケージ自身のカタログで契約を固定）。
+            const string scope = "com.kajitaharuka.unity-editor-localization";
+            Assert.That(EditorL10n.TryGetLocaleTablePath(scope, "JA", out var path), Is.True);
+            Assert.That(path, Does.EndWith("ja.json"));
+        }
+
+        [Test]
         public void ValidateScope_SkipsSameValueWarningForFixedTerm()
         {
             // manifest の fixedTerms に宣言した key は、全ロケールで defaultLocale と同値でも未翻訳警告を出さない。
