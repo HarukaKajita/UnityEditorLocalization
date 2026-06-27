@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """Validate EditorLocalization locale JSON tables.
 
-Checks key parity, placeholder parity, and unexpected exact duplicates of the
-default locale text. Exact duplicates are allowed for fixed terms by key.
+Checks key parity, placeholder set parity vs the default locale, placeholder
+number gaps (numbers not consecutive from 0), and unexpected exact duplicates of
+the default locale text. Exact duplicates are allowed for fixed terms by key.
+Optionally reports values left identical across regional variants (opt-in).
+These mirror the C# EditorL10nValidator so the two gates can cross-check.
 """
 
 from __future__ import annotations
@@ -45,6 +48,14 @@ def placeholders(value: str) -> tuple[str, ...]:
     return tuple(sorted(PLACEHOLDER_RE.findall(value)))
 
 
+def has_placeholder_gap(value: str) -> bool:
+    """番号が 0 から連続していない（連番欠落）かを返す。C# 側 FindMissingPlaceholderNumbers と対応。"""
+    numbers = sorted({int(n) for n in PLACEHOLDER_RE.findall(value)})
+    if not numbers:
+        return False
+    return numbers != list(range(numbers[-1] + 1))
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Validate EditorLocalization locale JSON quality.")
     parser.add_argument("locales_dir", type=Path, help="Directory containing {locale}.json files.")
@@ -54,6 +65,12 @@ def main() -> int:
         action="append",
         default=[],
         help="Key that may intentionally have the same value as the default locale. Repeat as needed.",
+    )
+    parser.add_argument(
+        "--report-variant-duplicates",
+        action="store_true",
+        help="Also print (non-failing) keys whose value is identical across the locales of a "
+        "regional-variant group (grouped by primary subtag, e.g. es-ES/es-419), to review for copy-paste left-overs.",
     )
     args = parser.parse_args()
 
@@ -86,6 +103,8 @@ def main() -> int:
             for key in sorted(default_keys & keys)
             if placeholders(default_table[key]) != placeholders(table[key])
         ]
+        # 連番欠落（{0} から連続しない）。default との不一致とは別軸なので独立して報告する。
+        placeholder_gap = [key for key in sorted(keys) if has_placeholder_gap(table[key])]
         same_unexpected = []
         if locale != args.default_locale:
             same_unexpected = [
@@ -96,10 +115,11 @@ def main() -> int:
 
         print(
             f"{locale}: keys={len(keys)}, missing={len(missing)}, extra={len(extra)}, "
-            f"placeholder={len(placeholder_mismatch)}, sameUnexpected={len(same_unexpected)}"
+            f"placeholder={len(placeholder_mismatch)}, gap={len(placeholder_gap)}, "
+            f"sameUnexpected={len(same_unexpected)}"
         )
 
-        if missing or extra or placeholder_mismatch or same_unexpected:
+        if missing or extra or placeholder_mismatch or placeholder_gap or same_unexpected:
             failed = True
             if missing:
                 print("  missing: " + ", ".join(missing))
@@ -111,10 +131,39 @@ def main() -> int:
                     for key in placeholder_mismatch
                 ]
                 print("  placeholder: " + "; ".join(details))
+            if placeholder_gap:
+                gap_details = [f"{key} {placeholders(table[key])}" for key in placeholder_gap]
+                print("  gap: " + "; ".join(gap_details))
             if same_unexpected:
                 print("  sameUnexpected: " + ", ".join(same_unexpected))
 
+    if args.report_variant_duplicates:
+        report_variant_duplicates(tables)
+
     return 1 if failed else 0
+
+
+def report_variant_duplicates(tables: dict[str, dict[str, str]]) -> None:
+    """地域バリアント（同一の primary subtag を持つ複数ロケール）間で値が同一なキーを情報表示する。
+    技術文では一致が正当な場合も多いため、失敗にはせずレビュー用に列挙するだけ。"""
+    groups: dict[str, list[str]] = {}
+    for locale in tables:
+        primary = locale.split("-")[0].lower()
+        groups.setdefault(primary, []).append(locale)
+
+    for primary, locales in sorted(groups.items()):
+        if len(locales) < 2:
+            continue
+        locales = sorted(locales)
+        shared_keys = set.intersection(*(set(tables[loc]) for loc in locales))
+        identical = [
+            key
+            for key in sorted(shared_keys)
+            if len({tables[loc][key] for loc in locales}) == 1
+        ]
+        print(f"[variant-duplicates] {primary} ({', '.join(locales)}): {len(identical)} identical across all")
+        if identical:
+            print("  " + ", ".join(identical))
 
 
 if __name__ == "__main__":

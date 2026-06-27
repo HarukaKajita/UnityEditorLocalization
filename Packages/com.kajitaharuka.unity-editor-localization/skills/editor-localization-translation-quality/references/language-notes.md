@@ -2,6 +2,10 @@
 
 Use these notes as review prompts, not as a substitute for native-speaker review.
 
+## Regional variants
+
+Variants such as `es-ES`/`es-419`, `pt-BR`/`pt-PT`, and `zh-Hans`/`zh-Hant` should differ where real usage differs (vocabulary, spelling, idiom). But for terse, code-adjacent strings (short diagnostics, messages built mostly from fixed terms) the variants legitimately coincide. Differentiate where natural; do not fabricate differences just to make the files non-identical. Identical variant values are acceptable when no genuine regional difference exists.
+
 ## Japanese `ja`
 
 - Do not omit particles in documentation or final user-facing prose.
@@ -29,6 +33,7 @@ Use these notes as review prompts, not as a substitute for native-speaker review
 - Use polite concise UI endings: `지정하세요`, `내보냅니다`, `취소되었습니다`.
 - `에셋` is natural in Unity contexts.
 - Keep fixed product/type names in Latin script and attach particles naturally: `<FixedTerm>을`, `<FixedTerm>에서`.
+- Choose particles by the Korean *pronunciation* of a Latin term, not its spelling. A word ending in a silent `e` can still be consonant-final when read: `Locale`→로케일 ends in ㄹ, so use consonant-form particles (`이`/`과`/`을`), as in `URL을`, `Google이`. Do not switch to `가`/`와`/`를` just because the Latin spelling ends in a vowel letter.
 
 ## Spanish `es-ES` / `es-419`
 

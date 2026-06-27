@@ -32,6 +32,7 @@ Keep these terms unchanged unless the current project already documents a locali
 - Keep extension-style product names, class names, and command identifiers in their original script unless the project says otherwise.
 - Keep file extensions with their dot when referring to the format, such as `.json`, `.asset`, `.prefab`, `.zip`, `.tgz`, and `.unitypackage`.
 - Keep configuration keys and field names unchanged, such as `name`, `version`, `id`, `path`, or project-specific schema fields.
+- Keep code-like inline tokens inside diagnostic and log messages in English even though they look like words: `key=value` markers and bracketed debug fields such as `present=[...]`, `missing=[...]`, `expected=[...]`, `actual=[...]`. Translate only the human sentence around them.
 - Translate `asset` only where it sounds natural. Otherwise keep `asset` to match Unity user vocabulary.
 - Avoid flag icons for languages. Use native names and locale tags.
 
