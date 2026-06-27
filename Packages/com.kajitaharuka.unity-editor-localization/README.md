@@ -217,7 +217,7 @@ Tools > UnityEditorLocalization > Validate Catalogs
 スキルはエージェントの探索パス（`.claude/skills` / `.agents/skills`）に置かれて初めて有効になります。次のいずれかで登録できます。
 
 - **Unity から（おすすめ）**: `Tools > UnityEditorLocalization > AI Agent Skills` の
-  `Install for user`（ホームの `~/.claude/skills` と `~/.agents/skills`）または
+  `Install for current user`（ホームの `~/.claude/skills` と `~/.agents/skills`）または
   `Install for this project`（このプロジェクト直下の `.claude/skills` と `.agents/skills`）。
   `Preferences > UnityEditorLocalization` の「AIエージェント連携スキル」からも、同じ登録操作と、表示された CLI コマンドのコピーができます。
   macOS / Linux / Windows いずれでも動作します（macOS/Linux は `ln`、Windows は `mklink /D`。権限が無い環境では junction にフォールバック）。

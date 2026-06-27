@@ -31,10 +31,12 @@ namespace Kajitaharuka.EditorLocalization
 
         // ===== メニュー =====
 
-        [MenuItem("Tools/UnityEditorLocalization/AI Agent Skills/Install for user (~/.claude, ~/.agents)", priority = 200)]
+        // 注意: MenuItem は '/' をサブメニュー区切りとして解釈するため、項目名にパス（~/.claude 等）を
+        // 入れると意図せず階層化される。項目名に '/' は使わない（パス詳細は Preferences の tooltip と README）。
+        [MenuItem("Tools/UnityEditorLocalization/AI Agent Skills/Install for current user", priority = 200)]
         private static void MenuInstallUser() => Debug.Log(InstallToUser());
 
-        [MenuItem("Tools/UnityEditorLocalization/AI Agent Skills/Install for this project (.claude, .agents)", priority = 201)]
+        [MenuItem("Tools/UnityEditorLocalization/AI Agent Skills/Install for this project", priority = 201)]
         private static void MenuInstallProject() => Debug.Log(InstallToProject());
 
         [MenuItem("Tools/UnityEditorLocalization/AI Agent Skills/Copy CLI commands to clipboard", priority = 220)]
