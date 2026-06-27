@@ -95,8 +95,9 @@
         { "key": "skills.result.installed", "value": "Встановлено. Подробиці див. у Console." },
         { "key": "skills.result.copied", "value": "Команду скопійовано в буфер обміну." },
         { "key": "dev.title", "value": "Розробник" },
-        { "key": "diagnostics.label", "value": "Попередження про нерозвʼязані ключі" },
+        { "key": "diagnostics.label", "value": "Попереджати про нерозв'язані переклади" },
         { "key": "diagnostics.tooltip", "value": "Попереджає в Console один раз на scope/ключ, коли виявлено невідомий scope або нерозвʼязаний ключ." },
+        { "key": "diagnostics.note", "value": "Коли увімкнено, Tr() попереджає в Console про невідомий scope або key, якого немає в жодному locale — корисно під час розробки, щоб виявляти одруки чи key, ще не додані до каталогу. Tr() усе одно повертає key, тож нічого не ламається. Один раз на scope/key; типово вимкнено." },
         { "key": "locale.unset", "value": "не задано" }
     ]
 }

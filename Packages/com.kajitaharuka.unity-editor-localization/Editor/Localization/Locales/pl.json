@@ -95,8 +95,9 @@
         { "key": "skills.result.installed", "value": "Zainstalowano. Szczegóły w Console." },
         { "key": "skills.result.copied", "value": "Polecenie skopiowane do schowka." },
         { "key": "dev.title", "value": "Deweloper" },
-        { "key": "diagnostics.label", "value": "Ostrzeżenia o nierozwiązanych kluczach" },
+        { "key": "diagnostics.label", "value": "Ostrzegaj o nierozwiązanych tłumaczeniach" },
         { "key": "diagnostics.tooltip", "value": "Ostrzega w Console raz na scope/klucz, gdy wykryto nieznany scope lub nierozwiązany klucz." },
+        { "key": "diagnostics.note", "value": "Po włączeniu Tr() ostrzega w Console o nieznanym scope lub key, którego nie ma w żadnym locale — przydatne podczas tworzenia, aby wykryć literówki lub key jeszcze nieobecne w katalogu. Tr() i tak zwraca key, więc nic się nie psuje. Raz na scope/key; domyślnie wyłączone." },
         { "key": "locale.unset", "value": "nieustawiony" }
     ]
 }

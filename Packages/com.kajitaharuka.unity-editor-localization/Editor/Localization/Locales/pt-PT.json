@@ -95,8 +95,9 @@
         { "key": "skills.result.installed", "value": "Instalado. Veja a Console para detalhes." },
         { "key": "skills.result.copied", "value": "Comando copiado para a área de transferência." },
         { "key": "dev.title", "value": "Desenvolvedor" },
-        { "key": "diagnostics.label", "value": "Avisos de chaves não resolvidas" },
+        { "key": "diagnostics.label", "value": "Avisar sobre traduções não resolvidas" },
         { "key": "diagnostics.tooltip", "value": "Avisa na Console uma vez por scope/chave quando um scope desconhecido ou uma chave não resolvida é detectado." },
+        { "key": "diagnostics.note", "value": "Quando ativo, Tr() avisa na Console em caso de scope desconhecido ou key que não está em nenhuma locale — útil durante o desenvolvimento para encontrar erros de digitação ou key que ainda não estão no catálogo. Tr() devolve à mesma a key, por isso nada quebra. Uma vez por scope/key; desativado por predefinição." },
         { "key": "locale.unset", "value": "não definido" }
     ]
 }

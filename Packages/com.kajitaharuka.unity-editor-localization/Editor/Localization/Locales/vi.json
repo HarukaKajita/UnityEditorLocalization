@@ -95,8 +95,9 @@
         { "key": "skills.result.installed", "value": "Đã cài. Xem Console để biết chi tiết." },
         { "key": "skills.result.copied", "value": "Đã sao chép lệnh vào clipboard." },
         { "key": "dev.title", "value": "Nhà phát triển" },
-        { "key": "diagnostics.label", "value": "Cảnh báo key chưa phân giải" },
+        { "key": "diagnostics.label", "value": "Cảnh báo bản dịch chưa giải quyết" },
         { "key": "diagnostics.tooltip", "value": "Cảnh báo trong Console một lần cho mỗi scope/key khi phát hiện scope không xác định hoặc key chưa phân giải." },
+        { "key": "diagnostics.note", "value": "Khi bật, Tr() cảnh báo trong Console với scope không xác định hoặc key không có trong bất kỳ locale nào — hữu ích khi phát triển để phát hiện lỗi gõ hoặc key chưa được thêm vào danh mục. Tr() vẫn trả về key nên không hỏng. Một lần cho mỗi scope/key; mặc định tắt." },
         { "key": "locale.unset", "value": "chưa đặt" }
     ]
 }

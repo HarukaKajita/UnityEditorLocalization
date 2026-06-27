@@ -95,8 +95,9 @@
         { "key": "skills.result.installed", "value": "登録しました。詳細は Console を確認してください。" },
         { "key": "skills.result.copied", "value": "コマンドをクリップボードにコピーしました。" },
         { "key": "dev.title", "value": "開発者向け" },
-        { "key": "diagnostics.label", "value": "未解決警告" },
+        { "key": "diagnostics.label", "value": "未解決の翻訳を警告" },
         { "key": "diagnostics.tooltip", "value": "未知 scope や未解決 key を検出したときに、同一 scope/key につき一度だけ Console へ警告します。" },
+        { "key": "diagnostics.note", "value": "オンにすると、Tr() が未登録の scope や、どの locale にも無い key を引いたとき Console に警告します。開発中にタイプミスや未追加の key を見つけるのに役立ちます。Tr() は key を返すので壊れません。同一 scope/key につき 1 回・既定オフ。" },
         { "key": "locale.unset", "value": "未設定" }
     ]
 }

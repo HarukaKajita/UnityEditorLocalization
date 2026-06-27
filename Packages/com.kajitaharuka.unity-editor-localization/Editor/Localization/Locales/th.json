@@ -95,8 +95,9 @@
         { "key": "skills.result.installed", "value": "ติดตั้งแล้ว ดูรายละเอียดที่ Console" },
         { "key": "skills.result.copied", "value": "คัดลอกคำสั่งไปยังคลิปบอร์ดแล้ว" },
         { "key": "dev.title", "value": "นักพัฒนา" },
-        { "key": "diagnostics.label", "value": "คำเตือน key ที่แก้ค่าไม่ได้" },
+        { "key": "diagnostics.label", "value": "เตือนการแปลที่ยังไม่ resolve" },
         { "key": "diagnostics.tooltip", "value": "เตือนใน Console หนึ่งครั้งต่อ scope/key เมื่อพบ scope ที่ไม่รู้จักหรือ key ที่แก้ค่าไม่ได้" },
+        { "key": "diagnostics.note", "value": "เมื่อเปิด Tr() จะเตือนใน Console เมื่อพบ scope ที่ไม่รู้จัก หรือ key ที่ไม่มีใน locale ใดเลย มีประโยชน์ระหว่างพัฒนาเพื่อหาคำที่พิมพ์ผิดหรือ key ที่ยังไม่ได้เพิ่มลงในแคตตาล็อก Tr() ยังคงคืนค่า key จึงไม่พัง หนึ่งครั้งต่อ scope/key ปิดไว้โดยค่าเริ่มต้น" },
         { "key": "locale.unset", "value": "ไม่ได้ตั้งค่า" }
     ]
 }

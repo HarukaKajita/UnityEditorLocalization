@@ -738,8 +738,12 @@ namespace Kajitaharuka.EditorLocalization
                 BindTooltip(toggle, "diagnostics.tooltip");
                 EditorL10nUi.RegisterLocaleCallback(toggle, () => toggle.label = Tr("diagnostics.label"));
                 toggle.RegisterValueChangedCallback(evt => EditorL10nPreferences.DiagnosticsEnabled = evt.newValue);
-
                 foldout.Add(toggle);
+
+                // トグルの意味が一目で分かるよう、何を・いつ・どう振る舞うかを永続のノートで添える
+                // （tooltip だけだと開発者でも用途が分からない、という指摘への対応）。
+                foldout.Add(EditorL10nUiKit.HintRow(Tr("diagnostics.note")).Also(label => BindLabel(label, "diagnostics.note")));
+
                 card.Add(foldout);
                 return card;
             }

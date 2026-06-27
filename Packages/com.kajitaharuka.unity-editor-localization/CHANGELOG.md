@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Changed
+- Preferences の開発者向け「未解決警告」トグルを分かりやすく改善。ラベルを「未解決の翻訳を警告」へ変更し、**何を・いつ・どう振る舞うか**を説明する永続ノートを追加した（`Tr()` が未登録 scope や、どの locale にも無い key を引いたとき Console に警告。タイプミスや未追加 key を開発中に見つける用途。`Tr()` は key を返すので壊れない／同一 scope/key につき 1 回／既定オフ）。ノートは 19 言語へ追加。
 - 「再読み込み・検証」を独立した大項目（**カタログ** Section、タイトル付き）へ昇格し、主要操作の**表示言語**・**scope 個別設定**の下へ移動。検証結果はその Section 内に scope ごとに分類して表示する。
 - `EditorL10nValidator` の結果を構造化。`EditorL10nValidationIssue`（`Severity` / `Kind`〈`EditorL10nValidationMessageKind`〉/ `Scope` / `Locale` / `Args`）と `EditorL10nValidationResult.Issues` を追加し、UI が由来 scope ごとに分類できるようにした。診断の詳細文は文字列で固定せず**種類＋引数**で持ち、表示時（`Message` プロパティ）にパッケージ自身の翻訳カタログから現在の表示言語で整形する。既存の `Errors` / `Warnings`（`{scope}/{locale}: 詳細` の平坦な文字列）と Console 出力は後方互換だが、文面は表示言語に追従するようになった。
 - 表示ロケールの解決順に**システム言語（OS）フォールバック**を追加。グローバル設定が未設定のとき、OS の優先言語（Unity の `Application.systemLanguage` を主に、地域は `CultureInfo` で補完。macOS でも信頼可）を推定して表示に使い、対応する翻訳が無ければ既存の fallback 連鎖が各 scope の `defaultLocale` へ落とす。解決順は `scope 個別設定 → グローバル設定 → システム言語 → defaultLocale`。検出のみ OS API（enum）を言語タグ表へ対応付け、カタログ/解決は文字列タグのみで扱う方針（言語追加で解決ロジックの C# は不変）を維持する。

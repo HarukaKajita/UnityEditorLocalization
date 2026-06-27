@@ -95,8 +95,9 @@
         { "key": "skills.result.installed", "value": "已注册。详情请查看 Console。" },
         { "key": "skills.result.copied", "value": "已将命令复制到剪贴板。" },
         { "key": "dev.title", "value": "开发者" },
-        { "key": "diagnostics.label", "value": "未解析 key 警告" },
+        { "key": "diagnostics.label", "value": "警告未解决的翻译" },
         { "key": "diagnostics.tooltip", "value": "检测到未知 scope 或未解析 key 时，对同一 scope/key 仅向 Console 警告一次。" },
+        { "key": "diagnostics.note", "value": "开启后，当 Tr() 请求未注册的 scope 或在所有 locale 中都找不到的 key 时，会在 Console 中警告。便于开发期发现拼写错误或尚未加入目录的 key。Tr() 仍会返回 key，不会出错。每个 scope/key 仅一次；默认关闭。" },
         { "key": "locale.unset", "value": "未设置" }
     ]
 }

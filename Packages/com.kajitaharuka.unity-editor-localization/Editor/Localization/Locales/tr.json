@@ -95,8 +95,9 @@
         { "key": "skills.result.installed", "value": "Kuruldu. Ayrıntılar için Console'a bakın." },
         { "key": "skills.result.copied", "value": "Komut panoya kopyalandı." },
         { "key": "dev.title", "value": "Geliştirici" },
-        { "key": "diagnostics.label", "value": "Çözülmemiş anahtar uyarıları" },
+        { "key": "diagnostics.label", "value": "Çözülmemiş çevirileri uyar" },
         { "key": "diagnostics.tooltip", "value": "Bilinmeyen bir scope veya çözülmemiş bir anahtar algılandığında scope/anahtar başına Console'da bir kez uyarır." },
+        { "key": "diagnostics.note", "value": "Açıkken Tr() bilinmeyen bir scope veya hiçbir locale'de bulunmayan bir key için Console'da uyarır — geliştirme sırasında yazım hatalarını veya kataloğa henüz eklenmemiş key'leri bulmak için yararlıdır. Tr() yine de key'i döndürür, bu yüzden hiçbir şey bozulmaz. scope/key başına bir kez; varsayılan olarak kapalı." },
         { "key": "locale.unset", "value": "ayarlanmadı" }
     ]
 }

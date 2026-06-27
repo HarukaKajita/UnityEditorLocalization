@@ -95,8 +95,9 @@
         { "key": "skills.result.installed", "value": "Terpasang. Lihat Console untuk detail." },
         { "key": "skills.result.copied", "value": "Perintah disalin ke clipboard." },
         { "key": "dev.title", "value": "Pengembang" },
-        { "key": "diagnostics.label", "value": "Peringatan key yang tidak terselesaikan" },
+        { "key": "diagnostics.label", "value": "Peringatkan terjemahan yang belum terselesaikan" },
         { "key": "diagnostics.tooltip", "value": "Memberi peringatan di Console sekali per scope/key saat scope tak dikenal atau key tak terselesaikan terdeteksi." },
+        { "key": "diagnostics.note", "value": "Saat aktif, Tr() memperingatkan di Console untuk scope yang tidak dikenal atau key yang tidak ada di locale mana pun — berguna saat pengembangan untuk menemukan salah ketik atau key yang belum ada di katalog. Tr() tetap mengembalikan key, jadi tidak ada yang rusak. Sekali per scope/key; mati secara default." },
         { "key": "locale.unset", "value": "tidak diset" }
     ]
 }

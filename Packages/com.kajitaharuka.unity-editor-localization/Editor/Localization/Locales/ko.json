@@ -95,8 +95,9 @@
         { "key": "skills.result.installed", "value": "등록했습니다. 자세한 내용은 Console을 확인하세요." },
         { "key": "skills.result.copied", "value": "명령을 클립보드에 복사했습니다." },
         { "key": "dev.title", "value": "개발자" },
-        { "key": "diagnostics.label", "value": "미해석 key 경고" },
+        { "key": "diagnostics.label", "value": "미해결 번역 경고" },
         { "key": "diagnostics.tooltip", "value": "알 수 없는 scope나 미해석 key를 감지하면 같은 scope/key당 한 번만 Console에 경고합니다." },
+        { "key": "diagnostics.note", "value": "켜면 Tr() 호출에서 등록되지 않은 scope나 어떤 locale에도 없는 key를 요청하면 Console에 경고합니다. 개발 중 오타나 아직 카탈로그에 없는 key를 찾는 데 유용합니다. key는 그대로 반환되므로 깨지지 않습니다. scope/key당 한 번; 기본 꺼짐." },
         { "key": "locale.unset", "value": "미설정" }
     ]
 }

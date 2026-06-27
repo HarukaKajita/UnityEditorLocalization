@@ -95,8 +95,9 @@
         { "key": "skills.result.installed", "value": "Installiert. Details siehe Console." },
         { "key": "skills.result.copied", "value": "Befehl in die Zwischenablage kopiert." },
         { "key": "dev.title", "value": "Entwickler" },
-        { "key": "diagnostics.label", "value": "Warnungen zu ungelösten Keys" },
+        { "key": "diagnostics.label", "value": "Vor ungelösten Übersetzungen warnen" },
         { "key": "diagnostics.tooltip", "value": "Warnt in der Console einmal pro Scope/Key, wenn ein unbekannter Scope oder ungelöster Key erkannt wird." },
+        { "key": "diagnostics.note", "value": "Wenn aktiv, warnt Tr() in der Console bei unbekanntem scope oder einem in keiner locale gefundenen key — hilfreich während der Entwicklung, um Tippfehler oder noch nicht im Katalog vorhandene key zu finden. Tr() gibt trotzdem den key zurück, nichts bricht. Einmal pro scope/key; standardmäßig aus." },
         { "key": "locale.unset", "value": "nicht gesetzt" }
     ]
 }
