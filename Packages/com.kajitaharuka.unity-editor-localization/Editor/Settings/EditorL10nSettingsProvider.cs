@@ -19,10 +19,17 @@ namespace Kajitaharuka.EditorLocalization
         // この設定画面自身の UI 文言を引く scope（Editor/Localization の manifest と一致させる）。
         private const string UiScope = "com.kajitaharuka.unity-editor-localization";
 
+        // Preferences のこの設定ページのパス。CreateProvider とメニューから開く導線で共有する。
+        private const string SettingsPath = "Preferences/UnityEditorLocalization";
+
+        // Tools から Preferences を開き、この項目を選択状態にする導線。
+        [MenuItem("Tools/UnityEditorLocalization/Settings", priority = 0)]
+        private static void OpenSettings() => SettingsService.OpenUserPreferences(SettingsPath);
+
         [SettingsProvider]
         public static SettingsProvider CreateProvider()
         {
-            return new SettingsProvider("Preferences/UnityEditorLocalization", SettingsScope.User)
+            return new SettingsProvider(SettingsPath, SettingsScope.User)
             {
                 label = "UnityEditorLocalization",
                 // Preferences 検索での発見性（多言語）。
