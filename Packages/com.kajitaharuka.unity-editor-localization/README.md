@@ -7,7 +7,7 @@ Unity Editor拡張向けの軽量な多言語化基盤です。Editor上のInspe
 - Editor専用です。ランタイム、Addressables、Unity Localization packageには依存しません。
 - ロケールはC#のenumではなくmanifestの文字列タグで扱います。
 - 新しいロケールはJSONファイルを追加するだけで増やせます。
-- 表示言語はユーザーごとの`EditorPrefs`に保存し、全 scope 共通のグローバル設定と scope 個別設定を使い分けられます。
+- 表示言語はユーザーごとの`EditorPrefs`に保存し、全 scope 共通のグローバル設定と scope 個別設定を使い分けられます。グローバル未設定時は OS の言語へ自動追従します（Preferences のトグルで無効化可）。
 - UI Toolkit用のラベル、ボタン、PropertyField、言語選択Dropdown、コンパクトな言語選択メニューの補助APIを含みます。
 - manifestや翻訳テーブルJSONの変更を検知し、カタログを自動リロードします。
 - 欠落キーと`string.Format` placeholderの不一致を検証できます。
@@ -173,7 +173,7 @@ C#コードの変更は不要です。必要に応じて`Tools > UnityEditorLoca
 表示言語は次の優先順位で決まります。
 
 ```text
-scope 個別設定 -> グローバル設定 -> scope の defaultLocale
+scope 個別設定 -> グローバル設定 -> システム言語 -> scope の defaultLocale
 ```
 
 そのうえで、文言は次の順で探索します。
@@ -182,7 +182,7 @@ scope 個別設定 -> グローバル設定 -> scope の defaultLocale
 選択ロケール -> 親ロケール -> defaultLocale -> key
 ```
 
-グローバル設定は`Preferences > UnityEditorLocalization`で変更できます。scope 個別設定がある場合は、その scope では個別設定がグローバル設定より優先されます。scope 個別設定は、Preferences で「グローバル設定に従う」を選ぶと解除できます。Preferences では scope 文字列で検索でき、各 scope の現在の解決ロケール（override / fallback はバッジで表示）・`defaultLocale`・manifest パス（クリックで選択）を確認できます。ヘッダー右上のアイコンからオンラインドキュメントを開け、カタログの再読み込み（Reload）・検証（Validate）も実行できます。Preferences 画面自身も多言語化されており、表示言語の変更に追従します。
+グローバル設定は`Preferences > UnityEditorLocalization`で変更できます。scope 個別設定がある場合は、その scope では個別設定がグローバル設定より優先されます。scope 個別設定は、Preferences で「グローバル設定に従う」を選ぶと解除できます。グローバル設定が未設定のときは、OS の言語（`CultureInfo`の BCP-47 タグ）を推定して表示に使い、対応する翻訳が無ければ各 scope の`defaultLocale`へフォールバックします。この挙動は Preferences のトグルで無効化でき、検出されたシステム言語と、各 scope で実際に効く fallback 連鎖（使用段を強調表示）も Preferences で確認できます。Preferences では scope 文字列で検索でき、各 scope の現在の解決ロケール（override / fallback はバッジで表示）・`defaultLocale`・manifest パス（クリックで選択）を確認できます。ヘッダー右上のアイコンからオンラインドキュメントを開け、カタログの再読み込み（Reload）・検証（Validate）も実行できます。Preferences 画面自身も多言語化されており、表示言語の変更に追従します。
 
 例:
 

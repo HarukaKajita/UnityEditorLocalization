@@ -3,11 +3,16 @@
 ## [Unreleased]
 
 ### Changed
+- 表示ロケールの解決順に**システム言語（OS）フォールバック**を追加。グローバル設定が未設定のとき、OS の UI 言語（`CultureInfo` の BCP-47 文字列タグ）を推定して表示に使い、対応する翻訳が無ければ既存の fallback 連鎖が各 scope の `defaultLocale` へ落とす。解決順は `scope 個別設定 → グローバル設定 → システム言語 → defaultLocale`。enum ではなく文字列タグを用い、言語追加で C# を改変しない方針を維持する。
+- 表示ロケールの解決順を `EditorL10n.GetActiveLocale(scope, out source)` に集約し、由来（`EditorL10nLocaleSource`）を単一情報源化。Preferences の scope メタ表示はこの source を使い、System を含む由来を正しく表示する。
 - Preferences（`Preferences > UnityEditorLocalization`）を IMGUI から UI Toolkit へ全面再設計。2 ゾーンヘッダー（左=タイトル＋概況バッジ／右=オンラインドキュメントを開くボタン）、グループ再編（表示言語 → scope 個別設定 → 開発者向けの段階的開示）、scope ごとの解決状態（override/fallback）のバッジ可視化、manifest の選択+ping、両スキン・キーボード操作・長い識別子の折り返しに対応。
 - Preferences 画面自身の文言を、パッケージ自身の翻訳カタログ（scope=`com.kajitaharuka.unity-editor-localization`、`Editor/Localization/` の en/ja）から引くドッグフーディング構成へ変更。表示言語の変更に画面自身が追従し、国際的なアクセシビリティを確保する。
 - `package.json` の `documentationUrl`/`changelogUrl`/`licensesUrl` を `https://kajitaharuka.com/products/unity-editor-localization/` 系へ統一（製品ページ URL と一致）。
 
 ### Added
+- `EditorL10n.GetSystemLocale()` と `Get`/`SetSystemLocaleFallbackEnabled()` を公開 API として追加。システム言語タグの供給元は差し替え可能な `SystemLocaleProvider`（テスト用シーム）とし、EditMode テストで解決順と由来を検証する。フォールバックの有効/無効は `EditorPrefs` に保存する（既定は有効）。
+- Preferences の表示言語セクションに、検出したシステム言語の表示・システム言語フォールバックの有効/無効トグル・未設定時の解決先を示す動的ヒントを追加。
+- Preferences の各 scope カードに、実際に効いている fallback 連鎖（要求 → 親 → defaultLocale）をチップ列で可視化し、実際に翻訳が当たった段を色＋太字で強調する表示を追加。
 - Preferences にカタログの Reload / Validate ボタンと、両操作の意味を確認できる説明トグル（ⓘ で HelpBox を開閉、ホバー tooltip でも要約）を追加。検証結果をインラインで表示する。
 - エディタ UI 再利用部品 `Editor/UI/EditorL10nUiKit.cs`（2 ゾーンヘッダー・状態バッジ・ドキュメントボタン・セクションカード等）と、両スキンのデザイントークン `Editor/UI/EditorDesignTokens.uss`（Unity 内部 `--unity-*` 変数に非依存）を追加。
 - オンラインドキュメント URL を集約する `Editor/UI/EditorL10nDocs.cs` を追加。
