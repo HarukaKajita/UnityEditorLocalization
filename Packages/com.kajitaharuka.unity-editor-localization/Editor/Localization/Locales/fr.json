@@ -42,6 +42,8 @@
         { "key": "wizard.error.alreadyExists", "value": "Un manifest existe déjà à cet emplacement." },
         { "key": "wizard.error.writeFailed", "value": "Échec de l'écriture des fichiers. Voir la Console." },
         { "key": "wizard.result.created", "value": "Catalogue créé : {0}" },
+        { "key": "quickfix.addKey.tooltip", "value": "Ajouter cette key à cette locale (copie la valeur de la defaultLocale)" },
+        { "key": "quickfix.failed", "value": "Échec de l'ajout de la key. Voir la Console." },
         { "key": "global.title", "value": "Langue d'affichage" },
         { "key": "global.label", "value": "Tous les scopes" },
         { "key": "global.tooltip", "value": "Langue d'affichage utilisée quand un scope n'a pas de réglage propre." },

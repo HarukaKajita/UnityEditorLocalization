@@ -42,6 +42,8 @@
         { "key": "wizard.error.alreadyExists", "value": "Đã có manifest ở vị trí đó." },
         { "key": "wizard.error.writeFailed", "value": "Ghi tệp thất bại. Xem Console." },
         { "key": "wizard.result.created", "value": "Đã tạo danh mục: {0}" },
+        { "key": "quickfix.addKey.tooltip", "value": "Thêm key này vào locale này (sao chép giá trị của defaultLocale)" },
+        { "key": "quickfix.failed", "value": "Thêm key thất bại. Xem Console." },
         { "key": "global.title", "value": "Ngôn ngữ hiển thị" },
         { "key": "global.label", "value": "Tất cả scope" },
         { "key": "global.tooltip", "value": "Ngôn ngữ hiển thị dùng khi một scope không có ghi đè riêng." },

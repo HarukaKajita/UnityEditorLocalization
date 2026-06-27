@@ -42,6 +42,8 @@
         { "key": "wizard.error.alreadyExists", "value": "该位置已存在 manifest。" },
         { "key": "wizard.error.writeFailed", "value": "写入文件失败。请查看 Console。" },
         { "key": "wizard.result.created", "value": "已创建目录：{0}" },
+        { "key": "quickfix.addKey.tooltip", "value": "将该 key 添加到此 locale（复制 defaultLocale 的值）" },
+        { "key": "quickfix.failed", "value": "添加 key 失败。请查看 Console。" },
         { "key": "global.title", "value": "显示语言" },
         { "key": "global.label", "value": "所有 scope" },
         { "key": "global.tooltip", "value": "当 scope 没有单独设置时使用的显示语言。" },

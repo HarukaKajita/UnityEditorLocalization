@@ -390,6 +390,18 @@
     background-color: var(--eui-card-bg);
 }
 
+/* 不足キーをその場で追加するクイックfix（"+"）。コンパクトな固定サイズ。 */
+.l10n-vissue__add {
+    width: 16px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0;
+    margin: 0 4px 0 0;
+    flex-shrink: 0;
+    font-size: 12px;
+    -unity-text-align: middle-center;
+}
+
 /* 深刻度マーカー（× / !）。eui-badge の配色を流用しつつ正方形に寄せる。 */
 .l10n-vissue__mark {
     min-width: 16px;

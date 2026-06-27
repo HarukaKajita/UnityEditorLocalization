@@ -42,6 +42,8 @@
         { "key": "wizard.error.alreadyExists", "value": "その場所には既に manifest があります。" },
         { "key": "wizard.error.writeFailed", "value": "ファイルの書き込みに失敗しました。Console を確認してください。" },
         { "key": "wizard.result.created", "value": "カタログを作成しました: {0}" },
+        { "key": "quickfix.addKey.tooltip", "value": "この locale にこの key を追加（defaultLocale の値をコピー）" },
+        { "key": "quickfix.failed", "value": "key の追加に失敗しました。Console を確認してください。" },
         { "key": "global.title", "value": "表示言語" },
         { "key": "global.label", "value": "すべての scope" },
         { "key": "global.tooltip", "value": "scope 個別設定がない場合に使う表示言語です。" },

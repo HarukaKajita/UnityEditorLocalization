@@ -42,6 +42,8 @@
         { "key": "wizard.error.alreadyExists", "value": "Sudah ada manifest di lokasi itu." },
         { "key": "wizard.error.writeFailed", "value": "Gagal menulis file. Lihat Console." },
         { "key": "wizard.result.created", "value": "Katalog dibuat: {0}" },
+        { "key": "quickfix.addKey.tooltip", "value": "Tambahkan key ini ke locale ini (menyalin nilai defaultLocale)" },
+        { "key": "quickfix.failed", "value": "Gagal menambahkan key. Lihat Console." },
         { "key": "global.title", "value": "Bahasa tampilan" },
         { "key": "global.label", "value": "Semua scope" },
         { "key": "global.tooltip", "value": "Bahasa tampilan yang dipakai saat scope tidak punya override." },

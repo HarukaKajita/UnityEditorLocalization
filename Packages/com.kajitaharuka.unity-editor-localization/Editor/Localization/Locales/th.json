@@ -42,6 +42,8 @@
         { "key": "wizard.error.alreadyExists", "value": "ตำแหน่งนี้มี manifest อยู่แล้ว" },
         { "key": "wizard.error.writeFailed", "value": "เขียนไฟล์ไม่สำเร็จ ดูที่ Console" },
         { "key": "wizard.result.created", "value": "สร้างแคตตาล็อกแล้ว: {0}" },
+        { "key": "quickfix.addKey.tooltip", "value": "เพิ่ม key นี้ลงใน locale นี้ (คัดลอกค่าจาก defaultLocale)" },
+        { "key": "quickfix.failed", "value": "เพิ่ม key ไม่สำเร็จ ดูที่ Console" },
         { "key": "global.title", "value": "ภาษาที่แสดง" },
         { "key": "global.label", "value": "ทุก scope" },
         { "key": "global.tooltip", "value": "ภาษาที่แสดงเมื่อ scope ไม่มีการตั้งค่าเฉพาะ" },

@@ -42,6 +42,8 @@
         { "key": "wizard.error.alreadyExists", "value": "W tym miejscu już istnieje manifest." },
         { "key": "wizard.error.writeFailed", "value": "Nie udało się zapisać plików. Zobacz Console." },
         { "key": "wizard.result.created", "value": "Utworzono katalog: {0}" },
+        { "key": "quickfix.addKey.tooltip", "value": "Dodaj ten key do tego locale (kopiuje wartość defaultLocale)" },
+        { "key": "quickfix.failed", "value": "Nie udało się dodać key. Zobacz Console." },
         { "key": "global.title", "value": "Język wyświetlania" },
         { "key": "global.label", "value": "Wszystkie scope" },
         { "key": "global.tooltip", "value": "Język wyświetlania używany, gdy scope nie ma własnego ustawienia." },

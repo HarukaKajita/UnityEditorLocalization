@@ -42,6 +42,8 @@
         { "key": "wizard.error.alreadyExists", "value": "В этом месте уже есть manifest." },
         { "key": "wizard.error.writeFailed", "value": "Не удалось записать файлы. См. Console." },
         { "key": "wizard.result.created", "value": "Каталог создан: {0}" },
+        { "key": "quickfix.addKey.tooltip", "value": "Добавить этот key в этот locale (копирует значение defaultLocale)" },
+        { "key": "quickfix.failed", "value": "Не удалось добавить key. См. Console." },
         { "key": "global.title", "value": "Язык интерфейса" },
         { "key": "global.label", "value": "Все scope" },
         { "key": "global.tooltip", "value": "Язык интерфейса, используемый, когда у scope нет переопределения." },

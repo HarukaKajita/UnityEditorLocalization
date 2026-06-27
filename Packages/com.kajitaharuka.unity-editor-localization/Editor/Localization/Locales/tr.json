@@ -42,6 +42,8 @@
         { "key": "wizard.error.alreadyExists", "value": "Bu konumda zaten bir manifest var." },
         { "key": "wizard.error.writeFailed", "value": "Dosyalar yazılamadı. Console'a bakın." },
         { "key": "wizard.result.created", "value": "Katalog oluşturuldu: {0}" },
+        { "key": "quickfix.addKey.tooltip", "value": "Bu key'i bu locale'e ekle (defaultLocale değerini kopyalar)" },
+        { "key": "quickfix.failed", "value": "key eklenemedi. Console'a bakın." },
         { "key": "global.title", "value": "Görüntüleme dili" },
         { "key": "global.label", "value": "Tüm scope'lar" },
         { "key": "global.tooltip", "value": "Bir scope'un kendine ait ayarı yokken kullanılan görüntüleme dili." },

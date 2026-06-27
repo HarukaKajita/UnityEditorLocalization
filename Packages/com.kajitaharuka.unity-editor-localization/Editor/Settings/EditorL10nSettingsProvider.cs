@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -321,6 +322,18 @@ namespace Kajitaharuka.EditorLocalization
                 var row = new VisualElement();
                 row.AddToClassList("l10n-vissue");
 
+                // 不足キーはその場で追加できるクイックfix（"+"。defaultLocale の値をコピーして種にする）。
+                Button addButton = null;
+                if (issue.Kind == EditorL10nValidationMessageKind.MissingKey
+                    && !string.IsNullOrEmpty(issue.Locale) && issue.Args.Count > 0)
+                {
+                    var missingKey = issue.Args[0];
+                    addButton = new Button(() => QuickAddMissingKey(issue.Scope, issue.Locale, missingKey)) { text = "+" };
+                    addButton.AddToClassList("l10n-vissue__add");
+                    addButton.tooltip = Tr("quickfix.addKey.tooltip");
+                    row.Add(addButton);
+                }
+
                 var isError = issue.Severity == EditorL10nValidationSeverity.Error;
                 // 色だけに頼らず形（× / !）でも深刻度が伝わるマーカー（色覚配慮）。文言ではないので未翻訳化しない。
                 var mark = EditorL10nUiKit.Pill(isError ? "×" : "!",
@@ -345,10 +358,79 @@ namespace Kajitaharuka.EditorLocalization
                 {
                     row.AddToClassList("l10n-vissue--clickable");
                     row.tooltip = Tr("catalogs.issue.openAsset.tooltip");
-                    row.RegisterCallback<ClickEvent>(_ => PingAsset(assetPath));
+                    var quickAdd = addButton;
+                    row.RegisterCallback<ClickEvent>(evt =>
+                    {
+                        // 追加ボタンのクリックはクイックfixが処理するので、行のジャンプは発火させない。
+                        if (quickAdd != null && evt.target == quickAdd)
+                            return;
+                        PingAsset(assetPath);
+                    });
                 }
 
                 return row;
+            }
+
+            // 不足キーをその locale テーブルへ追加する（値は defaultLocale からコピー）。
+            // 正準ライターでファイルを書き戻し、再 import → 再検証して結果表示を更新する。
+            private void QuickAddMissingKey(string scope, string locale, string key)
+            {
+                try
+                {
+                    if (!EditorL10n.TryGetLocaleTablePath(scope, locale, out var tablePath))
+                        throw new Exception($"locale テーブルのパスが見つかりません: {scope}/{locale}");
+
+                    var entries = LoadTableEntries(tablePath);
+                    if (entries.All(entry => entry.Key != key))
+                    {
+                        entries.Add(new KeyValuePair<string, string>(key, GetDefaultLocaleValue(scope, key)));
+                        File.WriteAllText(FileUtil.GetPhysicalPath(tablePath), EditorL10nCatalogWriter.WriteTable(locale, entries));
+                        AssetDatabase.ImportAsset(tablePath);
+                    }
+
+                    EditorL10n.Reload();
+                    _lastValidation = EditorL10nValidator.ValidateAll();
+                    UpdateCatalogsResultLine();
+                    RenderValidationGroups(_lastValidation);
+                    Debug.Log($"EditorLocalization: {scope}/{locale} に key を追加しました: {key}");
+                }
+                catch (Exception exception)
+                {
+                    Debug.LogError($"EditorLocalization: key の追加に失敗しました: {exception}");
+                    if (_catalogsResult != null)
+                        SetResult(_catalogsResult, Tr("quickfix.failed"), EditorL10nBadgeKind.Error);
+                }
+            }
+
+            // locale テーブルの全エントリを出現順で読み出す（追加時に既存順を保つため）。
+            private static List<KeyValuePair<string, string>> LoadTableEntries(string tablePath)
+            {
+                var result = new List<KeyValuePair<string, string>>();
+                var asset = AssetDatabase.LoadAssetAtPath<TextAsset>(tablePath);
+                if (asset == null)
+                    return result;
+
+                var document = JsonUtility.FromJson<EditorL10nTableDocument>(asset.text);
+                if (document?.entries == null)
+                    return result;
+
+                foreach (var entry in document.entries)
+                    if (entry != null && !string.IsNullOrEmpty(entry.key))
+                        result.Add(new KeyValuePair<string, string>(entry.key, entry.value ?? ""));
+                return result;
+            }
+
+            // 種にする defaultLocale の値を取得する（無ければ空）。
+            private static string GetDefaultLocaleValue(string scope, string key)
+            {
+                if (!EditorL10n.TryGetScopeInfo(scope, out var info) || string.IsNullOrEmpty(info.DefaultLocale))
+                    return "";
+                if (!EditorL10n.TryGetLocaleTablePath(scope, info.DefaultLocale, out var path))
+                    return "";
+                foreach (var entry in LoadTableEntries(path))
+                    if (entry.Key == key)
+                        return entry.Value;
+                return "";
             }
 
             // issue の由来アセットを解決する。locale 由来はその locale テーブル、scope 由来（locale 空）は manifest。
