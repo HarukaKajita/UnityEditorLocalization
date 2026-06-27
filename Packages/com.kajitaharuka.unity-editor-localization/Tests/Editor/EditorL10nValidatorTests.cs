@@ -97,6 +97,18 @@ namespace Kajitaharuka.EditorLocalization.Tests
         }
 
         [Test]
+        public void ScopeCatalog_TryGetTablePath_ReturnsRegisteredLocalePath()
+        {
+            var scope = new EditorL10nScopeCatalog("sample", "ja", "Assets/Sample/l10n-manifest.json");
+            scope.AddLocale(new EditorL10nLocaleInfo("ja", "日本語", "Japanese"),
+                new Dictionary<string, string> { ["k"] = "v" }, "Assets/Sample/Locales/ja.json");
+
+            Assert.That(scope.TryGetTablePath("ja", out var path), Is.True);
+            Assert.That(path, Is.EqualTo("Assets/Sample/Locales/ja.json"));
+            Assert.That(scope.TryGetTablePath("en", out _), Is.False);
+        }
+
+        [Test]
         public void ValidateScope_SkipsSameValueWarningForFixedTerm()
         {
             // manifest の fixedTerms に宣言した key は、全ロケールで defaultLocale と同値でも未翻訳警告を出さない。

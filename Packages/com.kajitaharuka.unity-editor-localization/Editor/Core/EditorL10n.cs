@@ -162,6 +162,16 @@ namespace Kajitaharuka.EditorLocalization
             return false;
         }
 
+        /// <summary>
+        /// scope の指定 locale のテーブルアセットパスを取得する（検証結果から該当 JSON へジャンプする用途）。
+        /// </summary>
+        public static bool TryGetLocaleTablePath(string scope, string locale, out string tablePath)
+        {
+            tablePath = "";
+            return Catalog.TryGetScope(scope ?? "", out var scopeCatalog)
+                && scopeCatalog.TryGetTablePath(NormalizeLocaleTag(locale), out tablePath);
+        }
+
         public static IReadOnlyList<string> GetScopes()
         {
             return Catalog.Scopes.Select(scope => scope.Scope).OrderBy(scope => scope).ToArray();

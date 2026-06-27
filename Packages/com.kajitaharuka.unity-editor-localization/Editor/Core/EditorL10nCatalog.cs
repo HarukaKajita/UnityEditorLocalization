@@ -113,6 +113,8 @@ namespace Kajitaharuka.EditorLocalization
         private readonly List<EditorL10nLocaleInfo> _locales = new();
         private readonly Dictionary<string, Dictionary<string, string>> _tablesByLocale = new();
         private readonly HashSet<string> _tablePaths = new();
+        // locale タグ -> その locale のテーブルアセットパス（検証結果から該当ファイルへジャンプする用途）。
+        private readonly Dictionary<string, string> _tablePathByLocale = new();
         // 全ロケールで defaultLocale と同値でも「未翻訳の疑い」警告を出さない固定語 key（manifest の fixedTerms）。
         private readonly HashSet<string> _fixedTerms;
 
@@ -146,12 +148,28 @@ namespace Kajitaharuka.EditorLocalization
             _locales.Add(locale);
             _tablesByLocale.Add(locale.Tag, entries ?? new Dictionary<string, string>());
             if (!string.IsNullOrEmpty(tablePath))
+            {
                 _tablePaths.Add(tablePath);
+                _tablePathByLocale[locale.Tag] = tablePath;
+            }
         }
 
         internal bool HasLocale(string locale)
         {
             return _tablesByLocale.ContainsKey(locale);
+        }
+
+        /// <summary>その locale のテーブルアセットパスを取得する（未登録/空なら false）。</summary>
+        internal bool TryGetTablePath(string locale, out string tablePath)
+        {
+            tablePath = "";
+            if (_tablePathByLocale.TryGetValue(locale ?? "", out var path) && !string.IsNullOrEmpty(path))
+            {
+                tablePath = path;
+                return true;
+            }
+
+            return false;
         }
 
         internal bool TryGetText(string locale, string key, out string text)
