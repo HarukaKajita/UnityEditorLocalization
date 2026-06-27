@@ -71,7 +71,7 @@ Package Managerから`Localized Editor Window`サンプルをimportすると、U
 
 ## 最小構成
 
-利用側パッケージにmanifestと翻訳テーブルを置きます。
+利用側パッケージにmanifestと翻訳テーブルを置きます。手書きする代わりに `Tools > UnityEditorLocalization > Create Catalog` のウィザードで、scope・出力フォルダ・defaultLocale・対象ロケールを指定して雛形（manifest＋空の翻訳テーブル）を生成することもできます。
 
 ```text
 Assets/MyEditorExtension/Editor/Localization/

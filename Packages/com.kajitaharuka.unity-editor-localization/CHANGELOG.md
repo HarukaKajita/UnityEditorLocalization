@@ -12,6 +12,7 @@
 - `package.json` の `documentationUrl`/`changelogUrl`/`licensesUrl` を `https://kajitaharuka.com/products/unity-editor-localization/` 系へ統一（製品ページ URL と一致）。
 
 ### Added
+- `Tools > UnityEditorLocalization > Create Catalog` **カタログ作成ウィザード**を追加。scope・出力フォルダ・defaultLocale・対象ロケールを入力すると、manifest と空の翻訳テーブルの雛形を正準フォーマット（[EditorL10nCatalogWriter](Editor/Core/EditorL10nCatalogWriter.cs)）で生成し、import → 自動 reload → manifest を ping する。手書き JSON の手間を無くし最小構成をすぐ用意できる。入力検証（scope 空/重複・フォルダ妥当・既存 manifest）付き。ウィザード UI 文言を 19 言語へ追加。
 - Preferences のカタログ検証結果の各 issue 行を**クリックで由来アセットへジャンプ**（選択+Ping）できるようにした。locale 由来 issue はその locale テーブル、scope 由来（locale 空）の issue は manifest を選択する。ホバーでクリック可能を示す。基盤として公開 API `EditorL10n.TryGetLocaleTablePath(scope, locale, out path)` を追加（tooltip 文言を 19 言語へ）。
 - CI / batchmode 用の検証エントリ `EditorL10nValidator.ValidateForCI()` を追加。`-batchmode -quit -executeMethod Kajitaharuka.EditorLocalization.EditorL10nValidator.ValidateForCI` で実行し、エラーがあれば非 0 で終了して CI を止める。既定はエラーのみで失敗し、`-l10nFailOnWarnings` を付けると警告でも失敗扱いにする。対話モードでは Editor を閉じないようログのみ。終了コードの判定は純関数 `ComputeExitCode(errorCount, warningCount, failOnWarnings)` に切り出し、EditMode テストで検証。
 - manifest に `fixedTerms`（key 配列）を追加。ファイル名・型名など全ロケールで `defaultLocale` と同値であることが正当な固定語キーを宣言すると、検証の「`defaultLocale` と同値（未翻訳の疑い）」警告を抑止する。`EditorL10nValidator`（in-editor）と翻訳品質スキルの `validate_locale_quality.py` の**双方が同じ manifest の宣言**を読むため、両検証で挙動が一致する（key 過不足・placeholder・連番欠落の検査は従来どおり適用）。リファレンス実装 ExportPackageExtension では `package.json`/`Exporter`/`Exporter {0}` を fixedTerms 化し、誤検知だった検証警告 54 件（3 固定語 × 18 ロケール）を解消。
