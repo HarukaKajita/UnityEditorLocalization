@@ -41,6 +41,7 @@
         { "key": "scope.meta", "value": "現在: {0}（{1}） / 既定: {2}" },
         { "key": "chain.label", "value": "解決順" },
         { "key": "chain.tooltip", "value": "要求ロケールから親、defaultLocale の順に探索し、最初に翻訳が見つかった言語で表示します。" },
+        { "key": "scope.locales.label", "value": "対応言語" },
         { "key": "source.scopeOverride", "value": "scope 個別設定" },
         { "key": "source.global", "value": "グローバル設定" },
         { "key": "source.default", "value": "既定ロケール" },

@@ -10,7 +10,8 @@
 - `package.json` の `documentationUrl`/`changelogUrl`/`licensesUrl` を `https://kajitaharuka.com/products/unity-editor-localization/` 系へ統一（製品ページ URL と一致）。
 
 ### Added
-- Preferences 画面自身の翻訳を **19 言語**へ拡張。既存 en（defaultLocale）/ja に加え、zh-Hans・zh-Hant・ko・fr・de・it・es-ES・es-419・pt-BR・pt-PT・ru・pl・tr・th・vi・uk・id の 17 言語（各 66 キー）を `Editor/Localization/Locales/` に追加し、manifest へ登録。固定語（scope/locale/manifest/EditorPrefs/Console/CLI/defaultLocale/パス/Claude Code/placeholder/記号）は保持。キー過不足・placeholder・未翻訳疑いの機械検証をクリア（カタログ検証は Errors 0、新規 17 言語の警告 0）。CJK・タイ語など一部は最終的なネイティブレビュー推奨。
+- Preferences の scope 個別設定で、各 scope の解決順の下に、その scope が対応する言語コードの一覧（`en · ja · zh-Hans · …`）を表示。
+- Preferences 画面自身の翻訳を **19 言語**へ拡張。既存 en（defaultLocale）/ja に加え、zh-Hans・zh-Hant・ko・fr・de・it・es-ES・es-419・pt-BR・pt-PT・ru・pl・tr・th・vi・uk・id の 17 言語（各 67 キー）を `Editor/Localization/Locales/` に追加し、manifest へ登録。固定語（scope/locale/manifest/EditorPrefs/Console/CLI/defaultLocale/パス/Claude Code/placeholder/記号）は保持。キー過不足・placeholder・未翻訳疑いの機械検証をクリア（カタログ検証は Errors 0、新規 17 言語の警告 0）。CJK・タイ語など一部は最終的なネイティブレビュー推奨。
 - `Tools > UnityEditorLocalization > Settings` メニューを追加。Preferences を開いて UnityEditorLocalization の項目を選択状態にする（`SettingsService.OpenUserPreferences`）。
 - 同梱スキル（翻訳ワークフロー / 既存拡張の多言語化連携）を `.claude/skills` と `.agents/skills` へ symlink 登録する `EditorL10nSkillInstaller` を追加。登録先はユーザー（ホーム）/ プロジェクト（リポジトリ直下）から選べる。`Tools > UnityEditorLocalization > AI Agent Skills` のメニューと、`Preferences > UnityEditorLocalization` の「AIエージェント連携スキル」節（登録ボタン＋CLI コマンドの明示・コピー）から実行できる。skills 実体パスは `PackageInfo.resolvedPath` で解決し、埋め込み/PackageCache のどちらでも動作する。登録は macOS/Linux=`ln`、Windows=`mklink /D`（権限が無ければ junction にフォールバック）でクロスプラットフォーム対応し、表示・コピーする CLI コマンドも OS に合わせて出力する。
 - `EditorL10n.GetSystemLocale()` と `Get`/`SetSystemLocaleFallbackEnabled()` を公開 API として追加。システム言語タグの供給元は差し替え可能な `SystemLocaleProvider`（テスト用シーム）とし、EditMode テストで解決順と由来を検証する。フォールバックの有効/無効は `EditorPrefs` に保存する（既定は有効）。

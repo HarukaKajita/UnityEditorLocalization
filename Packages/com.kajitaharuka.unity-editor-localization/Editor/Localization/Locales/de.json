@@ -41,6 +41,7 @@
         { "key": "scope.meta", "value": "Aktuell: {0} ({1}) · Standard: {2}" },
         { "key": "chain.label", "value": "Auflösung" },
         { "key": "chain.tooltip", "value": "Sucht die angeforderte Locale, ihre übergeordneten, dann defaultLocale und zeigt die erste Sprache mit Übersetzung." },
+        { "key": "scope.locales.label", "value": "Verfügbare Locales" },
         { "key": "source.scopeOverride", "value": "Scope-Override" },
         { "key": "source.global", "value": "globale Einstellung" },
         { "key": "source.default", "value": "Standard-Locale" },

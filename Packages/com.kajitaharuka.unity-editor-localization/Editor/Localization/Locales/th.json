@@ -41,6 +41,7 @@
         { "key": "scope.meta", "value": "ปัจจุบัน: {0} ({1}) · ค่าเริ่มต้น: {2}" },
         { "key": "chain.label", "value": "การแก้ค่า" },
         { "key": "chain.tooltip", "value": "ค้นหา locale ที่ร้องขอ พาเรนต์ของมัน จากนั้น defaultLocale แล้วแสดงภาษาแรกที่มีคำแปล" },
+        { "key": "scope.locales.label", "value": "locale ที่รองรับ" },
         { "key": "source.scopeOverride", "value": "การตั้งค่าต่อ scope" },
         { "key": "source.global", "value": "การตั้งค่าส่วนกลาง" },
         { "key": "source.default", "value": "locale เริ่มต้น" },

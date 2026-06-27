@@ -41,6 +41,7 @@
         { "key": "scope.meta", "value": "Atual: {0} ({1}) · predefinido: {2}" },
         { "key": "chain.label", "value": "Resolução" },
         { "key": "chain.tooltip", "value": "Procura a locale solicitada, seus pais e depois defaultLocale, e mostra o primeiro idioma que tem tradução." },
+        { "key": "scope.locales.label", "value": "Locales disponíveis" },
         { "key": "source.scopeOverride", "value": "ajuste por scope" },
         { "key": "source.global", "value": "configuração global" },
         { "key": "source.default", "value": "locale predefinida" },

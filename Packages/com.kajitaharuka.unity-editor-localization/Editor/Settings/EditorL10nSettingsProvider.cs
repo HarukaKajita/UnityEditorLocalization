@@ -624,6 +624,14 @@ namespace Kajitaharuka.EditorLocalization
                     _chainRow = new VisualElement();
                     _chainRow.AddToClassList("l10n-scope-chain");
                     body.Add(_chainRow);
+
+                    // 解決順の下に、この scope が対応する言語コードの一覧を表示する（固定。見出しのみ言語追従）。
+                    var localeTags = string.Join(" · ", locales.Select(locale => locale.Tag));
+                    var localesRow = EditorL10nUiKit.HintRow("");
+                    void ApplyLocalesRow() => localesRow.text = Tr("scope.locales.label") + ": " + localeTags;
+                    ApplyLocalesRow();
+                    EditorL10nUi.RegisterLocaleCallback(localesRow, ApplyLocalesRow);
+                    body.Add(localesRow);
                 }
 
                 Root.Add(body);

@@ -41,6 +41,7 @@
         { "key": "scope.meta", "value": "Geçerli: {0} ({1}) · varsayılan: {2}" },
         { "key": "chain.label", "value": "Çözümleme" },
         { "key": "chain.tooltip", "value": "İstenen locale'i, üst öğelerini, ardından defaultLocale'i arar ve çevirisi olan ilk dili gösterir." },
+        { "key": "scope.locales.label", "value": "Kullanılabilir locale" },
         { "key": "source.scopeOverride", "value": "scope geçersiz kılma" },
         { "key": "source.global", "value": "genel ayar" },
         { "key": "source.default", "value": "varsayılan locale" },

@@ -41,6 +41,7 @@
         { "key": "scope.meta", "value": "目前：{0}（{1}） · 預設：{2}" },
         { "key": "chain.label", "value": "解析順序" },
         { "key": "chain.tooltip", "value": "依序尋找請求的 locale、其父層、再到 defaultLocale，並顯示第一個有翻譯的語言。" },
+        { "key": "scope.locales.label", "value": "支援的語言" },
         { "key": "source.scopeOverride", "value": "scope 個別設定" },
         { "key": "source.global", "value": "全域設定" },
         { "key": "source.default", "value": "預設 locale" },

@@ -41,6 +41,7 @@
         { "key": "scope.meta", "value": "Поточний: {0} ({1}) · типовий: {2}" },
         { "key": "chain.label", "value": "Розвʼязання" },
         { "key": "chain.tooltip", "value": "Шукає запитану locale, її батьків, потім defaultLocale і показує першу мову, для якої є переклад." },
+        { "key": "scope.locales.label", "value": "Доступні locale" },
         { "key": "source.scopeOverride", "value": "перевизначення scope" },
         { "key": "source.global", "value": "глобальне налаштування" },
         { "key": "source.default", "value": "типова locale" },

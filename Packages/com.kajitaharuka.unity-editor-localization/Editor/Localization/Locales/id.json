@@ -41,6 +41,7 @@
         { "key": "scope.meta", "value": "Saat ini: {0} ({1}) · default: {2}" },
         { "key": "chain.label", "value": "Resolusi" },
         { "key": "chain.tooltip", "value": "Mencari locale yang diminta, induknya, lalu defaultLocale, dan menampilkan bahasa pertama yang punya terjemahan." },
+        { "key": "scope.locales.label", "value": "Locale tersedia" },
         { "key": "source.scopeOverride", "value": "override per scope" },
         { "key": "source.global", "value": "pengaturan global" },
         { "key": "source.default", "value": "locale bawaan" },

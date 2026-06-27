@@ -41,6 +41,7 @@
         { "key": "scope.meta", "value": "Hiện tại: {0} ({1}) · mặc định: {2}" },
         { "key": "chain.label", "value": "Phân giải" },
         { "key": "chain.tooltip", "value": "Tìm locale được yêu cầu, các cấp cha của nó, rồi defaultLocale, và hiển thị ngôn ngữ đầu tiên có bản dịch." },
+        { "key": "scope.locales.label", "value": "Locale khả dụng" },
         { "key": "source.scopeOverride", "value": "ghi đè theo scope" },
         { "key": "source.global", "value": "cài đặt toàn cục" },
         { "key": "source.default", "value": "locale mặc định" },

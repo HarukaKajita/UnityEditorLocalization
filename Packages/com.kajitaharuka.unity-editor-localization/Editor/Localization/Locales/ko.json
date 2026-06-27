@@ -41,6 +41,7 @@
         { "key": "scope.meta", "value": "현재: {0}({1}) · 기본: {2}" },
         { "key": "chain.label", "value": "해석 순서" },
         { "key": "chain.tooltip", "value": "요청한 locale, 그 상위, 그다음 defaultLocale 순으로 탐색하여 번역이 있는 첫 언어를 표시합니다." },
+        { "key": "scope.locales.label", "value": "지원 언어" },
         { "key": "source.scopeOverride", "value": "scope 개별 설정" },
         { "key": "source.global", "value": "전역 설정" },
         { "key": "source.default", "value": "기본 locale" },
