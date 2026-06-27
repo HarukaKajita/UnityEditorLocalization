@@ -66,6 +66,18 @@ namespace Kajitaharuka.EditorLocalization.Tests
         }
 
         [Test]
+        public void GetSystemLocale_RecomputesWhenProviderOutputChanges()
+        {
+            EditorL10n.SystemLocaleProvider = () => "ja_JP";
+            Assert.AreEqual("ja-JP", EditorL10n.GetSystemLocale());
+
+            // 正規化結果はメモ化されるが、生タグが変われば（供給元差し替え／OS 言語変更を模す）
+            // 無効化して再計算する。陳腐化しないことを固定する。
+            EditorL10n.SystemLocaleProvider = () => "fr_FR";
+            Assert.AreEqual("fr-FR", EditorL10n.GetSystemLocale());
+        }
+
+        [Test]
         public void GetActiveLocale_UsesSystemLocaleWhenGlobalUnsetAndEnabled()
         {
             EditorL10n.SystemLocaleProvider = () => "ja-JP";

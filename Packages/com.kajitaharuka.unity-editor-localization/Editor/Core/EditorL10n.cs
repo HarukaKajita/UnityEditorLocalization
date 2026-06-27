@@ -23,6 +23,12 @@ namespace Kajitaharuka.EditorLocalization
         // テストから差し替えてシステム言語フォールバックを環境非依存に検証できるようにする。
         internal static Func<string> SystemLocaleProvider = ReadSystemLocaleTag;
 
+        // GetSystemLocale の正規化結果を直近の供給元出力でメモ化する。GetActiveLocale は Tr のたびに
+        // 呼ばれるため、正規化（Split/LINQ/Join）の再計算を避ける。生タグをキーにするので、テストでの
+        // 供給元差し替えや OS 言語変更時は自動で再計算され、陳腐化しない。
+        private static string _systemLocaleRaw;
+        private static string _systemLocaleNormalized = "";
+
         public static event Action LocaleChanged;
 
         internal static EditorL10nCatalog Catalog => _catalog ??= EditorL10nCatalog.Load();
@@ -52,7 +58,13 @@ namespace Kajitaharuka.EditorLocalization
         /// </summary>
         public static string GetSystemLocale()
         {
-            return NormalizeLocaleTag(SystemLocaleProvider?.Invoke());
+            var raw = SystemLocaleProvider?.Invoke() ?? "";
+            if (raw != _systemLocaleRaw)
+            {
+                _systemLocaleRaw = raw;
+                _systemLocaleNormalized = NormalizeLocaleTag(raw);
+            }
+            return _systemLocaleNormalized;
         }
 
         /// <summary>
