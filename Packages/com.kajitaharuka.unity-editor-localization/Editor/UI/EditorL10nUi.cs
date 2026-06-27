@@ -24,6 +24,24 @@ namespace Kajitaharuka.EditorLocalization
         /// </summary>
         public const string CompactLocaleMenuDefaultMarker = "A/文";
 
+        /// <summary>「Powered by」クレジットの固定文言。ブランド名なので言語追従しない（全言語共通）。</summary>
+        public const string AttributionText = "Powered by UnityEditorLocalization";
+
+        /// <summary>
+        /// 「Powered by UnityEditorLocalization」のクレジット要素（任意・歓迎）。クリックで製品ページを開く。
+        /// 利用側ツールの About 行やフッターに置ける。文言は固定なので言語追従の購読は持たない。
+        /// </summary>
+        public static Button CreateAttribution()
+        {
+            var button = new Button(() => Application.OpenURL(EditorL10nDocs.DocumentationUrl))
+            {
+                text = AttributionText,
+                tooltip = EditorL10nDocs.DocumentationUrl,
+            };
+            button.AddToClassList("eui-attribution");
+            return button;
+        }
+
         public static void BindText(Label label, string scope, string key, params object[] args)
         {
             if (label == null)
@@ -135,17 +153,18 @@ namespace Kajitaharuka.EditorLocalization
         /// <summary>
         /// Inspectorヘッダーやツールバーに置きやすい、短い表示の言語選択メニューを生成する。
         /// </summary>
-        public static Button CreateCompactLocaleMenu(string scope, string tooltipLabel = null, string marker = CompactLocaleMenuDefaultMarker)
+        public static Button CreateCompactLocaleMenu(string scope, string tooltipLabel = null, string marker = CompactLocaleMenuDefaultMarker, bool showAttribution = true)
         {
-            return CreateCompactLocaleMenu(scope, () => tooltipLabel, marker);
+            return CreateCompactLocaleMenu(scope, () => tooltipLabel, marker, showAttribution);
         }
 
         /// <summary>
         /// tooltipラベルを翻訳キーから取得する、短い表示の言語選択メニューを生成する。
         /// </summary>
-        public static Button CreateLocalizedCompactLocaleMenu(string scope, string tooltipLabelKey, string marker = CompactLocaleMenuDefaultMarker)
+        /// <param name="showAttribution">開いたメニューの末尾に「Powered by UnityEditorLocalization」を出すか（既定: 出す。任意で false にできる）。</param>
+        public static Button CreateLocalizedCompactLocaleMenu(string scope, string tooltipLabelKey, string marker = CompactLocaleMenuDefaultMarker, bool showAttribution = true)
         {
-            return CreateCompactLocaleMenu(scope, () => EditorL10n.Tr(scope, tooltipLabelKey), marker);
+            return CreateCompactLocaleMenu(scope, () => EditorL10n.Tr(scope, tooltipLabelKey), marker, showAttribution);
         }
 
         public static DropdownField CreateLocalizedLocaleDropdown(string scope, string labelKey)
@@ -162,7 +181,7 @@ namespace Kajitaharuka.EditorLocalization
             return dropdown;
         }
 
-        private static Button CreateCompactLocaleMenu(string scope, Func<string> tooltipLabelProvider, string marker)
+        private static Button CreateCompactLocaleMenu(string scope, Func<string> tooltipLabelProvider, string marker, bool showAttribution)
         {
             var normalizedScope = scope ?? "";
             var button = new Button();
@@ -195,6 +214,14 @@ namespace Kajitaharuka.EditorLocalization
                         selectedLocale.Tag == activeLocale,
                         () => EditorL10n.SetActiveLocale(normalizedScope, selectedLocale.Tag));
                 }
+
+                // 開いたメニューの末尾に控えめなクレジット（任意・既定オン）。クリックで製品ページを開く。
+                if (showAttribution)
+                {
+                    menu.AddSeparator("");
+                    menu.AddItem(new GUIContent(AttributionText), false, () => Application.OpenURL(EditorL10nDocs.DocumentationUrl));
+                }
+
                 menu.ShowAsContext();
             };
 

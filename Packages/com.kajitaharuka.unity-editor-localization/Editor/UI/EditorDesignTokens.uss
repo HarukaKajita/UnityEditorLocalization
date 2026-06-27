@@ -155,6 +155,23 @@
     margin-bottom: 4px;
 }
 
+/* 「Powered by UnityEditorLocalization」クレジット（任意・控えめなリンク調）。枠/背景なし、ホバーで強調。 */
+.eui-attribution {
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    border-radius: 3px;
+    padding: 1px 4px;
+    margin: 2px 0 0 0;
+    color: var(--eui-text-muted);
+    font-size: 10px;
+    -unity-text-align: middle-left;
+}
+
+.eui-attribution:hover {
+    color: var(--eui-accent);
+    background-color: var(--eui-inset-bg);
+}
+
 /* クリックできるアセット/パス行（選択＋Ping）。長いパスは折り返す */
 .eui-asset-row {
     background-color: rgba(0, 0, 0, 0);
