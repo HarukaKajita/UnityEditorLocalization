@@ -285,3 +285,49 @@
 .l10n-scope-body {
     margin: 4px 0 2px 14px;
 }
+
+/* ===== fallback 連鎖の可視化（要求ロケール → 親 → defaultLocale）===== */
+/* 各段をチップで横並びにし、実際に翻訳が当たった段を強調する。色だけに頼らず
+   太字・配置でも「使用中」が伝わるようにする（アクセシビリティ）。 */
+.l10n-scope-chain {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    margin: 6px 0 0 0;
+}
+
+.l10n-scope-chain__label {
+    color: var(--eui-text-muted);
+    font-size: 10px;
+    margin-right: 4px;
+}
+
+/* 連鎖の各段（ロケールタグ）。既定は「試したが翻訳なし」の淡色表示。 */
+.l10n-chain-step {
+    color: var(--eui-text-muted);
+    background-color: var(--eui-card-bg);
+    border-radius: 3px;
+    padding: 0 5px;
+    margin: 1px 0;
+    font-size: 10px;
+    -unity-text-align: middle-center;
+}
+
+/* 実際に翻訳が見つかって表示に使われた段（強調）。 */
+.l10n-chain-step--used {
+    color: var(--eui-ok);
+    background-color: var(--eui-ok-bg);
+    -unity-font-style: bold;
+}
+
+/* 使用段より後＝探索に到達しない段（さらに淡く）。 */
+.l10n-chain-step--skipped {
+    opacity: 0.45;
+}
+
+/* 段同士の区切り矢印。 */
+.l10n-chain-sep {
+    color: var(--eui-text-muted);
+    font-size: 10px;
+    margin: 0 3px;
+}

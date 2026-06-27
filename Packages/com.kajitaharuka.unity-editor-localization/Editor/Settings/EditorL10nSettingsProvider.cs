@@ -164,7 +164,47 @@ namespace Kajitaharuka.EditorLocalization
 
                 var dropdown = BuildGlobalDropdown();
                 content.Add(dropdown);
-                content.Add(EditorL10nUiKit.HintRow(Tr("global.hint")).Also(label => BindLabel(label, "global.hint")));
+
+                // 検出したシステム（OS）言語の表示。実機で何が返るかの確認も兼ねる。
+                var systemLine = EditorL10nUiKit.HintRow("");
+                void ApplySystemLine()
+                {
+                    var systemLocale = EditorL10n.GetSystemLocale();
+                    systemLine.text = string.IsNullOrEmpty(systemLocale)
+                        ? Tr("system.detected.none")
+                        : Tr("system.detected", systemLocale);
+                }
+                ApplySystemLine();
+                EditorL10nUi.RegisterLocaleCallback(systemLine, ApplySystemLine);
+                content.Add(systemLine);
+
+                // システム言語フォールバックの有効/無効トグル（グローバル未設定時の挙動を切り替える）。
+                var fallbackToggle = new Toggle(Tr("system.fallback.label")) { value = EditorL10n.GetSystemLocaleFallbackEnabled() };
+                EditorL10nUiKit.AlignField(fallbackToggle);
+                BindTooltip(fallbackToggle, "system.fallback.tooltip");
+                EditorL10nUi.RegisterLocaleCallback(fallbackToggle, () => fallbackToggle.label = Tr("system.fallback.label"));
+                fallbackToggle.RegisterValueChangedCallback(evt => EditorL10n.SetSystemLocaleFallbackEnabled(evt.newValue));
+                content.Add(fallbackToggle);
+
+                // 未設定時に実際どう解決されるかを示す動的ヒント（トグルとシステム言語の検出状態に追従）。
+                var resolveHint = EditorL10nUiKit.HintRow("");
+                void ApplyResolveHint()
+                {
+                    if (!EditorL10n.GetSystemLocaleFallbackEnabled())
+                    {
+                        resolveHint.text = Tr("global.resolve.default");
+                        return;
+                    }
+
+                    var systemLocale = EditorL10n.GetSystemLocale();
+                    resolveHint.text = string.IsNullOrEmpty(systemLocale)
+                        ? Tr("global.resolve.systemNone")
+                        : Tr("global.resolve.system", systemLocale);
+                }
+                ApplyResolveHint();
+                EditorL10nUi.RegisterLocaleCallback(resolveHint, ApplyResolveHint);
+                content.Add(resolveHint);
+
                 return card;
             }
 
@@ -377,6 +417,8 @@ namespace Kajitaharuka.EditorLocalization
             private readonly Label _fallbackPill;
             private readonly Label _meta;
             private readonly Label _fallbackNote;
+            // fallback 連鎖の可視化行。locale を持つ scope のみ生成する（無い場合は null）。
+            private readonly VisualElement _chainRow;
 
             public ScopeCard(string scope)
             {
@@ -460,6 +502,11 @@ namespace Kajitaharuka.EditorLocalization
                 else
                 {
                     body.Add(BuildScopeDropdown(scope, locales));
+
+                    // 実際に効いている fallback 連鎖を可視化（要求 → 親 → defaultLocale、使用段を強調）。
+                    _chainRow = new VisualElement();
+                    _chainRow.AddToClassList("l10n-scope-chain");
+                    body.Add(_chainRow);
                 }
 
                 Root.Add(body);
@@ -522,14 +569,11 @@ namespace Kajitaharuka.EditorLocalization
 
                 var locales = EditorL10n.GetLocales(Scope).ToArray();
                 var explicitLocale = EditorL10n.NormalizeLocaleTag(EditorL10nPreferences.GetScopeLocale(Scope));
-                var requested = EditorL10n.GetActiveLocale(Scope);
+                var requested = EditorL10n.GetActiveLocale(Scope, out var source);
                 var resolved = ResolveAvailableLocale(requested, info.DefaultLocale, locales);
 
-                var sourceKey = !string.IsNullOrEmpty(explicitLocale)
-                    ? "source.scopeOverride"
-                    : (string.IsNullOrEmpty(EditorL10n.GetGlobalLocale()) ? "source.default" : "source.global");
-
-                _meta.text = Tr("scope.meta", FormatLocaleTag(resolved), Tr(sourceKey), FormatLocaleTag(info.DefaultLocale));
+                // 由来（source）は解決順を集約した EditorL10n.GetActiveLocale から受け取る（二重持ちを避ける）。
+                _meta.text = Tr("scope.meta", FormatLocaleTag(resolved), Tr(SourceKey(source)), FormatLocaleTag(info.DefaultLocale));
 
                 EditorL10nUiKit.SetBadge(_overridePill,
                     string.IsNullOrEmpty(explicitLocale) ? "" : Tr("pill.override"),
@@ -550,10 +594,60 @@ namespace Kajitaharuka.EditorLocalization
                 {
                     _fallbackNote.style.display = DisplayStyle.None;
                 }
+
+                UpdateChain(requested, info.DefaultLocale, locales);
+            }
+
+            // fallback 連鎖（要求 → 親 → defaultLocale）をチップ列で描画し、実際に翻訳が当たった段を強調する。
+            // locale を持たない scope では _chainRow を生成しないため、その場合は何もしない。
+            private void UpdateChain(string requested, string defaultLocale, EditorL10nLocaleInfo[] locales)
+            {
+                if (_chainRow == null)
+                    return;
+
+                _chainRow.Clear();
+
+                var label = new Label(Tr("chain.label"));
+                label.AddToClassList("l10n-scope-chain__label");
+                label.tooltip = Tr("chain.tooltip");
+                _chainRow.Add(label);
+
+                var available = new HashSet<string>(
+                    locales.Where(locale => locale != null && !string.IsNullOrEmpty(locale.Tag)).Select(locale => locale.Tag));
+
+                var chain = EditorL10n.BuildFallbackChain(requested, defaultLocale).ToArray();
+                var hitIndex = Array.FindIndex(chain, tag => available.Contains(tag));
+
+                for (var i = 0; i < chain.Length; i++)
+                {
+                    if (i > 0)
+                    {
+                        var separator = new Label("›");
+                        separator.AddToClassList("l10n-chain-sep");
+                        _chainRow.Add(separator);
+                    }
+
+                    var step = new Label(chain[i]);
+                    step.AddToClassList("l10n-chain-step");
+                    if (hitIndex >= 0 && i == hitIndex)
+                        step.AddToClassList("l10n-chain-step--used");   // 実際に表示へ使われた段
+                    else if (hitIndex >= 0 && i > hitIndex)
+                        step.AddToClassList("l10n-chain-step--skipped"); // 使用段より後＝探索に到達しない段
+                    _chainRow.Add(step);
+                }
             }
         }
 
         // ===== 共有ヘルパー =====
+        // 表示ロケールの由来 enum を翻訳キーへ対応付ける（meta 行の source 表示用）。
+        private static string SourceKey(EditorL10nLocaleSource source) => source switch
+        {
+            EditorL10nLocaleSource.ScopeOverride => "source.scopeOverride",
+            EditorL10nLocaleSource.Global => "source.global",
+            EditorL10nLocaleSource.System => "source.system",
+            _ => "source.default",
+        };
+
         private static bool ScopeMatchesSearch(string scope, string searchText)
         {
             if (string.IsNullOrWhiteSpace(searchText))
