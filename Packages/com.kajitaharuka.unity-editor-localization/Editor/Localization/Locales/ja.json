@@ -19,6 +19,7 @@
         { "key": "catalogs.count.warnings", "value": "警告 {0}" },
         { "key": "catalogs.groups.clean", "value": "他 {0} scope は問題なし。" },
         { "key": "catalogs.more", "value": "ほか {0} 件（詳細は Console）" },
+        { "key": "catalogs.issue.openAsset.tooltip", "value": "クリックで該当アセットを選択" },
         { "key": "validation.defaultLocaleEmpty", "value": "defaultLocale が空です。" },
         { "key": "validation.defaultLocaleNoTable", "value": "defaultLocale のテーブルがありません: {0}" },
         { "key": "validation.missingKey", "value": "key が不足しています: {0}" },

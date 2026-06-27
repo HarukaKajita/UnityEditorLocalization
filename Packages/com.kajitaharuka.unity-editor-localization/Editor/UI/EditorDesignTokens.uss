@@ -381,6 +381,13 @@
     flex-direction: row;
     align-items: flex-start;
     margin: 2px 0;
+    border-radius: 3px;
+    padding: 1px 2px;
+}
+
+/* 由来アセットへジャンプできる行は、ホバーで背景を出してクリック可能を示す。 */
+.l10n-vissue--clickable:hover {
+    background-color: var(--eui-card-bg);
 }
 
 /* 深刻度マーカー（× / !）。eui-badge の配色を流用しつつ正方形に寄せる。 */

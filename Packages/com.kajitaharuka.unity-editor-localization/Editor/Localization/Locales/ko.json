@@ -19,6 +19,7 @@
         { "key": "catalogs.count.warnings", "value": "경고 {0}개" },
         { "key": "catalogs.groups.clean", "value": "다른 {0}개 scope는 문제 없음." },
         { "key": "catalogs.more", "value": "그 외 {0}개 (자세한 내용은 Console)" },
+        { "key": "catalogs.issue.openAsset.tooltip", "value": "클릭하면 관련 에셋을 선택합니다" },
         { "key": "validation.defaultLocaleEmpty", "value": "defaultLocale이 비어 있습니다." },
         { "key": "validation.defaultLocaleNoTable", "value": "defaultLocale의 테이블이 없습니다: {0}" },
         { "key": "validation.missingKey", "value": "key가 없습니다: {0}" },

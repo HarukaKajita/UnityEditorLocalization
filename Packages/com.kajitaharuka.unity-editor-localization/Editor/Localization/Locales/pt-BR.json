@@ -19,6 +19,7 @@
         { "key": "catalogs.count.warnings", "value": "{0} avisos" },
         { "key": "catalogs.groups.clean", "value": "Outros {0} scopes sem problemas." },
         { "key": "catalogs.more", "value": "Mais {0} (veja o Console)." },
+        { "key": "catalogs.issue.openAsset.tooltip", "value": "Clique para selecionar o asset relacionado" },
         { "key": "validation.defaultLocaleEmpty", "value": "defaultLocale está vazio." },
         { "key": "validation.defaultLocaleNoTable", "value": "Nenhuma tabela para defaultLocale: {0}" },
         { "key": "validation.missingKey", "value": "key ausente: {0}" },

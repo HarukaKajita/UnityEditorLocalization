@@ -19,6 +19,7 @@
         { "key": "catalogs.count.warnings", "value": "{0} uyarı" },
         { "key": "catalogs.groups.clean", "value": "Diğer {0} scope sorunsuz." },
         { "key": "catalogs.more", "value": "{0} tane daha (Console'a bakın)" },
+        { "key": "catalogs.issue.openAsset.tooltip", "value": "İlgili asset'i seçmek için tıklayın" },
         { "key": "validation.defaultLocaleEmpty", "value": "defaultLocale boş." },
         { "key": "validation.defaultLocaleNoTable", "value": "defaultLocale için tablo yok: {0}" },
         { "key": "validation.missingKey", "value": "Eksik key: {0}" },

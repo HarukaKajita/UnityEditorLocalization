@@ -19,6 +19,7 @@
         { "key": "catalogs.count.warnings", "value": "คำเตือน {0} รายการ" },
         { "key": "catalogs.groups.clean", "value": "อีก {0} scope ไม่มีปัญหา" },
         { "key": "catalogs.more", "value": "อีก {0} รายการ (ดูที่ Console)" },
+        { "key": "catalogs.issue.openAsset.tooltip", "value": "คลิกเพื่อเลือก asset ที่เกี่ยวข้อง" },
         { "key": "validation.defaultLocaleEmpty", "value": "defaultLocale ว่างเปล่า" },
         { "key": "validation.defaultLocaleNoTable", "value": "ไม่มีตารางสำหรับ defaultLocale: {0}" },
         { "key": "validation.missingKey", "value": "ไม่มี key: {0}" },

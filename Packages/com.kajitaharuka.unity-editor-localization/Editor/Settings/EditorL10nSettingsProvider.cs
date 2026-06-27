@@ -339,7 +339,34 @@ namespace Kajitaharuka.EditorLocalization
                 var message = new Label(issue.Message);
                 message.AddToClassList("l10n-vissue__msg");
                 row.Add(message);
+
+                // クリックで由来アセット（locale テーブル、無ければ manifest）を選択+Ping し、原因箇所へ素早く辿れるようにする。
+                if (TryResolveIssueAsset(issue, out var assetPath))
+                {
+                    row.AddToClassList("l10n-vissue--clickable");
+                    row.tooltip = Tr("catalogs.issue.openAsset.tooltip");
+                    row.RegisterCallback<ClickEvent>(_ => PingAsset(assetPath));
+                }
+
                 return row;
+            }
+
+            // issue の由来アセットを解決する。locale 由来はその locale テーブル、scope 由来（locale 空）は manifest。
+            private static bool TryResolveIssueAsset(EditorL10nValidationIssue issue, out string assetPath)
+            {
+                if (!string.IsNullOrEmpty(issue.Locale)
+                    && EditorL10n.TryGetLocaleTablePath(issue.Scope, issue.Locale, out assetPath)
+                    && !string.IsNullOrEmpty(assetPath))
+                    return true;
+
+                if (EditorL10n.TryGetScopeInfo(issue.Scope, out var info) && !string.IsNullOrEmpty(info.ManifestPath))
+                {
+                    assetPath = info.ManifestPath;
+                    return true;
+                }
+
+                assetPath = "";
+                return false;
             }
 
             private static void SetResult(Label result, string text, EditorL10nBadgeKind kind)

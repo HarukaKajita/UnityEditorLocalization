@@ -19,6 +19,7 @@
         { "key": "catalogs.count.warnings", "value": "{0} 個警告" },
         { "key": "catalogs.groups.clean", "value": "其他 {0} 個 scope 沒有問題。" },
         { "key": "catalogs.more", "value": "另有 {0} 項（詳見 Console）" },
+        { "key": "catalogs.issue.openAsset.tooltip", "value": "點擊選擇相關資產" },
         { "key": "validation.defaultLocaleEmpty", "value": "defaultLocale 為空。" },
         { "key": "validation.defaultLocaleNoTable", "value": "缺少 defaultLocale 的表: {0}" },
         { "key": "validation.missingKey", "value": "缺少 key: {0}" },

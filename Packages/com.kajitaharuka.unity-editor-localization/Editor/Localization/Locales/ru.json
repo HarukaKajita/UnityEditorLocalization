@@ -19,6 +19,7 @@
         { "key": "catalogs.count.warnings", "value": "Предупреждений: {0}" },
         { "key": "catalogs.groups.clean", "value": "Ещё {0} scope без проблем." },
         { "key": "catalogs.more", "value": "Ещё {0} (см. Console)" },
+        { "key": "catalogs.issue.openAsset.tooltip", "value": "Нажмите, чтобы выбрать связанный ресурс" },
         { "key": "validation.defaultLocaleEmpty", "value": "defaultLocale пуст." },
         { "key": "validation.defaultLocaleNoTable", "value": "Нет таблицы для defaultLocale: {0}" },
         { "key": "validation.missingKey", "value": "Отсутствует key: {0}" },
