@@ -115,3 +115,8 @@ InitTestScene*.unity*
 !Publish/*.zip
 .maestri/
 .idea/.idea.UnityEditorLocalization/.idea/
+
+# Claude Code / agent skill links (各環境でメニュー/CLI から生成。core.symlinks 依存で
+# コミットには向かないため無視する)
+/.claude/skills/
+/.agents/

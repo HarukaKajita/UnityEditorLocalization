@@ -76,6 +76,7 @@ namespace Kajitaharuka.EditorLocalization
                 root.Add(BuildCatalogs());
                 root.Add(BuildGlobalSection());
                 root.Add(BuildScopeSection());
+                root.Add(BuildSkillsSection());
                 root.Add(BuildDeveloperSection());
 
                 _builtScopes = EditorL10n.GetScopes().ToArray();
@@ -328,6 +329,70 @@ namespace Kajitaharuka.EditorLocalization
                 _scopeEmpty.text = Tr(key);
                 _scopeEmpty.messageType = type;
                 _scopeEmpty.style.display = DisplayStyle.Flex;
+            }
+
+            // ===== Claude Code 連携スキル（同梱スキルの登録）=====
+            private VisualElement BuildSkillsSection()
+            {
+                var card = EditorL10nUiKit.Section(Tr("skills.title"), out var content);
+                BindLabel(card.Q<Label>(className: "eui-section__title"), "skills.title");
+                content.Add(EditorL10nUiKit.Note(Tr("skills.note")).Also(label => BindLabel(label, "skills.note")));
+
+                content.Add(BuildSkillRow("skills.translation.name", "skills.translation.desc"));
+                content.Add(BuildSkillRow("skills.optional.name", "skills.optional.desc"));
+
+                // 操作行（既存のカタログ操作行スタイルを流用して横並び＋結果表示）。
+                var row = new VisualElement();
+                row.AddToClassList("l10n-catalogs");
+
+                var result = new Label { name = "l10n-skills-result" };
+                result.AddToClassList("l10n-catalogs__result");
+                result.style.display = DisplayStyle.None;
+
+                var installUser = EditorL10nUiKit.ActionButton(Tr("skills.install.user"), () =>
+                {
+                    Debug.Log(EditorL10nSkillInstaller.InstallToUser());
+                    SetResult(result, Tr("skills.result.installed"), EditorL10nBadgeKind.Ok);
+                }, Tr("skills.install.user.tooltip"));
+                BindButtonText(installUser, "skills.install.user", "skills.install.user.tooltip");
+
+                var installProject = EditorL10nUiKit.ActionButton(Tr("skills.install.project"), () =>
+                {
+                    Debug.Log(EditorL10nSkillInstaller.InstallToProject());
+                    SetResult(result, Tr("skills.result.installed"), EditorL10nBadgeKind.Ok);
+                }, Tr("skills.install.project.tooltip"));
+                BindButtonText(installProject, "skills.install.project", "skills.install.project.tooltip");
+
+                var copyCli = EditorL10nUiKit.ActionButton(Tr("skills.cli.copy"), () =>
+                {
+                    EditorGUIUtility.systemCopyBuffer =
+                        EditorL10nSkillInstaller.CliSnippetForUser() + "\n" + EditorL10nSkillInstaller.CliSnippetForProject();
+                    SetResult(result, Tr("skills.result.copied"), EditorL10nBadgeKind.Neutral);
+                }, Tr("skills.cli.copy.tooltip"));
+                BindButtonText(copyCli, "skills.cli.copy", "skills.cli.copy.tooltip");
+
+                row.Add(installUser);
+                row.Add(installProject);
+                row.Add(copyCli);
+                row.Add(result);
+                content.Add(row);
+                return card;
+            }
+
+            // 同梱スキル 1 件の表示（名前＋説明）。言語変更に追従させる。
+            private VisualElement BuildSkillRow(string nameKey, string descKey)
+            {
+                var box = new VisualElement();
+                box.style.marginBottom = 4;
+
+                var name = new Label(Tr(nameKey));
+                name.style.unityFontStyleAndWeight = FontStyle.Bold;
+                name.style.fontSize = 11;
+                BindLabel(name, nameKey);
+
+                box.Add(name);
+                box.Add(EditorL10nUiKit.HintRow(Tr(descKey)).Also(label => BindLabel(label, descKey)));
+                return box;
             }
 
             // ===== 開発者向け（段階的開示）=====
