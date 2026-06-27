@@ -360,6 +360,9 @@ namespace Kajitaharuka.EditorLocalization
                 // 操作結果のインライン表示（登録/コピーの両方からここへ出す）。
                 var result = new Label { name = "l10n-skills-result" };
                 result.AddToClassList("l10n-catalogs__result");
+                // l10n-catalogs__result は横並び行（l10n-catalogs）内で全幅にするための flex-basis:100% を持つ。
+                // この節では result を列フローに直接置くため、flex-basis:100% だと全高を占めて他要素を潰す。auto へ戻す。
+                result.style.flexBasis = StyleKeyword.Auto;
                 result.style.display = DisplayStyle.None;
 
                 // 登録ボタン行（ボタン文言でどこへ登録するかを明示）。
