@@ -12,11 +12,28 @@ namespace Kajitaharuka.EditorLocalization
         private const string DiagnosticsEnabledKey = "Kajitaharuka.EditorLocalization.DiagnosticsEnabled";
         private const string GlobalLocaleKey = "Kajitaharuka.EditorLocalization.GlobalLocale";
         private const string ScopeLocaleKeyPrefix = "Kajitaharuka.EditorLocalization.ScopeLocale.";
+        private const string SystemLocaleFallbackEnabledKey = "Kajitaharuka.EditorLocalization.SystemLocaleFallbackEnabled";
 
         internal static bool DiagnosticsEnabled
         {
             get => EditorPrefs.GetBool(DiagnosticsEnabledKey, false);
             set => SetOrDelete(DiagnosticsEnabledKey, value);
+        }
+
+        /// <summary>
+        /// グローバル設定が未設定のとき、OS の言語へフォールバックするかどうか。既定は有効（true）。
+        /// 既定値と同じ「有効」のときはキーを削除し、無効化したときだけ false を保存する。
+        /// </summary>
+        internal static bool SystemLocaleFallbackEnabled
+        {
+            get => EditorPrefs.GetBool(SystemLocaleFallbackEnabledKey, true);
+            set
+            {
+                if (value)
+                    EditorPrefs.DeleteKey(SystemLocaleFallbackEnabledKey);
+                else
+                    EditorPrefs.SetBool(SystemLocaleFallbackEnabledKey, false);
+            }
         }
 
         internal static string GlobalLocale

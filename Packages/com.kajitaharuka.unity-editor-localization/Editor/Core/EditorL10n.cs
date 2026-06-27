@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -17,6 +18,10 @@ namespace Kajitaharuka.EditorLocalization
         private static readonly HashSet<string> ReportedDiagnostics = new();
         // Editor UI からの利用はメインスレッド前提のため、キャッシュ操作にロックは設けない。
         private static readonly Dictionary<(string Locale, string DefaultLocale), string[]> FallbackChainCache = new();
+
+        // システム（OS）由来のロケールタグの供給元。既定は CultureInfo から読む。
+        // テストから差し替えてシステム言語フォールバックを環境非依存に検証できるようにする。
+        internal static Func<string> SystemLocaleProvider = ReadSystemLocaleTag;
 
         public static event Action LocaleChanged;
 
@@ -40,17 +45,72 @@ namespace Kajitaharuka.EditorLocalization
             LocaleChanged?.Invoke();
         }
 
+        /// <summary>
+        /// OS の UI 言語から推定した表示ロケールタグ（正規化済み）を返す。判定できない場合は空文字。
+        /// enum（Application.systemLanguage）ではなく BCP-47 文字列タグを使い、言語を増やしても
+        /// C# を改変しない方針を保つ。
+        /// </summary>
+        public static string GetSystemLocale()
+        {
+            return NormalizeLocaleTag(SystemLocaleProvider?.Invoke());
+        }
+
+        /// <summary>
+        /// グローバル設定が未設定のとき、システム（OS）言語へフォールバックするかどうかを返す。既定は有効。
+        /// </summary>
+        public static bool GetSystemLocaleFallbackEnabled()
+        {
+            return EditorL10nPreferences.SystemLocaleFallbackEnabled;
+        }
+
+        /// <summary>
+        /// システム言語フォールバックの有効/無効を設定する。変更時は LocaleChanged を発火し UI を追従させる。
+        /// </summary>
+        public static void SetSystemLocaleFallbackEnabled(bool enabled)
+        {
+            EditorL10nPreferences.SystemLocaleFallbackEnabled = enabled;
+            LocaleChanged?.Invoke();
+        }
+
         public static string GetActiveLocale(string scope)
         {
+            return GetActiveLocale(scope, out _);
+        }
+
+        /// <summary>
+        /// 表示ロケールを解決し、由来（source）も返す。優先順は
+        /// scope 個別設定 → グローバル設定 → システム言語（有効時）→ scope の defaultLocale。
+        /// 解決順の単一情報源とし、UI 側はこの source を表示にそのまま使う。
+        /// </summary>
+        internal static string GetActiveLocale(string scope, out EditorL10nLocaleSource source)
+        {
             var normalizedScope = scope ?? "";
+
             var scopeLocale = NormalizeLocaleTag(EditorL10nPreferences.GetScopeLocale(normalizedScope));
             if (!string.IsNullOrEmpty(scopeLocale))
+            {
+                source = EditorL10nLocaleSource.ScopeOverride;
                 return scopeLocale;
+            }
 
             var globalLocale = NormalizeLocaleTag(EditorL10nPreferences.GlobalLocale);
             if (!string.IsNullOrEmpty(globalLocale))
+            {
+                source = EditorL10nLocaleSource.Global;
                 return globalLocale;
+            }
 
+            if (EditorL10nPreferences.SystemLocaleFallbackEnabled)
+            {
+                var systemLocale = GetSystemLocale();
+                if (!string.IsNullOrEmpty(systemLocale))
+                {
+                    source = EditorL10nLocaleSource.System;
+                    return systemLocale;
+                }
+            }
+
+            source = EditorL10nLocaleSource.Default;
             return Catalog.TryGetScope(normalizedScope, out var scopeCatalog)
                 ? scopeCatalog.DefaultLocale
                 : "";
@@ -233,6 +293,30 @@ namespace Kajitaharuka.EditorLocalization
 
             return string.Join("-", parts.Where(part => !string.IsNullOrEmpty(part)));
         }
+
+        // CurrentUICulture を優先し、Invariant 等で空なら InstalledUICulture（OS 設定言語）を試す。
+        // いずれも空なら空文字を返し、システム言語フォールバックをスキップさせる。
+        private static string ReadSystemLocaleTag()
+        {
+            var current = CultureInfo.CurrentUICulture;
+            if (current != null && !string.IsNullOrEmpty(current.Name))
+                return current.Name;
+
+            var installed = CultureInfo.InstalledUICulture;
+            if (installed != null && !string.IsNullOrEmpty(installed.Name))
+                return installed.Name;
+
+            return "";
+        }
+    }
+
+    /// <summary>表示ロケールの由来。Preferences が「現在この言語になっている理由」を示すために使う。</summary>
+    internal enum EditorL10nLocaleSource
+    {
+        ScopeOverride,
+        Global,
+        System,
+        Default,
     }
 }
 #endif
