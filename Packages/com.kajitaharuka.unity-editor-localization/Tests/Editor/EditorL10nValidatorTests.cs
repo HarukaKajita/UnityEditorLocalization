@@ -118,6 +118,52 @@ namespace Kajitaharuka.EditorLocalization.Tests
         }
 
         [Test]
+        public void CatalogWriter_WriteTable_RoundTripsWithEscaping()
+        {
+            var entries = new List<KeyValuePair<string, string>>
+            {
+                new KeyValuePair<string, string>("a.key", "plain"),
+                new KeyValuePair<string, string>("b.quote", "He said \"hi\"\nline2\tx"),
+            };
+
+            var json = EditorL10nCatalogWriter.WriteTable("ja", entries);
+            var doc = UnityEngine.JsonUtility.FromJson<EditorL10nTableDocument>(json);
+
+            Assert.That(doc.locale, Is.EqualTo("ja"));
+            Assert.That(doc.entries.Length, Is.EqualTo(2));
+            Assert.That(doc.entries[1].key, Is.EqualTo("b.quote"));
+            Assert.That(doc.entries[1].value, Is.EqualTo("He said \"hi\"\nline2\tx"));
+            // compact フォーマット（1 エントリ 1 行）を維持していること。
+            Assert.That(json, Does.Contain("        { \"key\": \"a.key\", \"value\": \"plain\" },"));
+        }
+
+        [Test]
+        public void CatalogWriter_WriteManifest_RoundTrips()
+        {
+            var document = new EditorL10nManifestDocument
+            {
+                scope = "com.example.tool",
+                defaultLocale = "ja",
+                fixedTerms = new[] { "x.fixed" },
+                locales = new[]
+                {
+                    new EditorL10nManifestLocale { tag = "ja", nativeName = "日本語", englishName = "Japanese", tablePath = "Locales/ja.json" },
+                    new EditorL10nManifestLocale { tag = "en", nativeName = "English", englishName = "English", tablePath = "Locales/en.json" },
+                },
+            };
+
+            var json = EditorL10nCatalogWriter.WriteManifest(document);
+            var back = UnityEngine.JsonUtility.FromJson<EditorL10nManifestDocument>(json);
+
+            Assert.That(back.scope, Is.EqualTo("com.example.tool"));
+            Assert.That(back.defaultLocale, Is.EqualTo("ja"));
+            Assert.That(back.fixedTerms, Is.EqualTo(new[] { "x.fixed" }));
+            Assert.That(back.locales.Length, Is.EqualTo(2));
+            Assert.That(back.locales[1].tag, Is.EqualTo("en"));
+            Assert.That(back.locales[1].tablePath, Is.EqualTo("Locales/en.json"));
+        }
+
+        [Test]
         public void ValidateScope_SkipsSameValueWarningForFixedTerm()
         {
             // manifest の fixedTerms に宣言した key は、全ロケールで defaultLocale と同値でも未翻訳警告を出さない。
