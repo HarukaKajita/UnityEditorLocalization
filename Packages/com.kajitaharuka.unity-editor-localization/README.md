@@ -207,20 +207,20 @@ Tools > UnityEditorLocalization > Validate Catalogs
 - defaultLocaleと同一の値が残っていないか
 - defaultLocaleにない余分なkeyがないか
 
-## Claude Code 連携スキル
+## AIエージェント連携スキル
 
-このパッケージは `skills/` に Claude Code（および互換エージェント）向けのスキルを 2 つ同梱しています。
+このパッケージは `skills/` に AIエージェント（Claude Code など）向けのスキルを 2 つ同梱しています。
 
-- **翻訳品質ワークフロー**（`editor-localization-translation-quality`）: 用語・スタイル・言語別の注意点と、翻訳テキストの静的検証スクリプトで翻訳の質を保ちます。
-- **任意依存連携の雛形生成**（`editor-localization-optional-integration`）: UnityEditorLocalization を任意依存（optional）として組み込む 2 アセンブリ構成の雛形を生成します。
+- **翻訳ワークフロー**（`editor-localization-translation-quality`）: 用語・スタイル・言語別の注意点と、翻訳テキストの静的検証スクリプトで翻訳の質を保ちます。
+- **既存拡張の多言語化連携**（`editor-localization-optional-integration`）: 既存のエディタ拡張に、UnityEditorLocalization を任意依存（optional）として組み込む 2 アセンブリ構成の雛形を生成します。
 
 スキルはエージェントの探索パス（`.claude/skills` / `.agents/skills`）に置かれて初めて有効になります。次のいずれかで登録できます。
 
-- **Unity から（おすすめ）**: `Tools > UnityEditorLocalization > Claude Code Skills` の
+- **Unity から（おすすめ）**: `Tools > UnityEditorLocalization > AI Agent Skills` の
   `Install for user`（ホームの `~/.claude/skills` と `~/.agents/skills`）または
   `Install for this project`（このプロジェクト直下の `.claude/skills` と `.agents/skills`）。
-  `Preferences > UnityEditorLocalization` の「Claude Code 連携スキル」からも同じ操作と、CLI コマンドのコピーができます。
-- **CLI から**: 上記メニューの `Copy CLI commands to clipboard`（または Preferences の「CLI コマンドをコピー」）で、実体パスを埋め込んだコマンドが得られます。ユーザースコープの例（macOS / Linux）:
+  `Preferences > UnityEditorLocalization` の「AIエージェント連携スキル」からも、同じ登録操作と、表示された CLI コマンドのコピーができます。
+- **CLI から**: 上記メニューの `Copy CLI commands to clipboard`（または Preferences に表示されるコマンドの「コピー」）で、実体パスを埋め込んだコマンドが得られます。ユーザースコープの例（macOS / Linux）:
 
   ```bash
   PKG="<...>/Packages/com.kajitaharuka.unity-editor-localization/skills"
@@ -240,7 +240,7 @@ Tools > UnityEditorLocalization > Validate Catalogs
 - `Documentation~/DEVELOPER_GUIDE.md`: 利用側拡張での設計指針
 - `Documentation~/UI_TOOLKIT_LOCALIZATION_TIPS.md`: UI Toolkitで言語変更に追従するための実装Tips
 - `Documentation~/OPTIONAL_INTEGRATION.md`: UnityEditorLocalizationを任意依存（optional）として組み込む2アセンブリ方式（基盤が無くても単一言語で動作し、導入時に多言語化が点灯）。雛形生成は`editor-localization-optional-integration`スキル
-- `skills/editor-localization-translation-quality/`: 翻訳品質ワークフロー
+- `skills/editor-localization-translation-quality/`: 翻訳ワークフロー
 
 ## ライセンス
 

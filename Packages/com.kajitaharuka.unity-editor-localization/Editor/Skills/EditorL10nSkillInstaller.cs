@@ -10,8 +10,8 @@ using Debug = UnityEngine.Debug;
 namespace Kajitaharuka.EditorLocalization
 {
     /// <summary>
-    /// パッケージ同梱の Claude Code スキル（翻訳品質ワークフロー / 任意依存連携の雛形生成）を、
-    /// 利用側の <c>.claude/skills</c> と <c>.agents/skills</c> へ symlink で登録するインストーラ。
+    /// パッケージ同梱の AIエージェント向けスキル（翻訳ワークフロー / 既存拡張の多言語化連携）を、
+    /// <c>.claude/skills</c> と <c>.agents/skills</c> へ symlink で登録するインストーラ（Claude Code 等で利用）。
     /// 登録先スコープはユーザー（ホーム）かプロジェクト（リポジトリ直下）を選べる。
     /// 同等の操作を行う CLI コマンドも生成し、CLI ユーザーがコピペで実行できるようにする。
     /// </summary>
@@ -31,18 +31,18 @@ namespace Kajitaharuka.EditorLocalization
 
         // ===== メニュー =====
 
-        [MenuItem("Tools/UnityEditorLocalization/Claude Code Skills/Install for user (~/.claude, ~/.agents)", priority = 200)]
+        [MenuItem("Tools/UnityEditorLocalization/AI Agent Skills/Install for user (~/.claude, ~/.agents)", priority = 200)]
         private static void MenuInstallUser() => Debug.Log(InstallToUser());
 
-        [MenuItem("Tools/UnityEditorLocalization/Claude Code Skills/Install for this project (.claude, .agents)", priority = 201)]
+        [MenuItem("Tools/UnityEditorLocalization/AI Agent Skills/Install for this project (.claude, .agents)", priority = 201)]
         private static void MenuInstallProject() => Debug.Log(InstallToProject());
 
-        [MenuItem("Tools/UnityEditorLocalization/Claude Code Skills/Copy CLI commands to clipboard", priority = 220)]
+        [MenuItem("Tools/UnityEditorLocalization/AI Agent Skills/Copy CLI commands to clipboard", priority = 220)]
         private static void MenuCopyCli()
         {
             var snippet = CliSnippetForUser() + "\n" + CliSnippetForProject();
             EditorGUIUtility.systemCopyBuffer = snippet;
-            Debug.Log("[UnityEditorLocalization] Claude Code スキル登録用の CLI コマンドをクリップボードにコピーしました:\n" + snippet);
+            Debug.Log("[UnityEditorLocalization] AIエージェント連携スキル登録用の CLI コマンドをクリップボードにコピーしました:\n" + snippet);
         }
 
         // ===== Preferences / メニューから呼ぶ公開ロジック =====
@@ -103,7 +103,7 @@ namespace Kajitaharuka.EditorLocalization
                 }
             }
 
-            return $"[UnityEditorLocalization] Claude Code スキルを {scopeLabel} スコープへ登録: 成功 {linked} / 失敗 {failed}\n{log}";
+            return $"[UnityEditorLocalization] AIエージェント連携スキルを {scopeLabel} スコープへ登録: 成功 {linked} / 失敗 {failed}\n{log}";
         }
 
         // パッケージの skills/ 実体パスを解決する。埋め込み/PackageCache のどちらでも resolvedPath で正しく解決できる。
