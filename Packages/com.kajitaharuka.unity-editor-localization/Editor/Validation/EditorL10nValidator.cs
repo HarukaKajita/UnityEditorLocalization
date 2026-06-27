@@ -8,25 +8,74 @@ using UnityEngine;
 
 namespace Kajitaharuka.EditorLocalization
 {
+    /// <summary>検証で見つかった問題の深刻度。</summary>
+    public enum EditorL10nValidationSeverity
+    {
+        Error,
+        Warning,
+    }
+
+    /// <summary>
+    /// 検証で見つかった 1 件の問題。由来（scope / locale）と詳細メッセージを構造化して保持し、
+    /// UI が scope ごとに分類して表示できるようにする。Console 用の平坦な 1 行表現も提供する。
+    /// </summary>
+    public sealed class EditorL10nValidationIssue
+    {
+        public EditorL10nValidationSeverity Severity { get; }
+        public string Scope { get; }
+        public string Locale { get; }
+        public string Message { get; }
+
+        internal EditorL10nValidationIssue(EditorL10nValidationSeverity severity, string scope, string locale, string message)
+        {
+            Severity = severity;
+            Scope = scope ?? "";
+            Locale = locale ?? "";
+            Message = message ?? "";
+        }
+
+        /// <summary>Console など平坦な 1 行表示用（<c>{scope}/{locale}: {message}</c> 形式）。</summary>
+        public string ToLogLine()
+        {
+            if (string.IsNullOrEmpty(Scope))
+                return Message;
+            var prefix = string.IsNullOrEmpty(Locale) ? Scope : Scope + "/" + Locale;
+            return prefix + ": " + Message;
+        }
+
+        public override string ToString() => ToLogLine();
+    }
+
     public sealed class EditorL10nValidationResult
     {
+        private readonly List<EditorL10nValidationIssue> _issues = new();
         private readonly List<string> _errors = new();
         private readonly List<string> _warnings = new();
 
+        /// <summary>scope ごとの分類表示に使う構造化された問題一覧（追加順）。</summary>
+        public IReadOnlyList<EditorL10nValidationIssue> Issues => _issues;
+        /// <summary>互換維持・Console 用の平坦なエラーメッセージ（<c>{scope}/{locale}: 詳細</c>）。</summary>
         public IReadOnlyList<string> Errors => _errors;
         public IReadOnlyList<string> Warnings => _warnings;
         public bool IsValid => _errors.Count == 0;
 
-        internal void AddError(string message)
+        // scope / locale / 詳細を受け取り、構造化 issue と平坦文字列の双方を蓄える（表示と Console で使い分ける）。
+        internal void AddError(string scope, string locale, string detail)
         {
-            if (!string.IsNullOrEmpty(message))
-                _errors.Add(message);
+            if (string.IsNullOrEmpty(detail))
+                return;
+            var issue = new EditorL10nValidationIssue(EditorL10nValidationSeverity.Error, scope, locale, detail);
+            _issues.Add(issue);
+            _errors.Add(issue.ToLogLine());
         }
 
-        internal void AddWarning(string message)
+        internal void AddWarning(string scope, string locale, string detail)
         {
-            if (!string.IsNullOrEmpty(message))
-                _warnings.Add(message);
+            if (string.IsNullOrEmpty(detail))
+                return;
+            var issue = new EditorL10nValidationIssue(EditorL10nValidationSeverity.Warning, scope, locale, detail);
+            _issues.Add(issue);
+            _warnings.Add(issue.ToLogLine());
         }
     }
 
@@ -82,9 +131,9 @@ namespace Kajitaharuka.EditorLocalization
         internal static void ValidateScope(EditorL10nScopeCatalog scope, EditorL10nValidationResult result)
         {
             if (string.IsNullOrEmpty(scope.DefaultLocale))
-                result.AddError($"{scope.Scope}: defaultLocaleが空です。");
+                result.AddError(scope.Scope, "", "defaultLocaleが空です。");
             if (!scope.HasLocale(scope.DefaultLocale))
-                result.AddError($"{scope.Scope}: defaultLocaleのテーブルがありません: {scope.DefaultLocale}");
+                result.AddError(scope.Scope, "", $"defaultLocaleのテーブルがありません: {scope.DefaultLocale}");
 
             if (!scope.TablesByLocale.TryGetValue(scope.DefaultLocale, out var defaultTable))
                 return;
@@ -95,9 +144,9 @@ namespace Kajitaharuka.EditorLocalization
                 var locale = tablePair.Key;
                 var table = tablePair.Value;
                 foreach (var missingKey in defaultKeys.Except(table.Keys).OrderBy(key => key))
-                    result.AddError($"{scope.Scope}/{locale}: keyが不足しています: {missingKey}");
+                    result.AddError(scope.Scope, locale, $"keyが不足しています: {missingKey}");
                 foreach (var extraKey in table.Keys.Except(defaultKeys).OrderBy(key => key))
-                    result.AddWarning($"{scope.Scope}/{locale}: defaultLocaleにないkeyがあります: {extraKey}");
+                    result.AddWarning(scope.Scope, locale, $"defaultLocaleにないkeyがあります: {extraKey}");
 
                 foreach (var key in table.Keys.OrderBy(key => key))
                 {
@@ -107,7 +156,7 @@ namespace Kajitaharuka.EditorLocalization
                     {
                         var present = FormatPlaceholders(placeholders);
                         var missing = string.Join(",", missingNumbers);
-                        result.AddWarning($"{scope.Scope}/{locale}: placeholder番号が連続していません: {key} present=[{present}] missing=[{missing}]");
+                        result.AddWarning(scope.Scope, locale, $"placeholder番号が連続していません: {key} present=[{present}] missing=[{missing}]");
                     }
                 }
 
@@ -116,10 +165,10 @@ namespace Kajitaharuka.EditorLocalization
                     var expected = ExtractPlaceholders(defaultTable[key]);
                     var actual = ExtractPlaceholders(table[key]);
                     if (!expected.SetEquals(actual))
-                        result.AddError($"{scope.Scope}/{locale}: placeholderが一致しません: {key} expected=[{FormatPlaceholders(expected)}] actual=[{FormatPlaceholders(actual)}]");
+                        result.AddError(scope.Scope, locale, $"placeholderが一致しません: {key} expected=[{FormatPlaceholders(expected)}] actual=[{FormatPlaceholders(actual)}]");
 
                     if (locale != scope.DefaultLocale && table[key] == defaultTable[key])
-                        result.AddWarning($"{scope.Scope}/{locale}: defaultLocaleと同一の値です（未翻訳の可能性）: {key}");
+                        result.AddWarning(scope.Scope, locale, $"defaultLocaleと同一の値です（未翻訳の可能性）: {key}");
                 }
             }
         }

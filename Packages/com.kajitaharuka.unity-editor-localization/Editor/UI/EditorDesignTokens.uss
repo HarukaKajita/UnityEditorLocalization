@@ -332,3 +332,79 @@
     font-size: 10px;
     margin: 0 3px;
 }
+
+/* ===== 検証結果の scope 別分類 ===== */
+/* どの scope 由来の警告/エラーかを一目で追えるよう、scope ごとに折りたためるグループで並べる。
+   見た目は scope カードと同じ語彙に合わせて一貫性を保つ。 */
+.l10n-validation-groups {
+    margin-top: 6px;
+}
+
+/* 1 scope ぶんの分類グループ（折りたたみ可能）。 */
+.l10n-vgroup {
+    background-color: var(--eui-inset-bg);
+    border-width: 1px;
+    border-color: var(--eui-border);
+    border-radius: 5px;
+    padding: 4px 6px;
+    margin-bottom: 6px;
+}
+
+/* head 行はクリックで開閉できる。ホバーで背景を出してクリック可能を示す。 */
+.l10n-vgroup__head {
+    flex-direction: row;
+    align-items: center;
+    border-radius: 4px;
+    padding: 1px 2px;
+}
+
+.l10n-vgroup__head:hover {
+    background-color: var(--eui-card-bg);
+}
+
+/* scope 名（長い識別子を折り返す）。 */
+.l10n-vgroup__name {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+    white-space: normal;
+    font-size: 12px;
+    color: var(--eui-text);
+}
+
+.l10n-vgroup__body {
+    margin: 4px 0 2px 14px;
+}
+
+/* issue 1 行（深刻度マーカー / locale チップ / メッセージ）。長文は折り返す。 */
+.l10n-vissue {
+    flex-direction: row;
+    align-items: flex-start;
+    margin: 2px 0;
+}
+
+/* 深刻度マーカー（× / !）。eui-badge の配色を流用しつつ正方形に寄せる。 */
+.l10n-vissue__mark {
+    min-width: 16px;
+    margin-top: 1px;
+    margin-right: 4px;
+    flex-shrink: 0;
+}
+
+/* locale チップ。inset 背景の上で沈まないよう card 背景で少し浮かせる。 */
+.l10n-vissue__locale {
+    background-color: var(--eui-card-bg);
+    color: var(--eui-text-muted);
+    margin-top: 1px;
+    margin-right: 4px;
+    flex-shrink: 0;
+}
+
+.l10n-vissue__msg {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+    white-space: normal;
+    font-size: 11px;
+    color: var(--eui-text-muted);
+}
