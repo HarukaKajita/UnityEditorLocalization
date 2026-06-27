@@ -259,6 +259,19 @@ Unity -batchmode -quit -projectPath . \
 - `Documentation~/OPTIONAL_INTEGRATION.md`: UnityEditorLocalizationを任意依存（optional）として組み込む2アセンブリ方式（基盤が無くても単一言語で動作し、導入時に多言語化が点灯）。雛形生成は`editor-localization-optional-integration`スキル
 - `skills/editor-localization-translation-quality/`: 翻訳ワークフロー
 
+## クレジット（任意・歓迎）
+
+MIT ライセンスなのでクレジット表示の義務はありません。ただ、UnityEditorLocalization で多言語化したことを表示してもらえると開発の励みになり、ほかの方にも知ってもらえます。付けていただけると嬉しいです。
+
+- 小さなクレジット要素を任意の場所（About 行・フッターなど）に置けます:
+
+  ```csharp
+  root.Add(EditorL10nUi.CreateAttribution());
+  // 「Powered by UnityEditorLocalization」。クリックで製品ページを開きます。
+  ```
+
+- `EditorL10nUi.CreateLocalizedCompactLocaleMenu` / `CreateCompactLocaleMenu` の言語メニューには、**開いたメニューの末尾に既定で**「Powered by UnityEditorLocalization」が控えめに表示されます。不要なら `showAttribution: false` で消せます。
+
 ## ライセンス
 
 MIT License です。詳細は `LICENSE.txt` を参照してください。

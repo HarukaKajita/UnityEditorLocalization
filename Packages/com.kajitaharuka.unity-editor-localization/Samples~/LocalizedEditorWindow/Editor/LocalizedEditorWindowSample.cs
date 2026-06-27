@@ -59,6 +59,12 @@ namespace Kajitaharuka.EditorLocalization.Samples.LocalizedEditorWindow
             scrollView.style.flexShrink = 1f;
             rootVisualElement.Add(scrollView);
 
+            // 任意のクレジット（EditorL10nUi.CreateAttribution の使用例）。scroll の下にフッターとして固定する。
+            // コンパクト言語メニューにも既定で「Powered by …」が出る（showAttribution: false で無効化可）。
+            var attribution = EditorL10nUi.CreateAttribution();
+            attribution.style.alignSelf = Align.FlexStart;
+            rootVisualElement.Add(attribution);
+
             scrollView.Add(CreateHeader());
             scrollView.Add(CreateOverviewSection());
             scrollView.Add(CreateDemoSection());
