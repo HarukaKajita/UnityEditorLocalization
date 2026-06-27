@@ -13,6 +13,108 @@
             "nativeName": "日本語",
             "englishName": "Japanese",
             "tablePath": "Locales/ja.json"
+        },
+        {
+            "tag": "zh-Hans",
+            "nativeName": "简体中文",
+            "englishName": "Simplified Chinese",
+            "tablePath": "Locales/zh-Hans.json"
+        },
+        {
+            "tag": "zh-Hant",
+            "nativeName": "繁體中文",
+            "englishName": "Traditional Chinese",
+            "tablePath": "Locales/zh-Hant.json"
+        },
+        {
+            "tag": "ko",
+            "nativeName": "한국어",
+            "englishName": "Korean",
+            "tablePath": "Locales/ko.json"
+        },
+        {
+            "tag": "fr",
+            "nativeName": "Français",
+            "englishName": "French",
+            "tablePath": "Locales/fr.json"
+        },
+        {
+            "tag": "de",
+            "nativeName": "Deutsch",
+            "englishName": "German",
+            "tablePath": "Locales/de.json"
+        },
+        {
+            "tag": "it",
+            "nativeName": "Italiano",
+            "englishName": "Italian",
+            "tablePath": "Locales/it.json"
+        },
+        {
+            "tag": "es-ES",
+            "nativeName": "Español (España)",
+            "englishName": "Spanish (Spain)",
+            "tablePath": "Locales/es-ES.json"
+        },
+        {
+            "tag": "es-419",
+            "nativeName": "Español (Latinoamérica)",
+            "englishName": "Spanish (Latin America)",
+            "tablePath": "Locales/es-419.json"
+        },
+        {
+            "tag": "pt-BR",
+            "nativeName": "Português (Brasil)",
+            "englishName": "Portuguese (Brazil)",
+            "tablePath": "Locales/pt-BR.json"
+        },
+        {
+            "tag": "pt-PT",
+            "nativeName": "Português (Portugal)",
+            "englishName": "Portuguese (Portugal)",
+            "tablePath": "Locales/pt-PT.json"
+        },
+        {
+            "tag": "ru",
+            "nativeName": "Русский",
+            "englishName": "Russian",
+            "tablePath": "Locales/ru.json"
+        },
+        {
+            "tag": "pl",
+            "nativeName": "Polski",
+            "englishName": "Polish",
+            "tablePath": "Locales/pl.json"
+        },
+        {
+            "tag": "tr",
+            "nativeName": "Türkçe",
+            "englishName": "Turkish",
+            "tablePath": "Locales/tr.json"
+        },
+        {
+            "tag": "th",
+            "nativeName": "ไทย",
+            "englishName": "Thai",
+            "tablePath": "Locales/th.json"
+        },
+        {
+            "tag": "vi",
+            "nativeName": "Tiếng Việt",
+            "englishName": "Vietnamese",
+            "tablePath": "Locales/vi.json"
+        },
+        {
+            "tag": "uk",
+            "nativeName": "Українська",
+            "englishName": "Ukrainian",
+            "tablePath": "Locales/uk.json"
+        },
+        {
+            "tag": "id",
+            "nativeName": "Bahasa Indonesia",
+            "englishName": "Indonesian",
+            "tablePath": "Locales/id.json"
         }
     ]
 }
