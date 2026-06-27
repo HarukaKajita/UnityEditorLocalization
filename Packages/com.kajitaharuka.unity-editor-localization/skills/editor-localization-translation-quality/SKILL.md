@@ -32,7 +32,7 @@ Use this skill for EditorLocalization locale work, especially `*.l10n-manifest.j
    - Keep file paths, extensions, JSON keys, code identifiers, package names, and user values unchanged unless the key explicitly describes them for humans.
    - Keep code-like inline tokens inside a message in English even though they look like words: `key=value` markers and bracketed debug fields such as `present=[...]`, `missing=[...]`, `expected=[...]`, `actual=[...]`. Translate only the human sentence around them.
    - Do not translate locale tags.
-   - Treat repeated source-language values as suspicious, but accept that some translations legitimately equal the source: short status words (Spanish `Error` == English `Error`), brand/format/identifier names, and deliberate glossary fixed terms. Allow those with `--allow-same-key` and record why — do not reword a correct translation just to differ from the source.
+   - Treat repeated source-language values as suspicious, but accept that some translations legitimately equal the source: short status words (Spanish `Error` == English `Error`), brand/format/identifier names, and deliberate glossary fixed terms. Declare those keys in the manifest's `fixedTerms` array so that **both** the in-editor C# validator and this script skip the same-as-default warning for them (`--allow-same-key` remains for ad-hoc script runs). Record why, and do not reword a correct translation just to differ from the source.
 
 5. Check language-specific risks.
    - Read `references/language-notes.md` when working on any supported locale beyond quick typo fixes.
@@ -64,7 +64,7 @@ python3 scripts/validate_locale_quality.py \
   --allow-same-key key.for.deliberate.fixed.term
 ```
 
-Use `--allow-same-key` only for deliberate fixed terms. Do not allow broad categories just to silence failures.
+Use `--allow-same-key` only for deliberate fixed terms. Do not allow broad categories just to silence failures. The script also auto-loads `fixedTerms` from the `*.l10n-manifest.json` next to the `Locales/` directory — the same declaration the C# `EditorL10nValidator` reads — and treats those keys like `--allow-same-key`. Prefer declaring fixed terms in the manifest (one source, both validators) over passing flags.
 
 The per-locale line reports `placeholder=` (placeholder set mismatch vs the default locale) and `gap=` (placeholder numbers that are not consecutive from `0`) as separate counts, mirroring the C# `EditorL10nValidator` so the two gates can cross-check. Add `--report-variant-duplicates` to print (non-failing) the keys whose value is identical across the locales of a regional-variant group (`es-ES`/`es-419`, `pt-BR`/`pt-PT`, `zh-Hans`/`zh-Hant`, grouped by primary subtag), to review for copy-paste left-overs — remembering that identical values are legitimate for terse technical strings.
 

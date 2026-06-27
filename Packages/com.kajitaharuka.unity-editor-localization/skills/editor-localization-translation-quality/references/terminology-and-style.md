@@ -38,6 +38,8 @@ Keep these terms unchanged unless the current project already documents a locali
 
 If a term is both a natural user-facing noun and a code/type-like concept, decide once per project and apply the same treatment across all locales.
 
+When a fixed term legitimately keeps the same value in every locale (including the default locale), declare its key in the manifest's `fixedTerms` array. Both the in-editor C# validator and the validation script then skip the "same as default (possibly untranslated)" warning for it, so the intentional fixed term is not mistaken for a missed translation.
+
 ## Quality Bar
 
 A translation is not complete just because every key has a value. Treat it as incomplete if:

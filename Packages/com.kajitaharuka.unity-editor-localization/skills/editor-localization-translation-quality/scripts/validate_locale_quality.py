@@ -56,6 +56,21 @@ def has_placeholder_gap(value: str) -> bool:
     return numbers != list(range(numbers[-1] + 1))
 
 
+def load_manifest_fixed_terms(locales_dir: Path) -> set[str]:
+    """locales_dir の親にある *.l10n-manifest.json の fixedTerms を読む。
+    C# の EditorL10nValidator と同じ宣言を共有し、意図的な固定語を両方の検証で同様に除外する。"""
+    terms: set[str] = set()
+    for manifest in sorted(locales_dir.parent.glob("*.l10n-manifest.json")):
+        try:
+            document = json.loads(manifest.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        value = document.get("fixedTerms")
+        if isinstance(value, list):
+            terms.update(str(item) for item in value)
+    return terms
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Validate EditorLocalization locale JSON quality.")
     parser.add_argument("locales_dir", type=Path, help="Directory containing {locale}.json files.")
@@ -90,7 +105,11 @@ def main() -> int:
 
     default_table = tables[args.default_locale]
     default_keys = set(default_table)
-    allowed_same = set(args.allow_same_key)
+    # manifest の fixedTerms（C# Validator と共有の宣言）と --allow-same-key を併用する。
+    manifest_fixed = load_manifest_fixed_terms(args.locales_dir)
+    allowed_same = set(args.allow_same_key) | manifest_fixed
+    if manifest_fixed:
+        print(f"(loaded {len(manifest_fixed)} fixedTerms from manifest)")
     failed = False
 
     for locale in sorted(tables):
