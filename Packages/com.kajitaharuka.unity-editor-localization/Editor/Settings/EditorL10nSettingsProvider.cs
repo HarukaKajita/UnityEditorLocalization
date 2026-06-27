@@ -69,15 +69,24 @@ namespace Kajitaharuka.EditorLocalization
             {
                 root.Clear();
                 EditorL10nUiKit.ApplyTheme(root);
+                // 親（Settings ペイン）が縦に狭いと flex 子が圧縮されて要素が重なり、レイアウトが崩れる。
+                // 内容を ScrollView に収め、狭いときは潰さずスクロールで全体に到達できるようにする。
+                root.style.flexGrow = 1;
+
+                var scroll = new ScrollView(ScrollViewMode.Vertical);
+                scroll.style.flexGrow = 1;
+                scroll.style.flexShrink = 1;
+                scroll.style.minHeight = 0; // 親が狭いとき scroll 自身が縮めるようにして内容をスクロール領域へ追い込む
+                root.Add(scroll);
 
                 var header = BuildHeader();
-                root.Add(header);
-                root.Add(EditorL10nUiKit.Note(Tr("note")).Also(label => BindLabel(label, "note")));
-                root.Add(BuildCatalogs());
-                root.Add(BuildGlobalSection());
-                root.Add(BuildScopeSection());
-                root.Add(BuildSkillsSection());
-                root.Add(BuildDeveloperSection());
+                scroll.Add(header);
+                scroll.Add(EditorL10nUiKit.Note(Tr("note")).Also(label => BindLabel(label, "note")));
+                scroll.Add(BuildCatalogs());
+                scroll.Add(BuildGlobalSection());
+                scroll.Add(BuildScopeSection());
+                scroll.Add(BuildSkillsSection());
+                scroll.Add(BuildDeveloperSection());
 
                 _builtScopes = EditorL10n.GetScopes().ToArray();
                 RebuildScopeList(_builtScopes);
