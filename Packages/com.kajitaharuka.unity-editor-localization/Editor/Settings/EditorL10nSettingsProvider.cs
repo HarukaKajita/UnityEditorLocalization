@@ -59,7 +59,9 @@ namespace Kajitaharuka.EditorLocalization
             private VisualElement _scopeList;
             private Label _countLabel;
             private HelpBox _scopeEmpty;
-            private string _searchText = "";
+            // 絞り込み文字列はここにキャッシュせず、ApplyFilter で常にこのフィールドの現在値を直接読む
+            // （キャッシュすると表示と内部状態が desync し、フィールドが空なのに全カードが消える不具合が起きうる）。
+            private TextField _search;
             private string[] _builtScopes = Array.Empty<string>();
             private readonly List<ScopeCard> _cards = new();
 
@@ -260,16 +262,13 @@ namespace Kajitaharuka.EditorLocalization
                 var card = EditorL10nUiKit.Section(Tr("scope.title"), out var content);
                 BindLabel(card.Q<Label>(className: "eui-section__title"), "scope.title");
 
-                var search = new TextField(Tr("scope.search.label"));
-                EditorL10nUiKit.AlignField(search);
-                BindTooltip(search, "scope.search.tooltip");
-                EditorL10nUi.RegisterLocaleCallback(search, () => search.label = Tr("scope.search.label"));
-                search.RegisterValueChangedCallback(evt =>
-                {
-                    _searchText = evt.newValue ?? "";
-                    ApplyFilter();
-                });
-                content.Add(search);
+                _search = new TextField(Tr("scope.search.label"));
+                EditorL10nUiKit.AlignField(_search);
+                BindTooltip(_search, "scope.search.tooltip");
+                EditorL10nUi.RegisterLocaleCallback(_search, () => _search.label = Tr("scope.search.label"));
+                // 値はキャッシュせず、変更時は再フィルタするだけ（ApplyFilter がフィールドの現在値を読む）。
+                _search.RegisterValueChangedCallback(_ => ApplyFilter());
+                content.Add(_search);
 
                 _countLabel = new Label();
                 _countLabel.AddToClassList("eui-hint");
@@ -300,13 +299,15 @@ namespace Kajitaharuka.EditorLocalization
             }
 
             // 検索でカードを表示/非表示（再構築せずドロップダウン/状態を保持）。件数と空状態を更新。
+            // 絞り込み文字列はフィールドから直接読む（キャッシュしないことで desync を排除）。
             private void ApplyFilter()
             {
+                var searchText = _search != null ? _search.value : "";
                 var total = _cards.Count;
                 var shown = 0;
                 foreach (var card in _cards)
                 {
-                    var match = ScopeMatchesSearch(card.Scope, _searchText);
+                    var match = ScopeMatchesSearch(card.Scope, searchText);
                     card.Root.style.display = match ? DisplayStyle.Flex : DisplayStyle.None;
                     if (match) shown++;
                 }
@@ -362,6 +363,12 @@ namespace Kajitaharuka.EditorLocalization
                     // 言語のみの変更。編集中のドロップダウンを壊さないよう、派生表示だけ in-place 更新。
                     foreach (var card in _cards)
                         card.UpdateState();
+
+                    // in-place 更新だけだと scope 一覧が再レイアウトされず、カードが消えて見えることがある
+                    // （フィルタを触ると復帰する症状）。フィルタ操作と同じ ApplyFilter を呼んで各カードの
+                    // display を書き直して表示を再適用し、併せて件数ラベルを新しい言語へ再翻訳する。
+                    // 検索文字列は不変なので在不在の判定（どのカードを出すか）は変わらない。
+                    ApplyFilter();
                 }
 
                 UpdateOverviewBadge();
