@@ -83,6 +83,20 @@ namespace Kajitaharuka.EditorLocalization.Tests
         }
 
         [Test]
+        public void ComputeExitCode_FailsOnErrorsAndOptionallyWarnings()
+        {
+            // エラーがあれば常に失敗（1）。
+            Assert.That(EditorL10nValidator.ComputeExitCode(1, 0, false), Is.EqualTo(1));
+            Assert.That(EditorL10nValidator.ComputeExitCode(2, 3, false), Is.EqualTo(1));
+            // 警告のみ: 既定は通す（0）、failOnWarnings のときだけ失敗（1）。
+            Assert.That(EditorL10nValidator.ComputeExitCode(0, 3, false), Is.EqualTo(0));
+            Assert.That(EditorL10nValidator.ComputeExitCode(0, 3, true), Is.EqualTo(1));
+            // 問題なし: 常に 0。
+            Assert.That(EditorL10nValidator.ComputeExitCode(0, 0, false), Is.EqualTo(0));
+            Assert.That(EditorL10nValidator.ComputeExitCode(0, 0, true), Is.EqualTo(0));
+        }
+
+        [Test]
         public void ValidateScope_SkipsSameValueWarningForFixedTerm()
         {
             // manifest の fixedTerms に宣言した key は、全ロケールで defaultLocale と同値でも未翻訳警告を出さない。

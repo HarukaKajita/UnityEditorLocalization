@@ -176,6 +176,47 @@ namespace Kajitaharuka.EditorLocalization
             return result;
         }
 
+        /// <summary>
+        /// CI / batchmode 用の検証エントリ。
+        /// <c>-batchmode -quit -executeMethod Kajitaharuka.EditorLocalization.EditorL10nValidator.ValidateForCI</c>
+        /// で実行する。既定はエラーがあるときだけ非 0 で終了して CI を止め、<c>-l10nFailOnWarnings</c> を付けると
+        /// 警告でも失敗扱いにする。対話モード（Editor 起動中）では誤って Editor を閉じないよう終了せずログのみ出す。
+        /// </summary>
+        public static void ValidateForCI()
+        {
+            var result = ValidateAndLog();
+            var failOnWarnings = HasCommandLineFlag("-l10nFailOnWarnings");
+            var exitCode = ComputeExitCode(result.ErrorCount, result.WarningCount, failOnWarnings);
+
+            Debug.Log($"EditorLocalization: CI 検証の終了コード = {exitCode}（errors={result.ErrorCount}, warnings={result.WarningCount}, failOnWarnings={failOnWarnings}）");
+
+            if (Application.isBatchMode)
+                EditorApplication.Exit(exitCode);
+            else
+                Debug.LogWarning($"EditorLocalization: 対話モードのため終了しません（batchmode なら exit code {exitCode}）。");
+        }
+
+        /// <summary>
+        /// CI の終了コードを決める純関数。エラーがあれば 1、警告は <paramref name="failOnWarnings"/> のときだけ 1、
+        /// それ以外は 0。副作用が無いので単体テストできる。
+        /// </summary>
+        public static int ComputeExitCode(int errorCount, int warningCount, bool failOnWarnings)
+        {
+            if (errorCount > 0)
+                return 1;
+            if (failOnWarnings && warningCount > 0)
+                return 1;
+            return 0;
+        }
+
+        private static bool HasCommandLineFlag(string flag)
+        {
+            foreach (var arg in Environment.GetCommandLineArgs())
+                if (string.Equals(arg, flag, StringComparison.OrdinalIgnoreCase))
+                    return true;
+            return false;
+        }
+
         public static EditorL10nValidationResult ValidateAll()
         {
             EditorL10n.Reload();

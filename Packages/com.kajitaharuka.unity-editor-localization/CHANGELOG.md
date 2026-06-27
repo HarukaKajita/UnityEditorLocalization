@@ -12,6 +12,7 @@
 - `package.json` の `documentationUrl`/`changelogUrl`/`licensesUrl` を `https://kajitaharuka.com/products/unity-editor-localization/` 系へ統一（製品ページ URL と一致）。
 
 ### Added
+- CI / batchmode 用の検証エントリ `EditorL10nValidator.ValidateForCI()` を追加。`-batchmode -quit -executeMethod Kajitaharuka.EditorLocalization.EditorL10nValidator.ValidateForCI` で実行し、エラーがあれば非 0 で終了して CI を止める。既定はエラーのみで失敗し、`-l10nFailOnWarnings` を付けると警告でも失敗扱いにする。対話モードでは Editor を閉じないようログのみ。終了コードの判定は純関数 `ComputeExitCode(errorCount, warningCount, failOnWarnings)` に切り出し、EditMode テストで検証。
 - manifest に `fixedTerms`（key 配列）を追加。ファイル名・型名など全ロケールで `defaultLocale` と同値であることが正当な固定語キーを宣言すると、検証の「`defaultLocale` と同値（未翻訳の疑い）」警告を抑止する。`EditorL10nValidator`（in-editor）と翻訳品質スキルの `validate_locale_quality.py` の**双方が同じ manifest の宣言**を読むため、両検証で挙動が一致する（key 過不足・placeholder・連番欠落の検査は従来どおり適用）。リファレンス実装 ExportPackageExtension では `package.json`/`Exporter`/`Exporter {0}` を fixedTerms 化し、誤検知だった検証警告 54 件（3 固定語 × 18 ロケール）を解消。
 - Preferences のカタログ検証結果を **scope ごとに分類**して表示。scope ごとの折りたたみグループ（エラーを含む scope は既定で展開、警告のみは折りたたみ）に、件数ピル（`エラー {n}` / `警告 {n}`）、各 issue 行（深刻度を色＋形 `×`/`!` で示すマーカー・由来 locale チップ・詳細メッセージ）を並べる。1 深刻度あたり 30 行で打ち切り、超過分は件数を示して Console（全件出力）へ誘導する。問題の無かった scope 数も控えめに示す。検証結果は **issue の詳細メッセージを含めて**画面の表示言語に追従する。
 - Preferences 画面自身の翻訳へ、検証結果分類 UI 用の 5 キー（`catalogs.title` / `catalogs.count.errors` / `catalogs.count.warnings` / `catalogs.groups.clean` / `catalogs.more`）を **19 言語**へ追加（各 67→72 キー）。機械検証（キー過不足・placeholder・未翻訳疑い）をクリア。
