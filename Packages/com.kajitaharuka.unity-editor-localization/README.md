@@ -207,6 +207,34 @@ Tools > UnityEditorLocalization > Validate Catalogs
 - defaultLocaleと同一の値が残っていないか
 - defaultLocaleにない余分なkeyがないか
 
+## Claude Code 連携スキル
+
+このパッケージは `skills/` に Claude Code（および互換エージェント）向けのスキルを 2 つ同梱しています。
+
+- **翻訳品質ワークフロー**（`editor-localization-translation-quality`）: 用語・スタイル・言語別の注意点と、翻訳テキストの静的検証スクリプトで翻訳の質を保ちます。
+- **任意依存連携の雛形生成**（`editor-localization-optional-integration`）: UnityEditorLocalization を任意依存（optional）として組み込む 2 アセンブリ構成の雛形を生成します。
+
+スキルはエージェントの探索パス（`.claude/skills` / `.agents/skills`）に置かれて初めて有効になります。次のいずれかで登録できます。
+
+- **Unity から（おすすめ）**: `Tools > UnityEditorLocalization > Claude Code Skills` の
+  `Install for user`（ホームの `~/.claude/skills` と `~/.agents/skills`）または
+  `Install for this project`（このプロジェクト直下の `.claude/skills` と `.agents/skills`）。
+  `Preferences > UnityEditorLocalization` の「Claude Code 連携スキル」からも同じ操作と、CLI コマンドのコピーができます。
+- **CLI から**: 上記メニューの `Copy CLI commands to clipboard`（または Preferences の「CLI コマンドをコピー」）で、実体パスを埋め込んだコマンドが得られます。ユーザースコープの例（macOS / Linux）:
+
+  ```bash
+  PKG="<...>/Packages/com.kajitaharuka.unity-editor-localization/skills"
+  for s in editor-localization-translation-quality editor-localization-optional-integration; do
+    mkdir -p ~/.claude/skills ~/.agents/skills
+    ln -sfn "$PKG/$s" ~/.claude/skills/"$s"
+    ln -sfn "$PKG/$s" ~/.agents/skills/"$s"
+  done
+  ```
+
+  プロジェクトスコープにする場合は `~` をプロジェクトルートのパスに置き換えます。`$PKG` はパッケージの実体パス（埋め込みなら `Packages/...`、registry/VPM 経由なら `Library/PackageCache/...`）で、上記メニュー/ボタンが正確な値を埋めて出力します。
+
+> 生成されるのは symlink です。registry/VPM 経由ではバージョン更新でパッケージの実体パスが変わるため、更新後に再実行してください。
+
 ## 関連資料
 
 - `Documentation~/DEVELOPER_GUIDE.md`: 利用側拡張での設計指針
