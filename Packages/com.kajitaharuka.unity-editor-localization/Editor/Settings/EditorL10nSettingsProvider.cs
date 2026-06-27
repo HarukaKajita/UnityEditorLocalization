@@ -234,8 +234,12 @@ namespace Kajitaharuka.EditorLocalization
                 EditorL10nUiKit.AlignField(dropdown);
                 BindTooltip(dropdown, "global.tooltip");
 
+                // Apply() による choices/value の更新が value-changed を巻き戻し発火させ、古い値で
+                // SetGlobalLocale を再実行する（カタログ/言語変化時に 1 段ズレる）のを防ぐガード。
+                var applying = false;
                 void Apply()
                 {
+                    applying = true;
                     tags.Clear();
                     var labels = new List<string>();
                     tags.Add("");
@@ -259,10 +263,12 @@ namespace Kajitaharuka.EditorLocalization
                     dropdown.label = Tr("global.label");
                     dropdown.choices = labels;
                     dropdown.SetValueWithoutNotify(labels[index]);
+                    applying = false;
                 }
 
                 dropdown.RegisterValueChangedCallback(_ =>
                 {
+                    if (applying) return;
                     var index = dropdown.index;
                     if (index >= 0 && index < tags.Count)
                         EditorL10n.SetGlobalLocale(tags[index]);
@@ -631,8 +637,12 @@ namespace Kajitaharuka.EditorLocalization
                 EditorL10nUiKit.AlignField(dropdown);
                 BindTooltip(dropdown, "scope.locale.tooltip");
 
+                // Apply() による choices/value の更新が value-changed を巻き戻し発火させ、古い値で
+                // SetActiveLocale を再実行する（カタログ/言語変化時のズレ）のを防ぐガード。
+                var applying = false;
                 void Apply()
                 {
+                    applying = true;
                     tags.Clear();
                     var labels = new List<string>();
                     tags.Add("");
@@ -658,10 +668,12 @@ namespace Kajitaharuka.EditorLocalization
                     dropdown.label = Tr("scope.locale.label");
                     dropdown.choices = labels;
                     dropdown.SetValueWithoutNotify(labels[index]);
+                    applying = false;
                 }
 
                 dropdown.RegisterValueChangedCallback(_ =>
                 {
+                    if (applying) return;
                     var index = dropdown.index;
                     if (index >= 0 && index < tags.Count)
                         EditorL10n.SetActiveLocale(scope, tags[index]);
