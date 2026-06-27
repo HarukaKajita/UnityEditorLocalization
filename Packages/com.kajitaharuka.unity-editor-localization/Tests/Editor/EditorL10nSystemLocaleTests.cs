@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using NUnit.Framework;
+using UnityEngine;
 
 namespace Kajitaharuka.EditorLocalization.Tests
 {
@@ -75,6 +76,30 @@ namespace Kajitaharuka.EditorLocalization.Tests
             // 無効化して再計算する。陳腐化しないことを固定する。
             EditorL10n.SystemLocaleProvider = () => "fr_FR";
             Assert.AreEqual("fr-FR", EditorL10n.GetSystemLocale());
+        }
+
+        [TestCase(SystemLanguage.Japanese, "ja")]
+        [TestCase(SystemLanguage.English, "en")]
+        [TestCase(SystemLanguage.ChineseSimplified, "zh-Hans")]
+        [TestCase(SystemLanguage.ChineseTraditional, "zh-Hant")]
+        [TestCase(SystemLanguage.Portuguese, "pt")]
+        [TestCase(SystemLanguage.Unknown, "")]
+        public void SystemLanguageToTag_MapsKnownLanguagesAndDegradesUnknown(SystemLanguage language, string expected)
+        {
+            Assert.AreEqual(expected, EditorL10n.SystemLanguageToTag(language));
+        }
+
+        [Test]
+        public void RefineWithRegion_AppendsRegionOnlyWhenLanguageAgrees()
+        {
+            // 言語が一致する CultureInfo タグなら地域を補う。
+            Assert.AreEqual("ja-JP", EditorL10n.RefineWithRegion("ja", "ja-JP"));
+            // 言語が食い違う（OS=日本語だが CultureInfo が en-US 等）なら地域を採らず言語タグのまま。
+            Assert.AreEqual("ja", EditorL10n.RefineWithRegion("ja", "en-US"));
+            // script を含むタグは地域で上書きせず保持する。
+            Assert.AreEqual("zh-Hans", EditorL10n.RefineWithRegion("zh-Hans", "zh-CN"));
+            // CultureInfo が空でも安全に言語タグを返す。
+            Assert.AreEqual("ja", EditorL10n.RefineWithRegion("ja", ""));
         }
 
         [Test]

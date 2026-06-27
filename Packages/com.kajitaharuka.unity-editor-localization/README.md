@@ -182,7 +182,7 @@ scope 個別設定 -> グローバル設定 -> システム言語 -> scope の d
 選択ロケール -> 親ロケール -> defaultLocale -> key
 ```
 
-グローバル設定は`Preferences > UnityEditorLocalization`で変更できます。scope 個別設定がある場合は、その scope では個別設定がグローバル設定より優先されます。scope 個別設定は、Preferences で「グローバル設定に従う」を選ぶと解除できます。グローバル設定が未設定のときは、OS の言語（`CultureInfo`の BCP-47 タグ）を推定して表示に使い、対応する翻訳が無ければ各 scope の`defaultLocale`へフォールバックします。この挙動は Preferences のトグルで無効化でき、検出されたシステム言語と、各 scope で実際に効く fallback 連鎖（使用段を強調表示）も Preferences で確認できます。Preferences では scope 文字列で検索でき、各 scope の現在の解決ロケール（override / fallback はバッジで表示）・`defaultLocale`・manifest パス（クリックで選択）を確認できます。ヘッダー右上のアイコンからオンラインドキュメントを開け、カタログの再読み込み（Reload）・検証（Validate）も実行できます。Preferences 画面自身も多言語化されており、表示言語の変更に追従します。
+グローバル設定は`Preferences > UnityEditorLocalization`で変更できます。scope 個別設定がある場合は、その scope では個別設定がグローバル設定より優先されます。scope 個別設定は、Preferences で「グローバル設定に従う」を選ぶと解除できます。グローバル設定が未設定のときは、OS の優先言語（Unity の`Application.systemLanguage`を主に、地域は`CultureInfo`で補完）を推定して表示に使い、対応する翻訳が無ければ各 scope の`defaultLocale`へフォールバックします。この挙動は Preferences のトグルで無効化でき、検出されたシステム言語と、各 scope で実際に効く fallback 連鎖（使用段を強調表示）も Preferences で確認できます。Preferences では scope 文字列で検索でき、各 scope の現在の解決ロケール（override / fallback はバッジで表示）・`defaultLocale`・manifest パス（クリックで選択）を確認できます。ヘッダー右上のアイコンからオンラインドキュメントを開け、カタログの再読み込み（Reload）・検証（Validate）も実行できます。Preferences 画面自身も多言語化されており、表示言語の変更に追従します。
 
 例:
 

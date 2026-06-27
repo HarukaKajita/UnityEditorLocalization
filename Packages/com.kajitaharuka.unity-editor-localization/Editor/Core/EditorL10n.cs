@@ -53,8 +53,10 @@ namespace Kajitaharuka.EditorLocalization
 
         /// <summary>
         /// OS の UI 言語から推定した表示ロケールタグ（正規化済み）を返す。判定できない場合は空文字。
-        /// enum（Application.systemLanguage）ではなく BCP-47 文字列タグを使い、言語を増やしても
-        /// C# を改変しない方針を保つ。
+        /// 検出は Unity の `Application.systemLanguage`（OS の優先言語を確実に取得。macOS でも信頼可）を
+        /// 主とし、地域は `CultureInfo` で補い、未対応の言語は `CultureInfo`→空へ degrade する。
+        /// enum 利用はこの「検出（既定の推定）」に限り、カタログ/解決はあくまで文字列タグのみで扱う
+        /// （言語を増やしても解決ロジックの C# は不変）方針は維持する。
         /// </summary>
         public static string GetSystemLocale()
         {
@@ -306,9 +308,19 @@ namespace Kajitaharuka.EditorLocalization
             return string.Join("-", parts.Where(part => !string.IsNullOrEmpty(part)));
         }
 
-        // CurrentUICulture を優先し、Invariant 等で空なら InstalledUICulture（OS 設定言語）を試す。
-        // いずれも空なら空文字を返し、システム言語フォールバックをスキップさせる。
+        // OS の優先言語（Application.systemLanguage）を主に、地域を CultureInfo で補ってタグを組む。
+        // enum で判定できない言語は CultureInfo へ degrade し、それも空なら空文字（フォールバックをスキップ）。
         private static string ReadSystemLocaleTag()
+        {
+            var languageTag = SystemLanguageToTag(Application.systemLanguage);
+            if (!string.IsNullOrEmpty(languageTag))
+                return RefineWithRegion(languageTag, ReadCultureTag());
+
+            return ReadCultureTag();
+        }
+
+        // CurrentUICulture を優先し、Invariant 等で空なら InstalledUICulture（OS 設定言語）を試す。
+        private static string ReadCultureTag()
         {
             var current = CultureInfo.CurrentUICulture;
             if (current != null && !string.IsNullOrEmpty(current.Name))
@@ -319,6 +331,78 @@ namespace Kajitaharuka.EditorLocalization
                 return installed.Name;
 
             return "";
+        }
+
+        // 言語のみのタグ（例 ja）に、CultureInfo の地域（例 ja-JP）を、言語が一致するときだけ補う。
+        // script を含むタグ（例 zh-Hans）は地域で上書きせず保持する。enum 検出の信頼性を CultureInfo で損なわせない。
+        internal static string RefineWithRegion(string languageTag, string cultureTag)
+        {
+            if (string.IsNullOrEmpty(cultureTag) || languageTag.IndexOf('-') >= 0)
+                return languageTag;
+
+            var cultureLanguage = FirstSubtag(cultureTag);
+            return string.Equals(cultureLanguage, languageTag, StringComparison.OrdinalIgnoreCase)
+                ? cultureTag
+                : languageTag;
+        }
+
+        private static string FirstSubtag(string tag)
+        {
+            var index = tag.IndexOf('-');
+            return index < 0 ? tag : tag.Substring(0, index);
+        }
+
+        // Unity の SystemLanguage を BCP-47 言語タグへ対応付ける（検出専用。未対応は空文字で degrade）。
+        // ここはロケールの「検出（既定の推定）」のための表であり、カタログ/解決のロケール定義ではない。
+        // 表に無い言語もカタログ追加だけで利用可能で、必要なら 1 行追加で OS 自動検出に対応できる。
+        internal static string SystemLanguageToTag(SystemLanguage language)
+        {
+            return language switch
+            {
+                SystemLanguage.Afrikaans => "af",
+                SystemLanguage.Arabic => "ar",
+                SystemLanguage.Basque => "eu",
+                SystemLanguage.Belarusian => "be",
+                SystemLanguage.Bulgarian => "bg",
+                SystemLanguage.Catalan => "ca",
+                SystemLanguage.Chinese => "zh-Hans",
+                SystemLanguage.ChineseSimplified => "zh-Hans",
+                SystemLanguage.ChineseTraditional => "zh-Hant",
+                SystemLanguage.Czech => "cs",
+                SystemLanguage.Danish => "da",
+                SystemLanguage.Dutch => "nl",
+                SystemLanguage.English => "en",
+                SystemLanguage.Estonian => "et",
+                SystemLanguage.Faroese => "fo",
+                SystemLanguage.Finnish => "fi",
+                SystemLanguage.French => "fr",
+                SystemLanguage.German => "de",
+                SystemLanguage.Greek => "el",
+                SystemLanguage.Hebrew => "he",
+                SystemLanguage.Hungarian => "hu",
+                SystemLanguage.Icelandic => "is",
+                SystemLanguage.Indonesian => "id",
+                SystemLanguage.Italian => "it",
+                SystemLanguage.Japanese => "ja",
+                SystemLanguage.Korean => "ko",
+                SystemLanguage.Latvian => "lv",
+                SystemLanguage.Lithuanian => "lt",
+                SystemLanguage.Norwegian => "nb",
+                SystemLanguage.Polish => "pl",
+                SystemLanguage.Portuguese => "pt",
+                SystemLanguage.Romanian => "ro",
+                SystemLanguage.Russian => "ru",
+                SystemLanguage.SerboCroatian => "sr",
+                SystemLanguage.Slovak => "sk",
+                SystemLanguage.Slovenian => "sl",
+                SystemLanguage.Spanish => "es",
+                SystemLanguage.Swedish => "sv",
+                SystemLanguage.Thai => "th",
+                SystemLanguage.Turkish => "tr",
+                SystemLanguage.Ukrainian => "uk",
+                SystemLanguage.Vietnamese => "vi",
+                _ => "",
+            };
         }
     }
 
