@@ -16,25 +16,48 @@ namespace Kajitaharuka.EditorLocalization
     }
 
     /// <summary>
-    /// 検証で見つかった 1 件の問題。由来（scope / locale）と詳細メッセージを構造化して保持し、
-    /// UI が scope ごとに分類して表示できるようにする。Console 用の平坦な 1 行表現も提供する。
+    /// 診断メッセージの種類。詳細文を文字列で固定せず種類＋引数で持つことで、表示時に
+    /// パッケージ自身の翻訳カタログから現在の表示言語で整形できる（多言語化・言語追従）。
+    /// </summary>
+    public enum EditorL10nValidationMessageKind
+    {
+        DefaultLocaleEmpty,
+        DefaultLocaleNoTable,
+        MissingKey,
+        ExtraKey,
+        PlaceholderGap,
+        PlaceholderMismatch,
+        SameAsDefault,
+    }
+
+    /// <summary>
+    /// 検証で見つかった 1 件の問題。由来（scope / locale）と、メッセージ種類＋整形引数を構造化して
+    /// 保持し、UI が scope ごとに分類して表示できるようにする。詳細文は表示時に翻訳カタログから
+    /// 整形するため、表示言語の変更に追従する。Console 用の平坦な 1 行表現も提供する。
     /// </summary>
     public sealed class EditorL10nValidationIssue
     {
         public EditorL10nValidationSeverity Severity { get; }
+        public EditorL10nValidationMessageKind Kind { get; }
         public string Scope { get; }
         public string Locale { get; }
-        public string Message { get; }
+        /// <summary>メッセージ整形に渡す引数（key 名・locale タグ・placeholder 一覧などの機械的トークン。翻訳しない）。</summary>
+        public IReadOnlyList<string> Args { get; }
 
-        internal EditorL10nValidationIssue(EditorL10nValidationSeverity severity, string scope, string locale, string message)
+        internal EditorL10nValidationIssue(EditorL10nValidationSeverity severity, EditorL10nValidationMessageKind kind,
+            string scope, string locale, string[] args)
         {
             Severity = severity;
+            Kind = kind;
             Scope = scope ?? "";
             Locale = locale ?? "";
-            Message = message ?? "";
+            Args = args ?? Array.Empty<string>();
         }
 
-        /// <summary>Console など平坦な 1 行表示用（<c>{scope}/{locale}: {message}</c> 形式）。</summary>
+        /// <summary>詳細メッセージ。表示時にパッケージ自身の翻訳カタログから現在の表示言語で整形する。</summary>
+        public string Message => EditorL10nValidationMessage.Format(Kind, Args);
+
+        /// <summary>Console など平坦な 1 行表示用（<c>{scope}/{locale}: {詳細}</c> 形式）。</summary>
         public string ToLogLine()
         {
             if (string.IsNullOrEmpty(Scope))
@@ -46,36 +69,70 @@ namespace Kajitaharuka.EditorLocalization
         public override string ToString() => ToLogLine();
     }
 
+    /// <summary>診断メッセージ種類を翻訳キーへ対応付け、パッケージ自身のカタログから詳細文を整形する。</summary>
+    internal static class EditorL10nValidationMessage
+    {
+        // 診断文はこのパッケージ自身の翻訳カタログ（scope=パッケージ名）から引く。
+        // 検証対象 scope の内容ではなく「検証ツールの文言」なので、パッケージ自身の scope を使うのが妥当。
+        private const string UiScope = "com.kajitaharuka.unity-editor-localization";
+
+        public static string Format(EditorL10nValidationMessageKind kind, IReadOnlyList<string> args)
+        {
+            // Tr は params object[] を取るため、string 引数を object[] へ移送する。
+            var formatArgs = new object[args?.Count ?? 0];
+            for (var i = 0; i < formatArgs.Length; i++)
+                formatArgs[i] = args[i];
+            return EditorL10n.Tr(UiScope, KeyFor(kind), formatArgs);
+        }
+
+        public static string KeyFor(EditorL10nValidationMessageKind kind) => kind switch
+        {
+            EditorL10nValidationMessageKind.DefaultLocaleEmpty => "validation.defaultLocaleEmpty",
+            EditorL10nValidationMessageKind.DefaultLocaleNoTable => "validation.defaultLocaleNoTable",
+            EditorL10nValidationMessageKind.MissingKey => "validation.missingKey",
+            EditorL10nValidationMessageKind.ExtraKey => "validation.extraKey",
+            EditorL10nValidationMessageKind.PlaceholderGap => "validation.placeholderGap",
+            EditorL10nValidationMessageKind.PlaceholderMismatch => "validation.placeholderMismatch",
+            _ => "validation.sameAsDefault",
+        };
+    }
+
     public sealed class EditorL10nValidationResult
     {
         private readonly List<EditorL10nValidationIssue> _issues = new();
-        private readonly List<string> _errors = new();
-        private readonly List<string> _warnings = new();
+        private int _errorCount;
+        private int _warningCount;
 
         /// <summary>scope ごとの分類表示に使う構造化された問題一覧（追加順）。</summary>
         public IReadOnlyList<EditorL10nValidationIssue> Issues => _issues;
-        /// <summary>互換維持・Console 用の平坦なエラーメッセージ（<c>{scope}/{locale}: 詳細</c>）。</summary>
-        public IReadOnlyList<string> Errors => _errors;
-        public IReadOnlyList<string> Warnings => _warnings;
-        public bool IsValid => _errors.Count == 0;
+        public int ErrorCount => _errorCount;
+        public int WarningCount => _warningCount;
+        public bool IsValid => _errorCount == 0;
 
-        // scope / locale / 詳細を受け取り、構造化 issue と平坦文字列の双方を蓄える（表示と Console で使い分ける）。
-        internal void AddError(string scope, string locale, string detail)
+        /// <summary>互換維持・Console 用の平坦なエラー文（<c>{scope}/{locale}: 詳細</c>）。現在の表示言語で整形される。</summary>
+        public IReadOnlyList<string> Errors => Project(EditorL10nValidationSeverity.Error);
+        public IReadOnlyList<string> Warnings => Project(EditorL10nValidationSeverity.Warning);
+
+        private List<string> Project(EditorL10nValidationSeverity severity)
         {
-            if (string.IsNullOrEmpty(detail))
-                return;
-            var issue = new EditorL10nValidationIssue(EditorL10nValidationSeverity.Error, scope, locale, detail);
-            _issues.Add(issue);
-            _errors.Add(issue.ToLogLine());
+            var list = new List<string>();
+            foreach (var issue in _issues)
+                if (issue.Severity == severity)
+                    list.Add(issue.ToLogLine());
+            return list;
         }
 
-        internal void AddWarning(string scope, string locale, string detail)
+        // scope / locale / メッセージ種類＋引数を受け取り、構造化 issue として蓄える（表示時に整形）。
+        internal void AddError(string scope, string locale, EditorL10nValidationMessageKind kind, params string[] args)
         {
-            if (string.IsNullOrEmpty(detail))
-                return;
-            var issue = new EditorL10nValidationIssue(EditorL10nValidationSeverity.Warning, scope, locale, detail);
-            _issues.Add(issue);
-            _warnings.Add(issue.ToLogLine());
+            _issues.Add(new EditorL10nValidationIssue(EditorL10nValidationSeverity.Error, kind, scope, locale, args));
+            _errorCount++;
+        }
+
+        internal void AddWarning(string scope, string locale, EditorL10nValidationMessageKind kind, params string[] args)
+        {
+            _issues.Add(new EditorL10nValidationIssue(EditorL10nValidationSeverity.Warning, kind, scope, locale, args));
+            _warningCount++;
         }
     }
 
@@ -112,9 +169,9 @@ namespace Kajitaharuka.EditorLocalization
                 Debug.LogError(error);
 
             if (result.IsValid)
-                Debug.Log($"EditorLocalization: 検証に成功しました。Warnings: {result.Warnings.Count}");
+                Debug.Log($"EditorLocalization: 検証に成功しました。Warnings: {result.WarningCount}");
             else
-                Debug.LogError($"EditorLocalization: 検証に失敗しました。Errors: {result.Errors.Count}, Warnings: {result.Warnings.Count}");
+                Debug.LogError($"EditorLocalization: 検証に失敗しました。Errors: {result.ErrorCount}, Warnings: {result.WarningCount}");
 
             return result;
         }
@@ -131,9 +188,9 @@ namespace Kajitaharuka.EditorLocalization
         internal static void ValidateScope(EditorL10nScopeCatalog scope, EditorL10nValidationResult result)
         {
             if (string.IsNullOrEmpty(scope.DefaultLocale))
-                result.AddError(scope.Scope, "", "defaultLocaleが空です。");
+                result.AddError(scope.Scope, "", EditorL10nValidationMessageKind.DefaultLocaleEmpty);
             if (!scope.HasLocale(scope.DefaultLocale))
-                result.AddError(scope.Scope, "", $"defaultLocaleのテーブルがありません: {scope.DefaultLocale}");
+                result.AddError(scope.Scope, "", EditorL10nValidationMessageKind.DefaultLocaleNoTable, scope.DefaultLocale);
 
             if (!scope.TablesByLocale.TryGetValue(scope.DefaultLocale, out var defaultTable))
                 return;
@@ -144,9 +201,9 @@ namespace Kajitaharuka.EditorLocalization
                 var locale = tablePair.Key;
                 var table = tablePair.Value;
                 foreach (var missingKey in defaultKeys.Except(table.Keys).OrderBy(key => key))
-                    result.AddError(scope.Scope, locale, $"keyが不足しています: {missingKey}");
+                    result.AddError(scope.Scope, locale, EditorL10nValidationMessageKind.MissingKey, missingKey);
                 foreach (var extraKey in table.Keys.Except(defaultKeys).OrderBy(key => key))
-                    result.AddWarning(scope.Scope, locale, $"defaultLocaleにないkeyがあります: {extraKey}");
+                    result.AddWarning(scope.Scope, locale, EditorL10nValidationMessageKind.ExtraKey, extraKey);
 
                 foreach (var key in table.Keys.OrderBy(key => key))
                 {
@@ -156,7 +213,7 @@ namespace Kajitaharuka.EditorLocalization
                     {
                         var present = FormatPlaceholders(placeholders);
                         var missing = string.Join(",", missingNumbers);
-                        result.AddWarning(scope.Scope, locale, $"placeholder番号が連続していません: {key} present=[{present}] missing=[{missing}]");
+                        result.AddWarning(scope.Scope, locale, EditorL10nValidationMessageKind.PlaceholderGap, key, present, missing);
                     }
                 }
 
@@ -165,10 +222,11 @@ namespace Kajitaharuka.EditorLocalization
                     var expected = ExtractPlaceholders(defaultTable[key]);
                     var actual = ExtractPlaceholders(table[key]);
                     if (!expected.SetEquals(actual))
-                        result.AddError(scope.Scope, locale, $"placeholderが一致しません: {key} expected=[{FormatPlaceholders(expected)}] actual=[{FormatPlaceholders(actual)}]");
+                        result.AddError(scope.Scope, locale, EditorL10nValidationMessageKind.PlaceholderMismatch,
+                            key, FormatPlaceholders(expected), FormatPlaceholders(actual));
 
                     if (locale != scope.DefaultLocale && table[key] == defaultTable[key])
-                        result.AddWarning(scope.Scope, locale, $"defaultLocaleと同一の値です（未翻訳の可能性）: {key}");
+                        result.AddWarning(scope.Scope, locale, EditorL10nValidationMessageKind.SameAsDefault, key);
                 }
             }
         }

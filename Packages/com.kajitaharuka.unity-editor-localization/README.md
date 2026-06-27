@@ -207,7 +207,7 @@ Tools > UnityEditorLocalization > Validate Catalogs
 - defaultLocaleと同一の値が残っていないか
 - defaultLocaleにない余分なkeyがないか
 
-`Preferences > UnityEditorLocalization` の **カタログ** セクションからも同じ検証を実行できます。結果は **どの scope 由来か** が分かるように scope ごとに分類され、scope ごとの折りたたみグループ（エラーを含む scope は既定で展開）に、エラー/警告の件数・由来 locale・詳細をその場で表示します。全件は Console にも出力されます。
+`Preferences > UnityEditorLocalization` の **カタログ** セクションからも同じ検証を実行できます。結果は **どの scope 由来か** が分かるように scope ごとに分類され、scope ごとの折りたたみグループ（エラーを含む scope は既定で展開）に、エラー/警告の件数・由来 locale・詳細をその場で表示します。詳細文も含めて表示言語に追従し、全件は Console にも出力されます。
 
 ## AIエージェント連携スキル
 

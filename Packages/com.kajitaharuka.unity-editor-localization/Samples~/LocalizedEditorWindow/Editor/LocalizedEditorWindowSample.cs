@@ -197,7 +197,7 @@ namespace Kajitaharuka.EditorLocalization.Samples.LocalizedEditorWindow
             var validateButton = new Button(() =>
             {
                 var result = EditorL10nValidator.ValidateAll();
-                SetStatus("status.validated", result.Errors.Count, result.Warnings.Count);
+                SetStatus("status.validated", result.ErrorCount, result.WarningCount);
             });
             validateButton.style.marginRight = 6f;
             validateButton.style.marginBottom = 6f;

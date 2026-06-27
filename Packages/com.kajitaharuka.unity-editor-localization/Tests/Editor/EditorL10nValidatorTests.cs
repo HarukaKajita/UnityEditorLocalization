@@ -45,9 +45,14 @@ namespace Kajitaharuka.EditorLocalization.Tests
                 new Dictionary<string, string> { ["sample.count"] = "項目 {1}" },
                 new Dictionary<string, string> { ["sample.count"] = "Items {1}" });
 
-            Assert.That(result.Errors, Is.Empty);
-            Assert.That(result.Warnings.Any(warning => warning.Contains("placeholder番号が連続していません")), Is.True);
-            Assert.That(result.Warnings.Any(warning => warning.Contains("missing=[0]")), Is.True);
+            // 詳細文は表示言語で整形されるため、言語非依存な構造（Kind / Args）で検証する。
+            // 既定表・en 表の双方が {0} を欠くため PlaceholderGap は複数件あり得る（Any で確認）。
+            Assert.That(result.ErrorCount, Is.Zero);
+            Assert.That(result.Issues.Any(issue =>
+                    issue.Kind == EditorL10nValidationMessageKind.PlaceholderGap
+                    && issue.Severity == EditorL10nValidationSeverity.Warning
+                    && issue.Args.Contains("0")), // 欠落している placeholder 番号 0
+                Is.True);
         }
 
         [Test]
@@ -57,8 +62,11 @@ namespace Kajitaharuka.EditorLocalization.Tests
                 new Dictionary<string, string> { ["sample.save"] = "保存" },
                 new Dictionary<string, string> { ["sample.save"] = "保存" });
 
-            Assert.That(result.Errors, Is.Empty);
-            Assert.That(result.Warnings.Any(warning => warning.Contains("defaultLocaleと同一の値です")), Is.True);
+            Assert.That(result.ErrorCount, Is.Zero);
+            Assert.That(result.Issues.Any(issue =>
+                    issue.Kind == EditorL10nValidationMessageKind.SameAsDefault
+                    && issue.Severity == EditorL10nValidationSeverity.Warning),
+                Is.True);
         }
 
         [Test]
@@ -68,7 +76,10 @@ namespace Kajitaharuka.EditorLocalization.Tests
                 new Dictionary<string, string> { ["sample.count"] = "項目 {0}" },
                 new Dictionary<string, string> { ["sample.count"] = "Items {1}" });
 
-            Assert.That(result.Errors.Any(error => error.Contains("placeholderが一致しません")), Is.True);
+            Assert.That(result.Issues.Any(issue =>
+                    issue.Kind == EditorL10nValidationMessageKind.PlaceholderMismatch
+                    && issue.Severity == EditorL10nValidationSeverity.Error),
+                Is.True);
         }
 
         private static EditorL10nValidationResult ValidateSampleScope(

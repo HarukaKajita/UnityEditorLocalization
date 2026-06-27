@@ -193,9 +193,9 @@ namespace Kajitaharuka.EditorLocalization
                 if (_catalogsResult == null || _lastValidation == null)
                     return;
                 if (_lastValidation.IsValid)
-                    SetResult(_catalogsResult, Tr("catalogs.result.ok", _lastValidation.Warnings.Count), EditorL10nBadgeKind.Ok);
+                    SetResult(_catalogsResult, Tr("catalogs.result.ok", _lastValidation.WarningCount), EditorL10nBadgeKind.Ok);
                 else
-                    SetResult(_catalogsResult, Tr("catalogs.result.issues", _lastValidation.Errors.Count, _lastValidation.Warnings.Count), EditorL10nBadgeKind.Warning);
+                    SetResult(_catalogsResult, Tr("catalogs.result.issues", _lastValidation.ErrorCount, _lastValidation.WarningCount), EditorL10nBadgeKind.Warning);
             }
 
             // 検証結果を scope ごとに分類して描画する（point-in-time のスナップショット）。

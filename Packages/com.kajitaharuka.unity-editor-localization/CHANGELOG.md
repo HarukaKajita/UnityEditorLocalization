@@ -4,7 +4,7 @@
 
 ### Changed
 - 「再読み込み・検証」を独立した大項目（**カタログ** Section、タイトル付き）へ昇格し、主要操作の**表示言語**・**scope 個別設定**の下へ移動。検証結果はその Section 内に scope ごとに分類して表示する。
-- `EditorL10nValidator` の結果を構造化。`EditorL10nValidationIssue`（`Severity` / `Scope` / `Locale` / `Message`）と `EditorL10nValidationResult.Issues` を追加し、UI が由来 scope ごとに分類できるようにした。既存の `Errors` / `Warnings`（`{scope}/{locale}: 詳細` の平坦な文字列）と Console 出力は不変で、後方互換を保つ。
+- `EditorL10nValidator` の結果を構造化。`EditorL10nValidationIssue`（`Severity` / `Kind`〈`EditorL10nValidationMessageKind`〉/ `Scope` / `Locale` / `Args`）と `EditorL10nValidationResult.Issues` を追加し、UI が由来 scope ごとに分類できるようにした。診断の詳細文は文字列で固定せず**種類＋引数**で持ち、表示時（`Message` プロパティ）にパッケージ自身の翻訳カタログから現在の表示言語で整形する。既存の `Errors` / `Warnings`（`{scope}/{locale}: 詳細` の平坦な文字列）と Console 出力は後方互換だが、文面は表示言語に追従するようになった。
 - 表示ロケールの解決順に**システム言語（OS）フォールバック**を追加。グローバル設定が未設定のとき、OS の優先言語（Unity の `Application.systemLanguage` を主に、地域は `CultureInfo` で補完。macOS でも信頼可）を推定して表示に使い、対応する翻訳が無ければ既存の fallback 連鎖が各 scope の `defaultLocale` へ落とす。解決順は `scope 個別設定 → グローバル設定 → システム言語 → defaultLocale`。検出のみ OS API（enum）を言語タグ表へ対応付け、カタログ/解決は文字列タグのみで扱う方針（言語追加で解決ロジックの C# は不変）を維持する。
 - 表示ロケールの解決順を `EditorL10n.GetActiveLocale(scope, out source)` に集約し、由来（`EditorL10nLocaleSource`）を単一情報源化。Preferences の scope メタ表示はこの source を使い、System を含む由来を正しく表示する。
 - Preferences（`Preferences > UnityEditorLocalization`）を IMGUI から UI Toolkit へ全面再設計。2 ゾーンヘッダー（左=タイトル＋概況バッジ／右=オンラインドキュメントを開くボタン）、グループ再編（表示言語 → scope 個別設定 → 開発者向けの段階的開示）、scope ごとの解決状態（override/fallback）のバッジ可視化、manifest の選択+ping、両スキン・キーボード操作・長い識別子の折り返し・狭い描画領域でのスクロール表示に対応。
@@ -12,8 +12,9 @@
 - `package.json` の `documentationUrl`/`changelogUrl`/`licensesUrl` を `https://kajitaharuka.com/products/unity-editor-localization/` 系へ統一（製品ページ URL と一致）。
 
 ### Added
-- Preferences のカタログ検証結果を **scope ごとに分類**して表示。scope ごとの折りたたみグループ（エラーを含む scope は既定で展開、警告のみは折りたたみ）に、件数ピル（`エラー {n}` / `警告 {n}`）、各 issue 行（深刻度を色＋形 `×`/`!` で示すマーカー・由来 locale チップ・詳細メッセージ）を並べる。1 深刻度あたり 30 行で打ち切り、超過分は件数を示して Console（全件出力）へ誘導する。問題の無かった scope 数も控えめに示す。検証結果は画面の表示言語にも追従する（issue の詳細メッセージのみ現状は日本語固定で、Console と同じ文面）。
+- Preferences のカタログ検証結果を **scope ごとに分類**して表示。scope ごとの折りたたみグループ（エラーを含む scope は既定で展開、警告のみは折りたたみ）に、件数ピル（`エラー {n}` / `警告 {n}`）、各 issue 行（深刻度を色＋形 `×`/`!` で示すマーカー・由来 locale チップ・詳細メッセージ）を並べる。1 深刻度あたり 30 行で打ち切り、超過分は件数を示して Console（全件出力）へ誘導する。問題の無かった scope 数も控えめに示す。検証結果は **issue の詳細メッセージを含めて**画面の表示言語に追従する。
 - Preferences 画面自身の翻訳へ、検証結果分類 UI 用の 5 キー（`catalogs.title` / `catalogs.count.errors` / `catalogs.count.warnings` / `catalogs.groups.clean` / `catalogs.more`）を **19 言語**へ追加（各 67→72 キー）。機械検証（キー過不足・placeholder・未翻訳疑い）をクリア。
+- Validator の診断メッセージ 7 種を翻訳キー化（`validation.defaultLocaleEmpty` ほか）し、**19 言語**へ追加（各 72→79 キー）。これにより Preferences の検証結果一覧と Console 出力の**詳細文も表示言語に追従**する。固定語（`defaultLocale`/`key`/`placeholder`/`Console`）・技術トークン（`present=`/`missing=`/`expected=`/`actual=`）・`{0}` 引数は保持。機械検証（キー過不足・placeholder・未翻訳疑い）をクリアし、各言語のネイティブ目線レビューを実施（韓国語の助詞 `이`/`과` は `locale` が ㄹ 終わりのため原案どおり正と確認）。
 - Preferences の scope 個別設定で、各 scope の解決順の下に、その scope が対応する言語コードの一覧（`en · ja · zh-Hans · …`）を表示。
 - Preferences 画面自身の翻訳を **19 言語**へ拡張。既存 en（defaultLocale）/ja に加え、zh-Hans・zh-Hant・ko・fr・de・it・es-ES・es-419・pt-BR・pt-PT・ru・pl・tr・th・vi・uk・id の 17 言語（各 67 キー）を `Editor/Localization/Locales/` に追加し、manifest へ登録。固定語（scope/locale/manifest/EditorPrefs/Console/CLI/defaultLocale/パス/Claude Code/placeholder/記号）は保持。キー過不足・placeholder・未翻訳疑いの機械検証をクリア（カタログ検証は Errors 0、新規 17 言語の警告 0）。CJK・タイ語など一部は最終的なネイティブレビュー推奨。
 - `Tools > UnityEditorLocalization > Settings` メニューを追加。Preferences を開いて UnityEditorLocalization の項目を選択状態にする（`SettingsService.OpenUserPreferences`）。
