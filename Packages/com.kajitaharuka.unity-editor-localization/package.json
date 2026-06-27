@@ -1,6 +1,6 @@
 {
   "name": "com.kajitaharuka.unity-editor-localization",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "displayName": "UnityEditorLocalization",
   "description": "Lightweight localization utilities for Unity Editor extensions.",
   "license": "MIT",
