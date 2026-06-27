@@ -340,7 +340,7 @@ namespace Kajitaharuka.EditorLocalization
                 _scopeEmpty.style.display = DisplayStyle.Flex;
             }
 
-            // ===== Claude Code 連携スキル（同梱スキルの登録）=====
+            // ===== AIエージェント連携スキル（同梱スキルの登録）=====
             private VisualElement BuildSkillsSection()
             {
                 var card = EditorL10nUiKit.Section(Tr("skills.title"), out var content);
@@ -350,13 +350,14 @@ namespace Kajitaharuka.EditorLocalization
                 content.Add(BuildSkillRow("skills.translation.name", "skills.translation.desc"));
                 content.Add(BuildSkillRow("skills.optional.name", "skills.optional.desc"));
 
-                // 操作行（既存のカタログ操作行スタイルを流用して横並び＋結果表示）。
-                var row = new VisualElement();
-                row.AddToClassList("l10n-catalogs");
-
+                // 操作結果のインライン表示（登録/コピーの両方からここへ出す）。
                 var result = new Label { name = "l10n-skills-result" };
                 result.AddToClassList("l10n-catalogs__result");
                 result.style.display = DisplayStyle.None;
+
+                // 登録ボタン行（ボタン文言でどこへ登録するかを明示）。
+                var installRow = new VisualElement();
+                installRow.AddToClassList("l10n-catalogs");
 
                 var installUser = EditorL10nUiKit.ActionButton(Tr("skills.install.user"), () =>
                 {
@@ -372,19 +373,38 @@ namespace Kajitaharuka.EditorLocalization
                 }, Tr("skills.install.project.tooltip"));
                 BindButtonText(installProject, "skills.install.project", "skills.install.project.tooltip");
 
+                installRow.Add(installUser);
+                installRow.Add(installProject);
+                content.Add(installRow);
+
+                // CLI で追加したい場合の案内＋コマンド明示＋横のコピーボタン。
+                content.Add(EditorL10nUiKit.Note(Tr("skills.cli.note")).Also(label => BindLabel(label, "skills.cli.note")));
+
+                var cliRow = new VisualElement();
+                cliRow.style.flexDirection = FlexDirection.Row;
+                cliRow.style.alignItems = Align.FlexStart;
+
+                // 読み取り専用の複数行フィールドにコマンドを表示（選択もできる）。値変更時は再表示するだけ。
+                var cliField = new TextField { multiline = true, isReadOnly = true };
+                cliField.value = EditorL10nSkillInstaller.CliSnippetForUser() + "\n" + EditorL10nSkillInstaller.CliSnippetForProject();
+                cliField.style.flexGrow = 1;
+                cliField.style.flexShrink = 1;
+                cliField.style.fontSize = 10;
+                cliField.style.marginRight = 4;
+
                 var copyCli = EditorL10nUiKit.ActionButton(Tr("skills.cli.copy"), () =>
                 {
-                    EditorGUIUtility.systemCopyBuffer =
-                        EditorL10nSkillInstaller.CliSnippetForUser() + "\n" + EditorL10nSkillInstaller.CliSnippetForProject();
+                    EditorGUIUtility.systemCopyBuffer = cliField.value;
                     SetResult(result, Tr("skills.result.copied"), EditorL10nBadgeKind.Neutral);
                 }, Tr("skills.cli.copy.tooltip"));
+                copyCli.style.flexShrink = 0;
                 BindButtonText(copyCli, "skills.cli.copy", "skills.cli.copy.tooltip");
 
-                row.Add(installUser);
-                row.Add(installProject);
-                row.Add(copyCli);
-                row.Add(result);
-                content.Add(row);
+                cliRow.Add(cliField);
+                cliRow.Add(copyCli);
+                content.Add(cliRow);
+
+                content.Add(result);
                 return card;
             }
 
