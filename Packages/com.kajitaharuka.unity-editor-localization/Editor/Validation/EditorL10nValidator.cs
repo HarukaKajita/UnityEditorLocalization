@@ -225,7 +225,8 @@ namespace Kajitaharuka.EditorLocalization
                         result.AddError(scope.Scope, locale, EditorL10nValidationMessageKind.PlaceholderMismatch,
                             key, FormatPlaceholders(expected), FormatPlaceholders(actual));
 
-                    if (locale != scope.DefaultLocale && table[key] == defaultTable[key])
+                    // 固定語（manifest の fixedTerms。ファイル名・型名など全ロケールで同値が正当）は未翻訳警告を出さない。
+                    if (locale != scope.DefaultLocale && table[key] == defaultTable[key] && !scope.IsFixedTerm(key))
                         result.AddWarning(scope.Scope, locale, EditorL10nValidationMessageKind.SameAsDefault, key);
                 }
             }

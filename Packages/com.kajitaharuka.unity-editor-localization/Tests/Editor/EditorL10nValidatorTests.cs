@@ -82,11 +82,24 @@ namespace Kajitaharuka.EditorLocalization.Tests
                 Is.True);
         }
 
+        [Test]
+        public void ValidateScope_SkipsSameValueWarningForFixedTerm()
+        {
+            // manifest の fixedTerms に宣言した key は、全ロケールで defaultLocale と同値でも未翻訳警告を出さない。
+            var result = ValidateSampleScope(
+                new Dictionary<string, string> { ["sample.fixed"] = "package.json" },
+                new Dictionary<string, string> { ["sample.fixed"] = "package.json" },
+                fixedTerms: new[] { "sample.fixed" });
+
+            Assert.That(result.Issues.Any(issue => issue.Kind == EditorL10nValidationMessageKind.SameAsDefault), Is.False);
+        }
+
         private static EditorL10nValidationResult ValidateSampleScope(
             Dictionary<string, string> defaultTable,
-            Dictionary<string, string> englishTable)
+            Dictionary<string, string> englishTable,
+            string[] fixedTerms = null)
         {
-            var scope = new EditorL10nScopeCatalog("sample", "ja", "Assets/Sample/l10n-manifest.json");
+            var scope = new EditorL10nScopeCatalog("sample", "ja", "Assets/Sample/l10n-manifest.json", fixedTerms);
             scope.AddLocale(new EditorL10nLocaleInfo("ja", "日本語", "Japanese"), defaultTable, "Assets/Sample/Locales/ja.json");
             scope.AddLocale(new EditorL10nLocaleInfo("en", "English", "English"), englishTable, "Assets/Sample/Locales/en.json");
 

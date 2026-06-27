@@ -87,6 +87,7 @@ manifestの例:
 {
   "scope": "com.example.my-editor-extension",
   "defaultLocale": "ja",
+  "fixedTerms": [],
   "locales": [
     {
       "tag": "ja",
@@ -103,6 +104,8 @@ manifestの例:
   ]
 }
 ```
+
+`fixedTerms`（任意）は、全ロケールで `defaultLocale` と同じ値であることが正当な固定語の key 配列です（例: ファイル名 `package.json`、型名 `Exporter`）。ここへ挙げた key は検証の「未翻訳の疑い」警告から除外されます。省略可能で、不要なら書かなくて構いません。
 
 翻訳テーブルの例:
 
@@ -204,7 +207,7 @@ Tools > UnityEditorLocalization > Validate Catalogs
 - defaultLocaleにあるkeyが各ロケールにも存在すること
 - `string.Format`形式のplaceholder番号が一致すること
 - placeholder番号が`0`から連続していること
-- defaultLocaleと同一の値が残っていないか
+- defaultLocaleと同一の値が残っていないか（manifestの`fixedTerms`に挙げた固定語キーは除外）
 - defaultLocaleにない余分なkeyがないか
 
 `Preferences > UnityEditorLocalization` の **カタログ** セクションからも同じ検証を実行できます。結果は **どの scope 由来か** が分かるように scope ごとに分類され、scope ごとの折りたたみグループ（エラーを含む scope は既定で展開）に、エラー/警告の件数・由来 locale・詳細をその場で表示します。詳細文も含めて表示言語に追従し、全件は Console にも出力されます。

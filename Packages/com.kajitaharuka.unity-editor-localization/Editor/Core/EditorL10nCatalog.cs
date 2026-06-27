@@ -62,7 +62,7 @@ namespace Kajitaharuka.EditorLocalization
             }
 
             var manifestDirectory = Path.GetDirectoryName(manifestPath)?.Replace("\\", "/") ?? "";
-            var scopeCatalog = new EditorL10nScopeCatalog(scope, EditorL10n.NormalizeLocaleTag(document.defaultLocale), manifestPath);
+            var scopeCatalog = new EditorL10nScopeCatalog(scope, EditorL10n.NormalizeLocaleTag(document.defaultLocale), manifestPath, document.fixedTerms);
             foreach (var locale in document.locales ?? Array.Empty<EditorL10nManifestLocale>())
             {
                 if (locale == null || string.IsNullOrEmpty(locale.tag) || string.IsNullOrEmpty(locale.tablePath))
@@ -113,6 +113,8 @@ namespace Kajitaharuka.EditorLocalization
         private readonly List<EditorL10nLocaleInfo> _locales = new();
         private readonly Dictionary<string, Dictionary<string, string>> _tablesByLocale = new();
         private readonly HashSet<string> _tablePaths = new();
+        // 全ロケールで defaultLocale と同値でも「未翻訳の疑い」警告を出さない固定語 key（manifest の fixedTerms）。
+        private readonly HashSet<string> _fixedTerms;
 
         internal string Scope { get; }
         internal string DefaultLocale { get; }
@@ -120,13 +122,18 @@ namespace Kajitaharuka.EditorLocalization
         internal IReadOnlyList<EditorL10nLocaleInfo> Locales => _locales;
         internal IReadOnlyDictionary<string, Dictionary<string, string>> TablesByLocale => _tablesByLocale;
         internal IReadOnlyCollection<string> TablePaths => _tablePaths;
+        internal IReadOnlyCollection<string> FixedTerms => _fixedTerms;
 
-        internal EditorL10nScopeCatalog(string scope, string defaultLocale, string manifestPath)
+        internal EditorL10nScopeCatalog(string scope, string defaultLocale, string manifestPath, IEnumerable<string> fixedTerms = null)
         {
             Scope = scope;
             DefaultLocale = defaultLocale;
             ManifestPath = manifestPath;
+            _fixedTerms = new HashSet<string>(fixedTerms ?? Array.Empty<string>());
         }
+
+        /// <summary>その key が固定語（同値でも未翻訳警告を出さない）として宣言されているか。</summary>
+        internal bool IsFixedTerm(string key) => key != null && _fixedTerms.Contains(key);
 
         internal void AddLocale(EditorL10nLocaleInfo locale, Dictionary<string, string> entries, string tablePath)
         {

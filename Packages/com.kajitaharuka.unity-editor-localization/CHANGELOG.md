@@ -12,6 +12,7 @@
 - `package.json` の `documentationUrl`/`changelogUrl`/`licensesUrl` を `https://kajitaharuka.com/products/unity-editor-localization/` 系へ統一（製品ページ URL と一致）。
 
 ### Added
+- manifest に `fixedTerms`（key 配列）を追加。ファイル名・型名など全ロケールで `defaultLocale` と同値であることが正当な固定語キーを宣言すると、検証の「`defaultLocale` と同値（未翻訳の疑い）」警告を抑止する。`EditorL10nValidator`（in-editor）と翻訳品質スキルの `validate_locale_quality.py` の**双方が同じ manifest の宣言**を読むため、両検証で挙動が一致する（key 過不足・placeholder・連番欠落の検査は従来どおり適用）。リファレンス実装 ExportPackageExtension では `package.json`/`Exporter`/`Exporter {0}` を fixedTerms 化し、誤検知だった検証警告 54 件（3 固定語 × 18 ロケール）を解消。
 - Preferences のカタログ検証結果を **scope ごとに分類**して表示。scope ごとの折りたたみグループ（エラーを含む scope は既定で展開、警告のみは折りたたみ）に、件数ピル（`エラー {n}` / `警告 {n}`）、各 issue 行（深刻度を色＋形 `×`/`!` で示すマーカー・由来 locale チップ・詳細メッセージ）を並べる。1 深刻度あたり 30 行で打ち切り、超過分は件数を示して Console（全件出力）へ誘導する。問題の無かった scope 数も控えめに示す。検証結果は **issue の詳細メッセージを含めて**画面の表示言語に追従する。
 - Preferences 画面自身の翻訳へ、検証結果分類 UI 用の 5 キー（`catalogs.title` / `catalogs.count.errors` / `catalogs.count.warnings` / `catalogs.groups.clean` / `catalogs.more`）を **19 言語**へ追加（各 67→72 キー）。機械検証（キー過不足・placeholder・未翻訳疑い）をクリア。
 - Validator の診断メッセージ 7 種を翻訳キー化（`validation.defaultLocaleEmpty` ほか）し、**19 言語**へ追加（各 72→79 キー）。これにより Preferences の検証結果一覧と Console 出力の**詳細文も表示言語に追従**する。固定語（`defaultLocale`/`key`/`placeholder`/`Console`）・技術トークン（`present=`/`missing=`/`expected=`/`actual=`）・`{0}` 引数は保持。機械検証（キー過不足・placeholder・未翻訳疑い）をクリアし、各言語のネイティブ目線レビューを実施（韓国語の助詞 `이`/`과` は `locale` が ㄹ 終わりのため原案どおり正と確認）。
