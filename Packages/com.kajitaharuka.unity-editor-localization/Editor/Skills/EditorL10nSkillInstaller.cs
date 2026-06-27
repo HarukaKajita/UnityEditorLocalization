@@ -59,7 +59,9 @@ namespace Kajitaharuka.EditorLocalization
             var skillsRoot = TryGetSkillsRoot(out var error);
             if (skillsRoot == null)
                 return "# " + error;
-            return BuildUnixSnippet("user scope (~/.claude, ~/.agents)", skillsRoot, "~");
+            return Application.platform == RuntimePlatform.WindowsEditor
+                ? BuildWindowsSnippet("user scope (.claude, .agents)", skillsRoot, "%USERPROFILE%")
+                : BuildUnixSnippet("user scope (~/.claude, ~/.agents)", skillsRoot, "~");
         }
 
         /// <summary>プロジェクトスコープへ登録する CLI コマンド片を返す（コピペ実行可能）。</summary>
@@ -68,7 +70,9 @@ namespace Kajitaharuka.EditorLocalization
             var skillsRoot = TryGetSkillsRoot(out var error);
             if (skillsRoot == null)
                 return "# " + error;
-            return BuildUnixSnippet("project scope (.claude, .agents)", skillsRoot, Quote(GetProjectBase()));
+            return Application.platform == RuntimePlatform.WindowsEditor
+                ? BuildWindowsSnippet("project scope (.claude, .agents)", skillsRoot, GetProjectBase())
+                : BuildUnixSnippet("project scope (.claude, .agents)", skillsRoot, Quote(GetProjectBase()));
         }
 
         // ===== 実装 =====
@@ -123,6 +127,7 @@ namespace Kajitaharuka.EditorLocalization
         }
 
         // ディレクトリ symlink を作る。既存の実ディレクトリは壊さない（ln -sfn / mklink が安全に失敗する）。
+        // macOS / Linux / Windows のいずれでも動作する。
         private static bool CreateDirectorySymlink(string link, string target, out string message)
         {
             message = "";
@@ -130,16 +135,25 @@ namespace Kajitaharuka.EditorLocalization
             {
                 if (Application.platform == RuntimePlatform.WindowsEditor)
                 {
+                    // cmd の mklink は区切りが '\' 前提。Unity のパスは '/' のことがあるため正規化する。
+                    var winLink = WinPath(link);
+                    var winTarget = WinPath(target);
+
                     // 既存の symlink/junction のみ除去を試み、実ディレクトリは触らない。
-                    if (Directory.Exists(link) && IsReparsePoint(link))
+                    if (Directory.Exists(winLink) && IsReparsePoint(winLink))
                     {
-                        try { Directory.Delete(link); } catch { /* 失敗時は mklink 側のエラーで報告 */ }
+                        try { Directory.Delete(winLink); } catch { /* 失敗時は mklink 側のエラーで報告 */ }
                     }
-                    return RunProcess("cmd.exe", "/c mklink /D " + Quote(link) + " " + Quote(target), out message);
+
+                    // まず実 symlink（/D）。管理者権限/開発者モードが無く失敗したら、昇格不要の
+                    // junction（/J）で再試行する。junction でもエージェントからの読み取りは同じく機能する。
+                    if (RunProcess("cmd.exe", "/c mklink /D " + Quote(winLink) + " " + Quote(winTarget), out message))
+                        return true;
+                    return RunProcess("cmd.exe", "/c mklink /J " + Quote(winLink) + " " + Quote(winTarget), out message);
                 }
 
                 // macOS / Linux: -s symlink, -f 既存を置換, -n 既存 symlink を辿らない（idempotent）。
-                return RunProcess("/bin/ln", "-sfn " + Quote(target) + " " + Quote(link), out message);
+                return RunProcess(UnixLnPath(), "-sfn " + Quote(target) + " " + Quote(link), out message);
             }
             catch (Exception e)
             {
@@ -147,6 +161,12 @@ namespace Kajitaharuka.EditorLocalization
                 return false;
             }
         }
+
+        // ln の場所はディストリにより /bin/ln か /usr/bin/ln。存在する方を使う（macOS は /bin/ln）。
+        private static string UnixLnPath() => File.Exists("/bin/ln") ? "/bin/ln" : "/usr/bin/ln";
+
+        // Windows の cmd 用にパス区切りを '\' へ正規化する。
+        private static string WinPath(string path) => (path ?? "").Replace('/', '\\');
 
         private static bool IsReparsePoint(string path)
         {
@@ -184,6 +204,26 @@ namespace Kajitaharuka.EditorLocalization
             sb.AppendLine("  ln -sfn \"$PKG/$s\" " + baseExpr + "/.claude/skills/\"$s\"");
             sb.AppendLine("  ln -sfn \"$PKG/$s\" " + baseExpr + "/.agents/skills/\"$s\"");
             sb.AppendLine("done");
+            return sb.ToString();
+        }
+
+        // Windows（cmd.exe）用のコピペ可能なコマンド片を組む。baseExpr は %USERPROFILE% または絶対パス。
+        // 区切りは '\' に正規化する。mklink /D が権限で失敗する場合は /D を /J（junction）に読み替える。
+        private static string BuildWindowsSnippet(string title, string skillsRoot, string baseExpr)
+        {
+            var pkg = WinPath(skillsRoot);
+            var bse = WinPath(baseExpr);
+            var sb = new StringBuilder();
+            sb.AppendLine(":: UnityEditorLocalization skills — " + title);
+            sb.AppendLine(":: cmd.exe で実行（mklink /D が権限で失敗する場合は /D を /J に変えてください）");
+            sb.AppendLine("set \"PKG=" + pkg + "\"");
+            sb.AppendLine("mkdir \"" + bse + "\\.claude\\skills\" 2>nul");
+            sb.AppendLine("mkdir \"" + bse + "\\.agents\\skills\" 2>nul");
+            foreach (var s in SkillFolders)
+            {
+                sb.AppendLine("mklink /D \"" + bse + "\\.claude\\skills\\" + s + "\" \"%PKG%\\" + s + "\"");
+                sb.AppendLine("mklink /D \"" + bse + "\\.agents\\skills\\" + s + "\" \"%PKG%\\" + s + "\"");
+            }
             return sb.ToString();
         }
 

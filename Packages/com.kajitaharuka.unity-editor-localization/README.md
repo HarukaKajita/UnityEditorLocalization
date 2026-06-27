@@ -220,7 +220,8 @@ Tools > UnityEditorLocalization > Validate Catalogs
   `Install for user`（ホームの `~/.claude/skills` と `~/.agents/skills`）または
   `Install for this project`（このプロジェクト直下の `.claude/skills` と `.agents/skills`）。
   `Preferences > UnityEditorLocalization` の「AIエージェント連携スキル」からも、同じ登録操作と、表示された CLI コマンドのコピーができます。
-- **CLI から**: 上記メニューの `Copy CLI commands to clipboard`（または Preferences に表示されるコマンドの「コピー」）で、実体パスを埋め込んだコマンドが得られます。ユーザースコープの例（macOS / Linux）:
+  macOS / Linux / Windows いずれでも動作します（macOS/Linux は `ln`、Windows は `mklink /D`。権限が無い環境では junction にフォールバック）。
+- **CLI から**: 上記メニューの `Copy CLI commands to clipboard`（または Preferences に表示されるコマンドの「コピー」）で、実体パスを埋め込んだコマンドが得られます。表示・コピーされるコマンドは **OS に合わせて変わります**（macOS/Linux は下記の `ln`、Windows は `mklink /D`）。ユーザースコープの例（macOS / Linux）:
 
   ```bash
   PKG="<...>/Packages/com.kajitaharuka.unity-editor-localization/skills"
