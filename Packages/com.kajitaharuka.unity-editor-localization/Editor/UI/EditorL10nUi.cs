@@ -14,6 +14,10 @@ namespace Kajitaharuka.EditorLocalization
     /// </summary>
     public static class EditorL10nUi
     {
+        // 部品自身の文言（カタログ外表記・無効理由など）を引く scope。パッケージ同梱カタログは
+        // 常に存在するため、利用側 scope のカタログ状態に依存せず表示言語へ追従できる。
+        private const string PackageUiScope = "com.kajitaharuka.unity-editor-localization";
+
         /// <summary>
         /// コンパクト言語選択メニューへ付与する既定のUSS class名。
         /// </summary>
@@ -125,8 +129,15 @@ namespace Kajitaharuka.EditorLocalization
                 activeIndex = 0;
 
             var dropdown = new DropdownField(label, choices, activeIndex);
+
+            // Apply() による choices/value の再代入は value-changed を同期発火しうる
+            // （SetValueWithoutNotify は choices 再代入をカバーしない）。ガード無しだと
+            // カタログ再読込・言語変更のたびに過渡値で SetActiveLocale を書き戻す恐れがある。
+            var applying = false;
+
             dropdown.RegisterValueChangedCallback(_ =>
             {
+                if (applying) return;
                 var currentLocales = EditorL10n.GetLocales(scope);
                 var index = dropdown.index;
                 if (index < 0 || index >= currentLocales.Count)
@@ -136,13 +147,21 @@ namespace Kajitaharuka.EditorLocalization
 
             void Apply()
             {
+                applying = true;
                 locales = EditorL10n.GetLocales(scope).ToArray();
                 choices = locales.Select(locale => locale.DisplayName).ToList();
                 dropdown.choices = choices;
 
                 var currentLocale = EditorL10n.GetActiveLocale(scope);
                 var index = FindLocaleIndex(locales, currentLocale);
-                dropdown.SetValueWithoutNotify(index >= 0 ? choices[index] : "");
+                // 候補に無い（登録済みカタログ外の）ロケールは空欄にせず、その旨を表示する
+                // （空白は「未設定」と誤読される。表記は Preferences と共通のキーを使う）。
+                dropdown.SetValueWithoutNotify(index >= 0
+                    ? choices[index]
+                    : string.IsNullOrEmpty(currentLocale)
+                        ? ""
+                        : EditorL10n.Tr(PackageUiScope, "outOfCatalog", currentLocale));
+                applying = false;
             }
 
             Apply();
@@ -194,7 +213,11 @@ namespace Kajitaharuka.EditorLocalization
                 var label = CompactLocaleLabel(locale);
                 var displayName = locale?.DisplayName ?? EditorL10n.GetActiveLocale(normalizedScope);
                 button.text = BuildCompactLocaleMenuText(marker, label);
-                button.tooltip = BuildLocaleTooltip(tooltipLabelProvider?.Invoke(), displayName);
+                // 無効時（カタログ未登録）は通常の説明でなく「なぜ押せないか」を出す。
+                // tooltip の管理元はこの Apply に一本化されているため上書き合戦は起きない。
+                button.tooltip = locales.Count > 0
+                    ? BuildLocaleTooltip(tooltipLabelProvider?.Invoke(), displayName)
+                    : EditorL10n.Tr(PackageUiScope, "menu.noCatalog.tooltip");
                 button.SetEnabled(locales.Count > 0);
             }
 
