@@ -4,7 +4,7 @@
         { "key": "header.subtitle", "value": "Langue d'affichage de l'Editor, enregistrée par utilisateur." },
         { "key": "header.overview", "value": "{0} scope · {1} locale" },
         { "key": "header.overview.empty", "value": "Aucun catalogue" },
-        { "key": "header.overview.fallback", "value": "Certains scopes utilisent le fallback car la langue demandée n'est pas disponible." },
+        { "key": "header.overview.fallback", "value": "Certains scopes se replient car la langue demandée n'est pas disponible." },
         { "key": "doc.tooltip", "value": "Ouvrir la documentation en ligne" },
         { "key": "note", "value": "La langue d'affichage est enregistrée par utilisateur dans EditorPrefs, pas dans les assets du projet. Ordre de résolution : réglage par scope → réglage global → langue du système → langue par défaut de chaque scope." },
         { "key": "catalogs.reload", "value": "Recharger" },

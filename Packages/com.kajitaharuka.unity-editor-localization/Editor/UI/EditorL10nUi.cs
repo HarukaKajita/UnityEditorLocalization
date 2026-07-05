@@ -147,21 +147,29 @@ namespace Kajitaharuka.EditorLocalization
 
             void Apply()
             {
+                // 公開 API のため、choices 再代入の同期通知中に利用側コールバックが例外を投げても
+                // ガードが立ちっぱなしにならないよう finally で必ず解除する。
                 applying = true;
-                locales = EditorL10n.GetLocales(scope).ToArray();
-                choices = locales.Select(locale => locale.DisplayName).ToList();
-                dropdown.choices = choices;
+                try
+                {
+                    locales = EditorL10n.GetLocales(scope).ToArray();
+                    choices = locales.Select(locale => locale.DisplayName).ToList();
+                    dropdown.choices = choices;
 
-                var currentLocale = EditorL10n.GetActiveLocale(scope);
-                var index = FindLocaleIndex(locales, currentLocale);
-                // 候補に無い（登録済みカタログ外の）ロケールは空欄にせず、その旨を表示する
-                // （空白は「未設定」と誤読される。表記は Preferences と共通のキーを使う）。
-                dropdown.SetValueWithoutNotify(index >= 0
-                    ? choices[index]
-                    : string.IsNullOrEmpty(currentLocale)
-                        ? ""
-                        : EditorL10n.Tr(PackageUiScope, "outOfCatalog", currentLocale));
-                applying = false;
+                    var currentLocale = EditorL10n.GetActiveLocale(scope);
+                    var index = FindLocaleIndex(locales, currentLocale);
+                    // 候補に無い（登録済みカタログ外の）ロケールは空欄にせず、その旨を表示する
+                    // （空白は「未設定」と誤読される。表記は Preferences と共通のキーを使う）。
+                    dropdown.SetValueWithoutNotify(index >= 0
+                        ? choices[index]
+                        : string.IsNullOrEmpty(currentLocale)
+                            ? ""
+                            : EditorL10n.Tr(PackageUiScope, "outOfCatalog", currentLocale));
+                }
+                finally
+                {
+                    applying = false;
+                }
             }
 
             Apply();
