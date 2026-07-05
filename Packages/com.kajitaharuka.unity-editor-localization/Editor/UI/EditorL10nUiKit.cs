@@ -193,6 +193,75 @@ namespace Kajitaharuka.EditorLocalization
             return card;
         }
 
+        /// <summary>開閉トグル用のチェブロンボタン。Button なのでキーボード操作でも開閉できる。</summary>
+        internal static Button Chevron()
+        {
+            var chevron = new Button { text = "▾" };
+            chevron.AddToClassList("eui-chevron");
+            return chevron;
+        }
+
+        /// <summary>
+        /// 折りたたみ可能なタイトル付きセクションカード。見出し行（チェブロン＋タイトル＋要約スロット）の
+        /// どこをクリックしても開閉でき、開閉状態は <paramref name="prefsKey"/> で EditorPrefs（ユーザーごと）に
+        /// 永続化する。畳んだままでも概況が分かるよう、<paramref name="summary"/> スロットへピル等を置ける。
+        /// 主要コントロールを含むセクションは defaultExpanded=true で「畳みの奥に隠さない」既定を守ること。
+        /// </summary>
+        internal static VisualElement CollapsibleSection(string title, string prefsKey, bool defaultExpanded,
+            out VisualElement content, out VisualElement summary)
+        {
+            var card = new VisualElement();
+            card.AddToClassList("eui-section");
+
+            var head = new VisualElement();
+            head.AddToClassList("eui-section__head");
+
+            var chevron = Chevron();
+
+            var titleLabel = new Label(title);
+            titleLabel.AddToClassList("eui-section__title");
+            titleLabel.name = "eui-section-title";
+
+            var summaryRow = new VisualElement();
+            summaryRow.AddToClassList("eui-section__summary");
+
+            head.Add(chevron);
+            head.Add(titleLabel);
+            head.Add(summaryRow);
+
+            var body = new VisualElement();
+            body.AddToClassList("eui-section__body");
+
+            var expanded = string.IsNullOrEmpty(prefsKey)
+                ? defaultExpanded
+                : EditorPrefs.GetBool(prefsKey, defaultExpanded);
+
+            void SetExpanded(bool value)
+            {
+                expanded = value;
+                body.style.display = value ? DisplayStyle.Flex : DisplayStyle.None;
+                chevron.text = value ? "▾" : "▸";
+                if (!string.IsNullOrEmpty(prefsKey))
+                    EditorPrefs.SetBool(prefsKey, value);
+            }
+
+            chevron.clicked += () => SetExpanded(!expanded);
+            // head 行のどこをクリックしても開閉できる（ヒット領域拡大）。チェブロンは自前で処理するため除外。
+            head.RegisterCallback<ClickEvent>(evt =>
+            {
+                if (evt.target == chevron)
+                    return;
+                SetExpanded(!expanded);
+            });
+            SetExpanded(expanded);
+
+            card.Add(head);
+            card.Add(body);
+            content = body;
+            summary = summaryRow;
+            return card;
+        }
+
         /// <summary>タイトル無しのセクションカード。Foldout 等それ自体が見出しを持つ要素を囲うのに使う。</summary>
         internal static VisualElement Card()
         {
