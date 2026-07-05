@@ -1046,6 +1046,7 @@ namespace Kajitaharuka.EditorLocalization
                 if (scopes.Count == 0)
                 {
                     EditorL10nUiKit.SetBadge(_overviewBadge, Tr("header.overview.empty"), EditorL10nBadgeKind.Neutral);
+                    _overviewBadge.tooltip = "";
                     return;
                 }
 
@@ -1064,17 +1065,32 @@ namespace Kajitaharuka.EditorLocalization
 
                 // 要約（ヘッダーバッジ）は個々の表示と矛盾させない総合判定にする:
                 // 検証でエラーが出ていれば Error、検証警告または「要求ロケールへ fallback 中」の scope が
-                // あれば Warning、それ以外は Neutral。
+                // あれば Warning、それ以外は Neutral。文言は構成情報のままなので、色が変わった理由は
+                // tooltip で回復可能にする（色だけに頼らない。tooltip の管理元はこのメソッドに一本化）。
                 var kind = EditorL10nBadgeKind.Neutral;
+                var reasons = new List<string>();
                 if (_lastValidation != null && _lastValidation.ErrorCount > 0)
+                {
                     kind = EditorL10nBadgeKind.Error;
-                else if (hasIssue || (_lastValidation != null && _lastValidation.WarningCount > 0))
+                    reasons.Add(Tr("catalogs.result.issues", _lastValidation.ErrorCount, _lastValidation.WarningCount));
+                }
+                else if (_lastValidation != null && _lastValidation.WarningCount > 0)
+                {
                     kind = EditorL10nBadgeKind.Warning;
+                    reasons.Add(Tr("catalogs.result.warnings", _lastValidation.WarningCount));
+                }
+                if (hasIssue)
+                {
+                    if (kind == EditorL10nBadgeKind.Neutral)
+                        kind = EditorL10nBadgeKind.Warning;
+                    reasons.Add(Tr("header.overview.fallback"));
+                }
 
                 EditorL10nUiKit.SetBadge(
                     _overviewBadge,
                     Tr("header.overview", scopes.Count, locales.Count),
                     kind);
+                _overviewBadge.tooltip = string.Join("\n", reasons);
             }
 
             private void BindButtonText(Button button, string textKey, string tooltipKey)
