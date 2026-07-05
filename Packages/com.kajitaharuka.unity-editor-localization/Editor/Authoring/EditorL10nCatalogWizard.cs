@@ -58,6 +58,10 @@ namespace Kajitaharuka.EditorLocalization
         // Preferences の結果表示と同じ部品 = SetInlineResult を使い、画面間で語彙を揃える）。
         private HelpBox _message;
         private Label _result;
+        // 表示中の結果を言語切替で再整形するためのスナップショット（key と引数を保持し、
+        // ApplyTexts で現在言語に描き直す。非表示のものは null）。
+        private string _messageKey;
+        private string _createdPath;
 
         // メニューに加えて Preferences のカタログ節（作成導線）からも開くため internal にする。
         [MenuItem("Tools/UnityEditorLocalization/Create Catalog", priority = 1)]
@@ -153,6 +157,15 @@ namespace Kajitaharuka.EditorLocalization
             if (_locales != null) _locales.label = Tr("wizard.locales.label");
             if (_localesHint != null) _localesHint.text = Tr("wizard.locales.hint");
             if (_create != null) _create.text = Tr("wizard.create");
+
+            // 表示中の結果/エラーも保持したスナップショットから現在言語で描き直す
+            // （さもないと言語切替後も旧言語のまま取り残される。Preferences の検証要約と同じ考え方）。
+            if (_message != null && _messageKey != null)
+                _message.text = Tr(_messageKey);
+            if (_result != null && _createdPath != null)
+                EditorL10nUiKit.SetInlineResult(_result,
+                    Tr("wizard.result.created", EditorL10nUiKit.InsertWrapOpportunities(_createdPath)),
+                    EditorL10nBadgeKind.Ok);
         }
 
         private void OnCreate()
@@ -243,6 +256,8 @@ namespace Kajitaharuka.EditorLocalization
             // 成功は Ok 色のインライン結果行で示す（結果色は内容と一致させる。エラー用 HelpBox は畳む）。
             // パスはスペースを含まないため、折り返し機会を挿入してはみ出しを防ぐ。
             _message.style.display = DisplayStyle.None;
+            _messageKey = null;
+            _createdPath = assetManifestPath;
             EditorL10nUiKit.SetInlineResult(_result,
                 Tr("wizard.result.created", EditorL10nUiKit.InsertWrapOpportunities(assetManifestPath)),
                 EditorL10nBadgeKind.Ok);
@@ -277,10 +292,12 @@ namespace Kajitaharuka.EditorLocalization
 
         private void ShowMessage(string key, HelpBoxMessageType type)
         {
+            _messageKey = key;
             _message.text = Tr(key);
             _message.messageType = type;
             _message.style.display = DisplayStyle.Flex;
             // エラー表示に切り替わるとき、前回の成功結果行が残って矛盾しないよう畳む。
+            _createdPath = null;
             if (_result != null)
                 _result.style.display = DisplayStyle.None;
         }
