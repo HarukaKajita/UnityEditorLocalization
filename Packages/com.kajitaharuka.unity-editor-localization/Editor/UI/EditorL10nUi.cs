@@ -16,7 +16,7 @@ namespace Kajitaharuka.EditorLocalization
     {
         // 部品自身の文言（カタログ外表記・無効理由など）を引く scope。パッケージ同梱カタログは
         // 常に存在するため、利用側 scope のカタログ状態に依存せず表示言語へ追従できる。
-        private const string PackageUiScope = "com.kajitaharuka.unity-editor-localization";
+        private const string PackageUiScope = EditorL10nPackage.Name;
 
         /// <summary>
         /// コンパクト言語選択メニューへ付与する既定のUSS class名。

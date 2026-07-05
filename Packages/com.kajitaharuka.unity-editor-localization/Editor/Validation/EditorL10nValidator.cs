@@ -74,7 +74,7 @@ namespace Kajitaharuka.EditorLocalization
     {
         // 診断文はこのパッケージ自身の翻訳カタログ（scope=パッケージ名）から引く。
         // 検証対象 scope の内容ではなく「検証ツールの文言」なので、パッケージ自身の scope を使うのが妥当。
-        private const string UiScope = "com.kajitaharuka.unity-editor-localization";
+        private const string UiScope = EditorL10nPackage.Name;
 
         public static string Format(EditorL10nValidationMessageKind kind, IReadOnlyList<string> args)
         {

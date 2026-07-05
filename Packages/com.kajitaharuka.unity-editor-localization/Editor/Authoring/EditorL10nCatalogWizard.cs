@@ -17,7 +17,7 @@ namespace Kajitaharuka.EditorLocalization
     /// </summary>
     internal sealed class EditorL10nCatalogWizard : EditorWindow
     {
-        private const string UiScope = "com.kajitaharuka.unity-editor-localization";
+        private const string UiScope = EditorL10nPackage.Name;
         private static string Tr(string key, params object[] args) => EditorL10n.Tr(UiScope, key, args);
 
         // 既知タグの表示名（manifest の nativeName/englishName に使う）。未知タグはタグ自身を名前にする。

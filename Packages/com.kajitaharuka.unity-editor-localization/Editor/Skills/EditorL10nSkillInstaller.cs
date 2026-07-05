@@ -28,7 +28,7 @@ namespace Kajitaharuka.EditorLocalization
     /// </summary>
     internal static class EditorL10nSkillInstaller
     {
-        private const string PackageName = "com.kajitaharuka.unity-editor-localization";
+        private const string PackageName = EditorL10nPackage.Name;
 
         // 同梱スキルのフォルダ名（パッケージの skills/ 直下）。スキルを増やしたらここへ追加する。
         internal static readonly string[] SkillFolders =

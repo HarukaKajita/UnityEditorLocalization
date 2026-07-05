@@ -21,7 +21,7 @@ namespace Kajitaharuka.EditorLocalization
     internal static class EditorL10nSettingsProvider
     {
         // この設定画面自身の UI 文言を引く scope（Editor/Localization の manifest と一致させる）。
-        private const string UiScope = "com.kajitaharuka.unity-editor-localization";
+        private const string UiScope = EditorL10nPackage.Name;
 
         // Preferences のこの設定ページのパス。CreateProvider とメニューから開く導線で共有する。
         private const string SettingsPath = "Preferences/UnityEditorLocalization";
