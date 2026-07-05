@@ -172,6 +172,21 @@ namespace Kajitaharuka.EditorLocalization
                 && scopeCatalog.TryGetTablePath(NormalizeLocaleTag(locale), out tablePath);
         }
 
+        /// <summary>
+        /// scope の指定 locale テーブルに含まれる key 数を返す（scope/locale が未登録なら false）。
+        /// Preferences のカタログ一覧で翻訳の進み具合を一目で示す表示用。
+        /// </summary>
+        internal static bool TryGetEntryCount(string scope, string locale, out int count)
+        {
+            count = 0;
+            if (!Catalog.TryGetScope(scope ?? "", out var scopeCatalog))
+                return false;
+            if (!scopeCatalog.TablesByLocale.TryGetValue(NormalizeLocaleTag(locale), out var table))
+                return false;
+            count = table.Count;
+            return true;
+        }
+
         public static IReadOnlyList<string> GetScopes()
         {
             return Catalog.Scopes.Select(scope => scope.Scope).OrderBy(scope => scope).ToArray();

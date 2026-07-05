@@ -54,8 +54,9 @@ namespace Kajitaharuka.EditorLocalization
         private Button _create;
         private HelpBox _message;
 
+        // メニューに加えて Preferences のカタログ節（作成導線）からも開くため internal にする。
         [MenuItem("Tools/UnityEditorLocalization/Create Catalog", priority = 1)]
-        private static void Open()
+        internal static void Open()
         {
             var window = GetWindow<EditorL10nCatalogWizard>(true);
             window.titleContent = new GUIContent(Tr("wizard.title"));

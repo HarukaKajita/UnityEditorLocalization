@@ -9,6 +9,17 @@ using Debug = UnityEngine.Debug;
 
 namespace Kajitaharuka.EditorLocalization
 {
+    /// <summary>スキル登録先 1 スコープ（ユーザー/プロジェクト）ぶんの登録状態。Preferences の状態ピル表示用。</summary>
+    internal enum EditorL10nSkillInstallState
+    {
+        /// <summary>期待するリンクが 1 つも無い。</summary>
+        NotInstalled,
+        /// <summary>期待するリンクがすべて有効（実体へ辿れる）。</summary>
+        Installed,
+        /// <summary>リンクの一部が欠けている、またはリンク先の実体が無い（再登録で直る）。</summary>
+        NeedsReinstall,
+    }
+
     /// <summary>
     /// パッケージ同梱の AIエージェント向けスキル（翻訳ワークフロー / 既存拡張の多言語化連携）を、
     /// <c>.claude/skills</c> と <c>.agents/skills</c> へ symlink で登録するインストーラ（Claude Code 等で利用）。
@@ -64,6 +75,77 @@ namespace Kajitaharuka.EditorLocalization
             return Application.platform == RuntimePlatform.WindowsEditor
                 ? BuildWindowsSnippet("user scope (.claude, .agents)", skillsRoot, "%USERPROFILE%")
                 : BuildUnixSnippet("user scope (~/.claude, ~/.agents)", skillsRoot, "~");
+        }
+
+        /// <summary>ユーザースコープ（ホーム配下）の登録状態を確認する。</summary>
+        internal static EditorL10nSkillInstallState GetUserInstallState() => GetInstallState(GetUserBase());
+
+        /// <summary>プロジェクトスコープ（リポジトリ直下）の登録状態を確認する。</summary>
+        internal static EditorL10nSkillInstallState GetProjectInstallState() => GetInstallState(GetProjectBase());
+
+        // 登録先ベースディレクトリ配下の期待リンクを走査し、登録状態へ集約する。
+        // 「有効なリンク」= Directory.Exists（symlink を辿って実体まで届く）。リンク切れ（symlink は
+        // あるが実体が無い）は親ディレクトリのエントリ列挙で検出する（.NET Standard 2.1 には
+        // リンク解決 API が無いため）。有効/欠落/リンク切れの混在は一律「再登録が必要」に倒す。
+        private static EditorL10nSkillInstallState GetInstallState(string baseDir)
+        {
+            if (string.IsNullOrEmpty(baseDir))
+                return EditorL10nSkillInstallState.NotInstalled;
+
+            var valid = 0;
+            var brokenOrMissing = 0;
+            var anyEntry = false;
+            foreach (var root in LinkRoots)
+            {
+                var linkDir = Path.Combine(baseDir, root.Replace('/', Path.DirectorySeparatorChar));
+                foreach (var skill in SkillFolders)
+                {
+                    var link = Path.Combine(linkDir, skill);
+                    if (Directory.Exists(link))
+                    {
+                        valid++;
+                        anyEntry = true;
+                    }
+                    else if (EntryExists(link))
+                    {
+                        // エントリはあるのに辿れない＝リンク切れ。
+                        brokenOrMissing++;
+                        anyEntry = true;
+                    }
+                    else
+                    {
+                        brokenOrMissing++;
+                    }
+                }
+            }
+
+            if (!anyEntry)
+                return EditorL10nSkillInstallState.NotInstalled;
+            return brokenOrMissing == 0
+                ? EditorL10nSkillInstallState.Installed
+                : EditorL10nSkillInstallState.NeedsReinstall;
+        }
+
+        // Directory/File.Exists は symlink を辿るため、リンク切れ symlink の存在は親のエントリ列挙で確認する。
+        private static bool EntryExists(string path)
+        {
+            try
+            {
+                var parent = Path.GetDirectoryName(path);
+                if (string.IsNullOrEmpty(parent) || !Directory.Exists(parent))
+                    return false;
+                var name = Path.GetFileName(path);
+                foreach (var entry in Directory.EnumerateFileSystemEntries(parent))
+                {
+                    if (string.Equals(Path.GetFileName(entry), name, StringComparison.Ordinal))
+                        return true;
+                }
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         /// <summary>プロジェクトスコープへ登録する CLI コマンド片を返す（コピペ実行可能）。</summary>
