@@ -1,5 +1,26 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+- Preferences の 5 つの大項目（表示言語 / scope 個別設定 / カタログ / AIエージェント連携スキル / 開発者向け）を折りたたみ可能にした。開閉状態は EditorPrefs（ユーザーごと）に永続化し、畳んだ見出しにも要約ピル（表示言語=現在の実効言語と由来、scope 個別設定=scope 数と個別設定数、カタログ=最終検証のエラー/警告件数）を表示する。開発者向けは従来どおり既定で畳む（Foldout を廃し、他の折りたたみと同じ共通部品へ統一）。
+- セクション見出しの視覚的階層を強化（11px・淡色 → 12px・本文色。中身の scope 名より見出しが弱かった逆転を解消）。あわせて `EditorDesignTokens.uss` に間隔・フォント・角丸のトークン（`--eui-space-*` / `--eui-font-*` / `--eui-radius-*`）を導入して生値の散在を解消し、10px だった補足・バッジ・fallback 連鎖チップの文字サイズを 11px へ引き上げた（可読性）。
+- カタログの大項目を scope 別グループへ統合再設計。各 scope のグループに**カタログのファイル一覧**（manifest 行と各 locale テーブル行。既定ロケールのバッジ・key 数ピル・manifest が宣言しているのに実体が無いテーブルの欠落マーカー `×` 付き。クリックで選択+Ping）と**検証結果**を同居させ、どのファイル・どの警告かを 1 箇所で追えるようにした。検証済みで問題の無い scope は ✓ ピルで示す（これに伴い「他 {0} scope は問題なし」の `catalogs.groups.clean` は廃止）。グループの開閉はユーザー操作を記憶し、未操作時の既定はエラーを含む scope のみ展開。
+- scope 個別設定カードから manifest 行をカタログの大項目へ移設し、「表示の設定（scope 個別設定）」と「データ資産の保守（カタログ）」の責務を分離した。scope の絞り込み検索は従来どおり scope 個別設定のみに適用する（別の大項目の表示を暗黙に書き換えない方針）。
+- 検証要約の色を内容と一致させた（エラーあり=エラー色 / 警告のみ=警告色＋専用文言 / 問題なし=OK 色。従来は警告があっても緑で表示されていた）。要約行に検証の実行時刻を添え、スナップショットの鮮度を明示する。
+- ヘッダーの概況バッジを総合判定へ変更（検証エラーあり=Error、検証警告または要求ロケールへ fallback 中の scope あり=Warning、平常=Neutral。従来は検証結果がバッジへ反映されなかった）。
+- カタログ節の操作ボタンを主操作順（検証 → 再読み込み → カタログを作成…）へ並べ替え、Preferences から作成ウィザードを直接開けるようにした。カタログ未登録時の空状態には作成導線を案内する。
+- 検証 issue 行のクイックfix「+」を行頭から行末へ移動し、深刻度マーカー（`×`/`!`）の縦の整列が崩れないようにした（IDE のクイックfix と同じ位置の慣習）。
+- AIエージェント連携スキルの登録先（ホーム / このプロジェクト）ごとに登録状態ピル（登録済み / 未登録 / 要再登録）を表示し、押す前から状態が分かるようにした。
+- ヘッダー直下に常設していた保存先・解決順の説明ノートを、表示言語の大項目内へ移設した。
+- スキル節・CLI 欄などに散在していた C# 直書きのスタイル（フォントサイズ・余白）を USS クラスへ移し、デザイントークンと一貫させた。
+
+### Added
+- UI 部品 `EditorL10nUiKit.CollapsibleSection`（チェブロン＋見出し＋要約スロット。見出し行全体のクリックで開閉、開閉状態を EditorPrefs へ永続化）と `Chevron` を追加。scope カード・検証グループの自前チェブロンも共通部品へ統一した。
+- `EditorL10n.TryGetEntryCount(scope, locale, out count)`（internal）を追加（カタログ一覧の key 数表示用）。
+- `EditorL10nSkillInstaller.GetUserInstallState()` / `GetProjectInstallState()` を追加。登録先の symlink の有無・リンク切れを確認し、`EditorL10nSkillInstallState`（Installed / NotInstalled / NeedsReinstall）で返す。
+- Preferences 翻訳へ 14 キーを **19 言語**で追加し、2 キーの文言を更新、1 キーを削除（各 98→111 キー）。追加: `catalogs.empty`（空状態と作成導線）/ `catalogs.create.tooltip` / `catalogs.result.warnings`（警告のみの要約）/ `catalogs.validatedAt`（検証時刻）/ `catalogs.pill.default` / `catalogs.table.tooltip` / `catalogs.table.missing.tooltip` / `catalogs.entries.tooltip` / `scope.summary` / `skills.status.installed` / `skills.status.notInstalled` / `skills.status.reinstall` / `skills.status.tooltip` / `summary.localeWithSource`。更新: `catalogs.result.ok`（警告件数への言及を分離）/ `catalogs.help.tooltip`（主操作の検証を先に説明）。削除: `catalogs.groups.clean`。`summary.localeWithSource` は句読点のみのパターンで原語と同値が正当なため manifest の `fixedTerms` へ宣言。キー過不足・placeholder・未翻訳疑いの機械検証をクリア。
+
 ## [1.1.0] - 2026-06-28
 
 ### Changed

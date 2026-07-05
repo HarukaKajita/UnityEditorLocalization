@@ -185,7 +185,7 @@ scope 個別設定 -> グローバル設定 -> システム言語 -> scope の d
 選択ロケール -> 親ロケール -> defaultLocale -> key
 ```
 
-グローバル設定は`Preferences > UnityEditorLocalization`で変更できます。scope 個別設定がある場合は、その scope では個別設定がグローバル設定より優先されます。scope 個別設定は、Preferences で「グローバル設定に従う」を選ぶと解除できます。グローバル設定が未設定のときは、OS の優先言語（Unity の`Application.systemLanguage`を主に、地域は`CultureInfo`で補完）を推定して表示に使い、対応する翻訳が無ければ各 scope の`defaultLocale`へフォールバックします。この挙動は Preferences のトグルで無効化でき、検出されたシステム言語と、各 scope で実際に効く fallback 連鎖（使用段を強調表示）も Preferences で確認できます。Preferences では scope 文字列で検索でき、各 scope の現在の解決ロケール（override / fallback はバッジで表示）・`defaultLocale`・manifest パス（クリックで選択）を確認できます。ヘッダー右上のアイコンからオンラインドキュメントを開け、カタログの再読み込み（Reload）・検証（Validate）も実行できます。Preferences 画面自身も多言語化されており、表示言語の変更に追従します。
+グローバル設定は`Preferences > UnityEditorLocalization`で変更できます。scope 個別設定がある場合は、その scope では個別設定がグローバル設定より優先されます。scope 個別設定は、Preferences で「グローバル設定に従う」を選ぶと解除できます。グローバル設定が未設定のときは、OS の優先言語（Unity の`Application.systemLanguage`を主に、地域は`CultureInfo`で補完）を推定して表示に使い、対応する翻訳が無ければ各 scope の`defaultLocale`へフォールバックします。この挙動は Preferences のトグルで無効化でき、検出されたシステム言語と、各 scope で実際に効く fallback 連鎖（使用段を強調表示）も Preferences で確認できます。Preferences の大項目（表示言語 / scope 個別設定 / カタログ / AIエージェント連携スキル / 開発者向け）は折りたたみでき、開閉状態はユーザーごとに保存され、畳んだ見出しにも現在の表示言語や scope 数・検証件数などの要約が表示されます。scope 個別設定では scope 文字列で検索でき、各 scope の現在の解決ロケール（override / fallback はバッジで表示）と`defaultLocale`を確認できます。manifest や翻訳テーブルの一覧はカタログの大項目にあり、クリックで該当アセットを選択できます。ヘッダー右上のアイコンからオンラインドキュメントを開け、カタログの検証（Validate）・再読み込み（Reload）・作成ウィザードの起動も実行できます。Preferences 画面自身も多言語化されており、表示言語の変更に追従します。
 
 例:
 
@@ -210,7 +210,7 @@ Tools > UnityEditorLocalization > Validate Catalogs
 - defaultLocaleと同一の値が残っていないか（manifestの`fixedTerms`に挙げた固定語キーは除外）
 - defaultLocaleにない余分なkeyがないか
 
-`Preferences > UnityEditorLocalization` の **カタログ** セクションからも同じ検証を実行できます。結果は **どの scope 由来か** が分かるように scope ごとに分類され、scope ごとの折りたたみグループ（エラーを含む scope は既定で展開）に、エラー/警告の件数・由来 locale・詳細をその場で表示します。詳細文も含めて表示言語に追従し、全件は Console にも出力されます。
+`Preferences > UnityEditorLocalization` の **カタログ** セクションからも同じ検証を実行できます。このセクションには scope ごとの折りたたみグループがあり、各グループにカタログのファイル一覧（manifest と各 locale テーブル。既定ロケールのバッジ・key 数・宣言済みでファイルが無いテーブルの欠落マーカー付き。クリックで該当アセットを選択）と、検証結果（エラー/警告の件数・由来 locale・詳細。エラーを含む scope は既定で展開、問題の無い scope は ✓）を **どの scope 由来か** が分かる形でまとめて表示します。検証の要約には実行時刻も添えられます。詳細文も含めて表示言語に追従し、全件は Console にも出力されます。カタログが未登録のときは、同セクションの「カタログを作成…」から作成ウィザードを開けます。
 
 ### CI で検証する
 
@@ -235,7 +235,7 @@ Unity -batchmode -quit -projectPath . \
 - **Unity から（おすすめ）**: `Tools > UnityEditorLocalization > AI Agent Skills` の
   `Install for current user`（ホームの `~/.claude/skills` と `~/.agents/skills`）または
   `Install for this project`（このプロジェクト直下の `.claude/skills` と `.agents/skills`）。
-  `Preferences > UnityEditorLocalization` の「AIエージェント連携スキル」からも、同じ登録操作と、表示された CLI コマンドのコピーができます。
+  `Preferences > UnityEditorLocalization` の「AIエージェント連携スキル」からも、同じ登録操作と、表示された CLI コマンドのコピーができます。登録先ごとの現在の登録状態（登録済み / 未登録 / 要再登録）もこの画面で確認できます。
   macOS / Linux / Windows いずれでも動作します（macOS/Linux は `ln`、Windows は `mklink /D`。権限が無い環境では junction にフォールバック）。
 - **CLI から**: 上記メニューの `Copy CLI commands to clipboard`（または Preferences に表示されるコマンドの「コピー」）で、実体パスを埋め込んだコマンドが得られます。表示・コピーされるコマンドは **OS に合わせて変わります**（macOS/Linux は下記の `ln`、Windows は `mklink /D`）。ユーザースコープの例（macOS / Linux）:
 
