@@ -45,14 +45,19 @@ namespace Kajitaharuka.EditorLocalization
         };
 
         private TextField _scope;
+        private Label _scopeHint;
         private ObjectField _folder;
         private TextField _defaultLocale;
         private TextField _locales;
         private Label _sectionTitle;
         private Label _subtitle;
-        private Label _localesHint;
+        private Button _doc;
         private Button _create;
+        private Label _localesHint;
+        // エラーは HelpBox、成功は Ok 色のインライン結果行で示す（結果色は内容と一致させる。
+        // Preferences の結果表示と同じ部品 = SetInlineResult を使い、画面間で語彙を揃える）。
         private HelpBox _message;
+        private Label _result;
 
         // メニューに加えて Preferences のカタログ節（作成導線）からも開くため internal にする。
         [MenuItem("Tools/UnityEditorLocalization/Create Catalog", priority = 1)]
@@ -68,11 +73,22 @@ namespace Kajitaharuka.EditorLocalization
         {
             var root = rootVisualElement;
             EditorL10nUiKit.ApplyTheme(root);
+            // 窓は任意サイズに縮む。エラー/成功メッセージ表示時や文長の長い言語では内容が伸びるため、
+            // 全体を ScrollView に収め、縦に狭いときは潰さずスクロールで全体へ到達できるようにする。
+            root.style.flexGrow = 1;
+
+            var scroll = new ScrollView(ScrollViewMode.Vertical);
+            scroll.style.flexGrow = 1;
+            scroll.style.flexShrink = 1;
+            scroll.style.minHeight = 0; // 既定 min-height:auto を解除し、親の高さに収めてスクロールさせる
+            root.Add(scroll);
 
             _subtitle = null;
-            var header = EditorL10nUiKit.Header("UnityEditorLocalization", Tr("wizard.subtitle"));
+            // 右肩の汎用 chrome にオンラインドキュメントへの導線を置く（Preferences と同じ位置・見た目）。
+            _doc = EditorL10nUiKit.DocButton(EditorL10nDocs.DocumentationUrl, Tr("doc.tooltip"));
+            var header = EditorL10nUiKit.Header("UnityEditorLocalization", Tr("wizard.subtitle"), null, _doc);
             _subtitle = header.Q<Label>("eui-header-subtitle");
-            root.Add(header);
+            scroll.Add(header);
 
             var card = EditorL10nUiKit.Section(Tr("wizard.title"), out var content);
             _sectionTitle = card.Q<Label>(className: "eui-section__title");
@@ -80,6 +96,10 @@ namespace Kajitaharuka.EditorLocalization
             _scope = new TextField(Tr("wizard.scope.label"));
             EditorL10nUiKit.AlignField(_scope);
             content.Add(_scope);
+
+            // 空の自由入力に例示を添える（認識>想起。命名の手がかりを記憶に頼らせない）。
+            _scopeHint = EditorL10nUiKit.HintRow(Tr("wizard.scope.hint"));
+            content.Add(_scopeHint);
 
             _folder = new ObjectField(Tr("wizard.folder.label")) { objectType = typeof(DefaultAsset), allowSceneObjects = false };
             EditorL10nUiKit.AlignField(_folder);
@@ -107,7 +127,12 @@ namespace Kajitaharuka.EditorLocalization
             _message.style.display = DisplayStyle.None;
             content.Add(_message);
 
-            root.Add(card);
+            _result = new Label();
+            _result.AddToClassList("eui-inline-result");
+            _result.style.display = DisplayStyle.None;
+            content.Add(_result);
+
+            scroll.Add(card);
 
             ApplyTexts();
             // 表示言語の変更に追従（静的ラベルの再翻訳）。root へ紐付けて閉じる際に購読解除される。
@@ -120,7 +145,9 @@ namespace Kajitaharuka.EditorLocalization
             titleContent = new GUIContent(Tr("wizard.title"));
             if (_subtitle != null) _subtitle.text = Tr("wizard.subtitle");
             if (_sectionTitle != null) _sectionTitle.text = Tr("wizard.title");
+            if (_doc != null) _doc.tooltip = Tr("doc.tooltip");
             if (_scope != null) _scope.label = Tr("wizard.scope.label");
+            if (_scopeHint != null) _scopeHint.text = Tr("wizard.scope.hint");
             if (_folder != null) _folder.label = Tr("wizard.folder.label");
             if (_defaultLocale != null) _defaultLocale.label = Tr("wizard.defaultLocale.label");
             if (_locales != null) _locales.label = Tr("wizard.locales.label");
@@ -213,9 +240,12 @@ namespace Kajitaharuka.EditorLocalization
                 EditorGUIUtility.PingObject(manifestAsset);
             }
 
-            _message.text = Tr("wizard.result.created", assetManifestPath);
-            _message.messageType = HelpBoxMessageType.Info;
-            _message.style.display = DisplayStyle.Flex;
+            // 成功は Ok 色のインライン結果行で示す（結果色は内容と一致させる。エラー用 HelpBox は畳む）。
+            // パスはスペースを含まないため、折り返し機会を挿入してはみ出しを防ぐ。
+            _message.style.display = DisplayStyle.None;
+            EditorL10nUiKit.SetInlineResult(_result,
+                Tr("wizard.result.created", EditorL10nUiKit.InsertWrapOpportunities(assetManifestPath)),
+                EditorL10nBadgeKind.Ok);
         }
 
         // 入力タグ列（空白/カンマ区切り）を正規化・重複排除し、defaultLocale を先頭に必ず含める。
@@ -250,6 +280,9 @@ namespace Kajitaharuka.EditorLocalization
             _message.text = Tr(key);
             _message.messageType = type;
             _message.style.display = DisplayStyle.Flex;
+            // エラー表示に切り替わるとき、前回の成功結果行が残って矛盾しないよう畳む。
+            if (_result != null)
+                _result.style.display = DisplayStyle.None;
         }
     }
 }
