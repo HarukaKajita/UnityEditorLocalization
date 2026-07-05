@@ -11,9 +11,12 @@ namespace Kajitaharuka.EditorLocalization
 {
     /// <summary>
     /// Preferences > UnityEditorLocalization の設定画面。UI Toolkit で構築し、2 ゾーンヘッダー
-    /// （左=アイデンティティ＋概況、右=ドキュメント等の汎用 chrome）、表示言語（グローバル）、
-    /// scope 個別設定、開発者向け（段階的開示）に再編する。画面自身の文言も自身の翻訳カタログ
-    /// （scope=UiScope）から引くことで多言語表示・言語切替に追従させる（ドッグフーディング）。
+    /// （左=アイデンティティ＋概況、右=ドキュメント等の汎用 chrome）の下に、折りたたみ可能な
+    /// 5 つの大項目（表示言語 / scope 個別設定 / カタログ / AIエージェント連携スキル / 開発者向け）を
+    /// 並べる。開閉状態は EditorPrefs（ユーザーごと）に永続化し、畳んだ見出しにも要約ピルで概況を出す。
+    /// カタログの大項目には scope ごとのファイル一覧（manifest / 各 locale テーブル）と検証結果を
+    /// 由来 scope 単位で統合表示する。画面自身の文言も自身の翻訳カタログ（scope=UiScope）から引くことで
+    /// 多言語表示・言語切替に追従させる（ドッグフーディング）。
     /// </summary>
     internal static class EditorL10nSettingsProvider
     {
@@ -22,6 +25,9 @@ namespace Kajitaharuka.EditorLocalization
 
         // Preferences のこの設定ページのパス。CreateProvider とメニューから開く導線で共有する。
         private const string SettingsPath = "Preferences/UnityEditorLocalization";
+
+        // 大項目の開閉状態を保存する EditorPrefs キーの前置詞（ユーザーごと。プロジェクト資産へ書かない方針と一貫）。
+        private const string SectionPrefsPrefix = "Kajitaharuka.EditorLocalization.Section.";
 
         // Tools から Preferences を開き、この項目を選択状態にする導線。
         [MenuItem("Tools/UnityEditorLocalization/Settings", priority = 0)]
@@ -69,14 +75,33 @@ namespace Kajitaharuka.EditorLocalization
             private HelpBox _scopeEmpty;
             // 絞り込み文字列はここにキャッシュせず、ApplyFilter で常にこのフィールドの現在値を直接読む
             // （キャッシュすると表示と内部状態が desync し、フィールドが空なのに全カードが消える不具合が起きうる）。
+            // 絞り込みの適用先は scope 個別設定（設定カード）のみ。カタログ節の scope グループは
+            // 折りたたみで密度を保つ方針とし、別節の表示を書き換える暗黙の副作用を持たせない。
             private TextField _search;
             private string[] _builtScopes = Array.Empty<string>();
             private readonly List<ScopeCard> _cards = new();
-            // カタログ検証の結果表示。要約行（_catalogsResult）と scope 別分類（_validationGroups）の参照を保持し、
-            // 言語変更時に保持したスナップショット（_lastValidation）で再描画して画面言語へ追従させる。
+
+            // 折りたたみセクションの見出し要約ピル（畳んだままでも概況が読めるようにする）。
+            private Label _globalSummary;
+            private Label _scopeSummary;
+            private Label _catalogsSummaryErrors;
+            private Label _catalogsSummaryWarnings;
+
+            // カタログ節の表示部。要約行（_catalogsResult）・検証時刻（_validatedAtHint）・scope 別グループ
+            // （_catalogGroups: ファイル一覧＋検証結果）の参照を保持し、言語変更時に保持したスナップショット
+            // （_lastValidation）で再描画して画面言語へ追従させる。
             private Label _catalogsResult;
-            private VisualElement _validationGroups;
+            private Label _validatedAtHint;
+            private VisualElement _catalogGroups;
+            private HelpBox _catalogsEmpty;
             private EditorL10nValidationResult _lastValidation;
+            private DateTime _lastValidatedAt;
+            // scope グループの開閉状態（ユーザー操作を記憶し、検証/言語変更の再描画でも保持する）。
+            private readonly Dictionary<string, bool> _groupExpanded = new();
+
+            // AIエージェント連携スキルの登録状態ピル（登録先ごと）。
+            private Label _userSkillStatePill;
+            private Label _projectSkillStatePill;
 
             public void Build(VisualElement root)
             {
@@ -94,7 +119,6 @@ namespace Kajitaharuka.EditorLocalization
 
                 var header = BuildHeader();
                 scroll.Add(header);
-                scroll.Add(EditorL10nUiKit.Note(Tr("note")).Also(label => BindLabel(label, "note")));
                 // 主要操作（表示言語）を上部に保ち、カタログの保守/検証はその下に置く（作業順・主要操作の明確化）。
                 scroll.Add(BuildGlobalSection());
                 scroll.Add(BuildScopeSection());
@@ -104,6 +128,9 @@ namespace Kajitaharuka.EditorLocalization
 
                 _builtScopes = EditorL10n.GetScopes().ToArray();
                 RebuildScopeList(_builtScopes);
+                RenderCatalogGroups();
+                UpdateScopeSummary();
+                UpdateOverviewBadge();
 
                 // 言語変更/カタログ変更へ追従。再構築サブツリーに含まれる header へ紐付けることで、
                 // 再アクティベーション時の root.Clear() で古い購読が確実に解除され、リークを防ぐ。
@@ -119,353 +146,32 @@ namespace Kajitaharuka.EditorLocalization
 
                 var header = EditorL10nUiKit.Header("UnityEditorLocalization", Tr("header.subtitle"), _overviewBadge, doc);
                 BindLabel(header.Q<Label>("eui-header-subtitle"), "header.subtitle");
-                UpdateOverviewBadge();
                 return header;
             }
 
-            // ===== カタログ（Reload / Validate / 検証結果の scope 別分類）=====
-            // 「再読み込み・検証」を独立した大項目（タイトル付き Section）として捉え直し、その中に
-            // 検証結果を scope ごとに分類して表示する。どの scope 由来の警告/エラーかを一目で追える。
-            private VisualElement BuildCatalogs()
+            // ===== 折りたたみセクションの共通生成 =====
+            // タイトルは翻訳キーへバインドし、開閉状態は EditorPrefs（ユーザーごと）に永続化する。
+            private VisualElement BuildSection(string titleKey, string prefsSuffix, bool defaultExpanded,
+                out VisualElement content, out VisualElement summary)
             {
-                var card = EditorL10nUiKit.Section(Tr("catalogs.title"), out var content);
-                BindLabel(card.Q<Label>(className: "eui-section__title"), "catalogs.title");
-
-                var row = new VisualElement();
-                row.AddToClassList("l10n-catalogs");
-
-                var result = new Label { name = "l10n-catalogs-result" };
-                result.AddToClassList("l10n-catalogs__result");
-                result.style.display = DisplayStyle.None;
-                _catalogsResult = result;
-
-                // 検証結果を scope ごとに分類して並べる領域（Validate 実行時に作り直す）。
-                var groups = new VisualElement();
-                groups.AddToClassList("l10n-validation-groups");
-                groups.style.display = DisplayStyle.None;
-                _validationGroups = groups;
-
-                var reload = EditorL10nUiKit.ActionButton(Tr("catalogs.reload"), () =>
-                {
-                    EditorL10n.Reload();
-                    SetResult(result, Tr("catalogs.reloaded"), EditorL10nBadgeKind.Neutral);
-                    // Reload でカタログが入れ替わると前回の検証結果は古くなるため分類表示を畳む。
-                    _lastValidation = null;
-                    RenderValidationGroups(null);
-                }, Tr("catalogs.reload.tooltip"));
-                BindButtonText(reload, "catalogs.reload", "catalogs.reload.tooltip");
-
-                var validate = EditorL10nUiKit.ActionButton(Tr("catalogs.validate"), () =>
-                {
-                    var validation = EditorL10nValidator.ValidateAndLog();
-                    _lastValidation = validation;
-                    UpdateCatalogsResultLine();
-                    RenderValidationGroups(validation);
-                }, Tr("catalogs.validate.tooltip"));
-                BindButtonText(validate, "catalogs.validate", "catalogs.validate.tooltip");
-
-                // 両操作の意味を説明する HelpBox（既定は非表示）。下の ⓘ ボタンで開閉する。
-                var help = EditorL10nUiKit.InfoBox(Tr("catalogs.help.tooltip"));
-                help.style.display = DisplayStyle.None;
-                EditorL10nUi.RegisterLocaleCallback(help, () => help.text = Tr("catalogs.help.tooltip"));
-
-                // 説明トグル（ⓘ）。クリック/キーボードで上の HelpBox を開閉でき（キーボード到達可）、
-                // ホバーの tooltip でも要約を確認できる（マウス）。これで説明性を入力手段に依らず確保する。
-                var helpToggle = EditorL10nUiKit.IconLinkButton("console.infoicon", Tr("catalogs.help.tooltip"), () =>
-                {
-                    help.style.display = help.style.display == DisplayStyle.None ? DisplayStyle.Flex : DisplayStyle.None;
-                });
-                BindTooltip(helpToggle, "catalogs.help.tooltip");
-
-                row.Add(reload);
-                row.Add(validate);
-                row.Add(helpToggle);
-                row.Add(result);
-
-                content.Add(row);
-                content.Add(help);
-                content.Add(groups);
+                var card = EditorL10nUiKit.CollapsibleSection(
+                    Tr(titleKey), SectionPrefsPrefix + prefsSuffix, defaultExpanded, out content, out summary);
+                BindLabel(card.Q<Label>(className: "eui-section__title"), titleKey);
                 return card;
-            }
-
-            // 検証結果の要約行を現在のスナップショット（_lastValidation）から（再）描画する。言語変更にも追従させる。
-            private void UpdateCatalogsResultLine()
-            {
-                if (_catalogsResult == null || _lastValidation == null)
-                    return;
-                if (_lastValidation.IsValid)
-                    SetResult(_catalogsResult, Tr("catalogs.result.ok", _lastValidation.WarningCount), EditorL10nBadgeKind.Ok);
-                else
-                    SetResult(_catalogsResult, Tr("catalogs.result.issues", _lastValidation.ErrorCount, _lastValidation.WarningCount), EditorL10nBadgeKind.Warning);
-            }
-
-            // 検証結果を scope ごとに分類して描画する（point-in-time のスナップショット）。
-            // null を渡すと領域を畳む。言語変更時は保持した _lastValidation で呼び直し、画面言語へ追従させる。
-            private void RenderValidationGroups(EditorL10nValidationResult validation)
-            {
-                if (_validationGroups == null)
-                    return;
-
-                _validationGroups.Clear();
-
-                if (validation == null)
-                {
-                    _validationGroups.style.display = DisplayStyle.None;
-                    return;
-                }
-
-                // 追加順を保ちつつ scope ごとに issue をまとめる。
-                var byScope = new Dictionary<string, List<EditorL10nValidationIssue>>();
-                var order = new List<string>();
-                foreach (var issue in validation.Issues)
-                {
-                    if (!byScope.TryGetValue(issue.Scope, out var list))
-                    {
-                        list = new List<EditorL10nValidationIssue>();
-                        byScope[issue.Scope] = list;
-                        order.Add(issue.Scope);
-                    }
-                    list.Add(issue);
-                }
-
-                if (order.Count == 0)
-                {
-                    _validationGroups.style.display = DisplayStyle.None;
-                    return;
-                }
-
-                _validationGroups.style.display = DisplayStyle.Flex;
-                foreach (var scope in order)
-                    _validationGroups.Add(BuildValidationGroup(scope, byScope[scope]));
-
-                // 問題の無かった scope 数を控えめに示す（検査済みである安心材料・全体像の把握）。
-                var cleanScopes = EditorL10n.GetScopes().Count - order.Count;
-                if (cleanScopes > 0)
-                    _validationGroups.Add(EditorL10nUiKit.HintRow(Tr("catalogs.groups.clean", cleanScopes)));
-            }
-
-            // 1 scope ぶんの分類グループ（折りたたみ可能）。ヘッダーに件数ピル、本文に issue 行を並べる。
-            private VisualElement BuildValidationGroup(string scope, List<EditorL10nValidationIssue> issues)
-            {
-                // 1 深刻度あたりの表示上限。巨大な scope（数十 key 欠落など）で UI が縦に伸び切るのを防ぐ。
-                // 全件は常に Console（ValidateAndLog）へ出ているので、超過分は件数だけ示して Console へ誘導する。
-                const int maxRowsPerSeverity = 30;
-
-                var errors = issues.Where(issue => issue.Severity == EditorL10nValidationSeverity.Error).ToList();
-                var warnings = issues.Where(issue => issue.Severity == EditorL10nValidationSeverity.Warning).ToList();
-
-                var group = new VisualElement();
-                group.AddToClassList("l10n-vgroup");
-
-                var head = new VisualElement();
-                head.AddToClassList("l10n-vgroup__head");
-
-                var chevron = new Button { text = "▾" };
-                chevron.AddToClassList("l10n-chevron");
-
-                var body = new VisualElement();
-                body.AddToClassList("l10n-vgroup__body");
-
-                // エラーを含む scope は既定で展開（注意が要る対象を最初から見せる）。警告だけなら畳む。
-                var expanded = errors.Count > 0;
-                void SetExpanded(bool value)
-                {
-                    expanded = value;
-                    body.style.display = value ? DisplayStyle.Flex : DisplayStyle.None;
-                    chevron.text = value ? "▾" : "▸";
-                }
-                chevron.clicked += () => SetExpanded(!expanded);
-
-                var name = new Label(EditorL10nUiKit.InsertWrapOpportunities(scope));
-                name.AddToClassList("l10n-vgroup__name");
-                name.tooltip = scope;
-
-                // 件数ピル（畳んだ状態でも深刻度の概況が分かる）。数を含むので未翻訳化されず多言語でも一意。
-                var pills = new VisualElement();
-                pills.AddToClassList("l10n-scope-card__pills");
-                if (errors.Count > 0)
-                    pills.Add(EditorL10nUiKit.Pill(Tr("catalogs.count.errors", errors.Count), EditorL10nBadgeKind.Error));
-                if (warnings.Count > 0)
-                    pills.Add(EditorL10nUiKit.Pill(Tr("catalogs.count.warnings", warnings.Count), EditorL10nBadgeKind.Warning));
-
-                head.Add(chevron);
-                head.Add(name);
-                head.Add(pills);
-                // head 行のどこをクリックしても開閉できる（ヒット領域拡大）。チェブロンは自前で処理するため除外。
-                head.RegisterCallback<ClickEvent>(evt =>
-                {
-                    if (evt.target == chevron)
-                        return;
-                    SetExpanded(!expanded);
-                });
-
-                // 本文: エラー → 警告 の順に行を並べる（深刻なものを上に）。上限超過分は件数を示す。
-                foreach (var issue in errors.Take(maxRowsPerSeverity))
-                    body.Add(BuildValidationIssueRow(issue));
-                if (errors.Count > maxRowsPerSeverity)
-                    body.Add(EditorL10nUiKit.HintRow(Tr("catalogs.more", errors.Count - maxRowsPerSeverity)));
-                foreach (var issue in warnings.Take(maxRowsPerSeverity))
-                    body.Add(BuildValidationIssueRow(issue));
-                if (warnings.Count > maxRowsPerSeverity)
-                    body.Add(EditorL10nUiKit.HintRow(Tr("catalogs.more", warnings.Count - maxRowsPerSeverity)));
-
-                SetExpanded(expanded);
-
-                group.Add(head);
-                group.Add(body);
-                return group;
-            }
-
-            // issue 1 件の行: 深刻度マーカー（色＋形）／locale チップ／詳細メッセージ。長文は折り返す。
-            private VisualElement BuildValidationIssueRow(EditorL10nValidationIssue issue)
-            {
-                var row = new VisualElement();
-                row.AddToClassList("l10n-vissue");
-
-                // 不足キーはその場で追加できるクイックfix（"+"。defaultLocale の値をコピーして種にする）。
-                Button addButton = null;
-                if (issue.Kind == EditorL10nValidationMessageKind.MissingKey
-                    && !string.IsNullOrEmpty(issue.Locale) && issue.Args.Count > 0)
-                {
-                    var missingKey = issue.Args[0];
-                    addButton = new Button(() => QuickAddMissingKey(issue.Scope, issue.Locale, missingKey)) { text = "+" };
-                    addButton.AddToClassList("l10n-vissue__add");
-                    addButton.tooltip = Tr("quickfix.addKey.tooltip");
-                    row.Add(addButton);
-                }
-
-                var isError = issue.Severity == EditorL10nValidationSeverity.Error;
-                // 色だけに頼らず形（× / !）でも深刻度が伝わるマーカー（色覚配慮）。文言ではないので未翻訳化しない。
-                var mark = EditorL10nUiKit.Pill(isError ? "×" : "!",
-                    isError ? EditorL10nBadgeKind.Error : EditorL10nBadgeKind.Warning);
-                mark.AddToClassList("l10n-vissue__mark");
-                row.Add(mark);
-
-                // どの locale 由来かを示すチップ（scope 全体の問題など locale が無いときは省略）。
-                if (!string.IsNullOrEmpty(issue.Locale))
-                {
-                    var locale = EditorL10nUiKit.Pill(issue.Locale, EditorL10nBadgeKind.Neutral);
-                    locale.AddToClassList("l10n-vissue__locale");
-                    row.Add(locale);
-                }
-
-                var message = new Label(issue.Message);
-                message.AddToClassList("l10n-vissue__msg");
-                row.Add(message);
-
-                // クリックで由来アセット（locale テーブル、無ければ manifest）を選択+Ping し、原因箇所へ素早く辿れるようにする。
-                if (TryResolveIssueAsset(issue, out var assetPath))
-                {
-                    row.AddToClassList("l10n-vissue--clickable");
-                    row.tooltip = Tr("catalogs.issue.openAsset.tooltip");
-                    var quickAdd = addButton;
-                    row.RegisterCallback<ClickEvent>(evt =>
-                    {
-                        // 追加ボタンのクリックはクイックfixが処理するので、行のジャンプは発火させない。
-                        if (quickAdd != null && evt.target == quickAdd)
-                            return;
-                        PingAsset(assetPath);
-                    });
-                }
-
-                return row;
-            }
-
-            // 不足キーをその locale テーブルへ追加する（値は defaultLocale からコピー）。
-            // 正準ライターでファイルを書き戻し、再 import → 再検証して結果表示を更新する。
-            private void QuickAddMissingKey(string scope, string locale, string key)
-            {
-                try
-                {
-                    if (!EditorL10n.TryGetLocaleTablePath(scope, locale, out var tablePath))
-                        throw new Exception($"locale テーブルのパスが見つかりません: {scope}/{locale}");
-
-                    var entries = LoadTableEntries(tablePath);
-                    if (entries.All(entry => entry.Key != key))
-                    {
-                        entries.Add(new KeyValuePair<string, string>(key, GetDefaultLocaleValue(scope, key)));
-                        File.WriteAllText(FileUtil.GetPhysicalPath(tablePath), EditorL10nCatalogWriter.WriteTable(locale, entries));
-                        AssetDatabase.ImportAsset(tablePath);
-                    }
-
-                    EditorL10n.Reload();
-                    // 再検証して結果表示を更新する。RenderValidationGroups はこの行ボタン自身も作り直すが、
-                    // 上の書き込み〜Reload は同期完了しており、このコールバックは既に return 済みなので安全
-                    // （いずれかの工程を非同期化する場合は detach 済み要素の使用に注意）。
-                    _lastValidation = EditorL10nValidator.ValidateAll();
-                    UpdateCatalogsResultLine();
-                    RenderValidationGroups(_lastValidation);
-                    Debug.Log($"EditorLocalization: {scope}/{locale} に key を追加しました: {key}");
-                }
-                catch (Exception exception)
-                {
-                    Debug.LogError($"EditorLocalization: key の追加に失敗しました: {exception}");
-                    if (_catalogsResult != null)
-                        SetResult(_catalogsResult, Tr("quickfix.failed"), EditorL10nBadgeKind.Error);
-                }
-            }
-
-            // locale テーブルの全エントリを出現順で読み出す（追加時に既存順を保つため）。
-            private static List<KeyValuePair<string, string>> LoadTableEntries(string tablePath)
-            {
-                var result = new List<KeyValuePair<string, string>>();
-                var asset = AssetDatabase.LoadAssetAtPath<TextAsset>(tablePath);
-                if (asset == null)
-                    return result;
-
-                var document = JsonUtility.FromJson<EditorL10nTableDocument>(asset.text);
-                if (document?.entries == null)
-                    return result;
-
-                foreach (var entry in document.entries)
-                    if (entry != null && !string.IsNullOrEmpty(entry.key))
-                        result.Add(new KeyValuePair<string, string>(entry.key, entry.value ?? ""));
-                return result;
-            }
-
-            // 種にする defaultLocale の値を取得する（無ければ空）。
-            private static string GetDefaultLocaleValue(string scope, string key)
-            {
-                if (!EditorL10n.TryGetScopeInfo(scope, out var info) || string.IsNullOrEmpty(info.DefaultLocale))
-                    return "";
-                if (!EditorL10n.TryGetLocaleTablePath(scope, info.DefaultLocale, out var path))
-                    return "";
-                foreach (var entry in LoadTableEntries(path))
-                    if (entry.Key == key)
-                        return entry.Value;
-                return "";
-            }
-
-            // issue の由来アセットを解決する。locale 由来はその locale テーブル、scope 由来（locale 空）は manifest。
-            private static bool TryResolveIssueAsset(EditorL10nValidationIssue issue, out string assetPath)
-            {
-                if (!string.IsNullOrEmpty(issue.Locale)
-                    && EditorL10n.TryGetLocaleTablePath(issue.Scope, issue.Locale, out assetPath)
-                    && !string.IsNullOrEmpty(assetPath))
-                    return true;
-
-                if (EditorL10n.TryGetScopeInfo(issue.Scope, out var info) && !string.IsNullOrEmpty(info.ManifestPath))
-                {
-                    assetPath = info.ManifestPath;
-                    return true;
-                }
-
-                assetPath = "";
-                return false;
-            }
-
-            private static void SetResult(Label result, string text, EditorL10nBadgeKind kind)
-            {
-                result.text = text;
-                result.style.display = string.IsNullOrEmpty(text) ? DisplayStyle.None : DisplayStyle.Flex;
-                result.style.color = ResolveColor(kind);
             }
 
             // ===== 表示言語（グローバル）=====
             private VisualElement BuildGlobalSection()
             {
-                var card = EditorL10nUiKit.Section(Tr("global.title"), out var content);
-                BindLabel(card.Q<Label>(className: "eui-section__title"), "global.title");
+                var card = BuildSection("global.title", "global", true, out var content, out var summary);
+
+                // 畳んだままでも「現在どの言語が・どの由来で」効いているかが分かる要約ピル。
+                _globalSummary = EditorL10nUiKit.Pill("", EditorL10nBadgeKind.Neutral);
+                summary.Add(_globalSummary);
+                UpdateGlobalSummary();
+
+                // 保存先と解決順の説明。表示言語の話なのでこの節に属させる（ヘッダー直下から移設）。
+                content.Add(EditorL10nUiKit.Note(Tr("note")).Also(label => BindLabel(label, "note")));
 
                 var dropdown = BuildGlobalDropdown();
                 content.Add(dropdown);
@@ -511,6 +217,29 @@ namespace Kajitaharuka.EditorLocalization
                 content.Add(resolveHint);
 
                 return card;
+            }
+
+            // グローバル節の要約ピル: 未設定時はシステム言語/既定への解決先を出し、規則の暗記に頼らせない。
+            private void UpdateGlobalSummary()
+            {
+                if (_globalSummary == null)
+                    return;
+
+                var globalLocale = EditorL10n.GetGlobalLocale();
+                string text;
+                if (!string.IsNullOrEmpty(globalLocale))
+                {
+                    text = Tr("summary.localeWithSource", globalLocale, Tr("source.global"));
+                }
+                else
+                {
+                    var systemLocale = EditorL10n.GetSystemLocaleFallbackEnabled() ? EditorL10n.GetSystemLocale() : "";
+                    text = string.IsNullOrEmpty(systemLocale)
+                        ? Tr("summary.localeWithSource", Tr("locale.unset"), Tr("source.default"))
+                        : Tr("summary.localeWithSource", systemLocale, Tr("source.system"));
+                }
+
+                EditorL10nUiKit.SetBadge(_globalSummary, text, EditorL10nBadgeKind.Neutral);
             }
 
             private DropdownField BuildGlobalDropdown()
@@ -568,8 +297,11 @@ namespace Kajitaharuka.EditorLocalization
             // ===== scope 個別設定 =====
             private VisualElement BuildScopeSection()
             {
-                var card = EditorL10nUiKit.Section(Tr("scope.title"), out var content);
-                BindLabel(card.Q<Label>(className: "eui-section__title"), "scope.title");
+                var card = BuildSection("scope.title", "scopes", true, out var content, out var summary);
+
+                // 畳んだままでも「いくつの scope があり、いくつ個別設定中か」が分かる要約ピル。
+                _scopeSummary = EditorL10nUiKit.Pill("", EditorL10nBadgeKind.Neutral);
+                summary.Add(_scopeSummary);
 
                 _search = new TextField(Tr("scope.search.label"));
                 EditorL10nUiKit.AlignField(_search);
@@ -639,32 +371,524 @@ namespace Kajitaharuka.EditorLocalization
                 _scopeEmpty.style.display = DisplayStyle.Flex;
             }
 
+            // scope 節の要約ピル: 総数と個別設定中の数。
+            private void UpdateScopeSummary()
+            {
+                if (_scopeSummary == null)
+                    return;
+
+                var total = _builtScopes.Length;
+                var overrides = _builtScopes.Count(scope => !string.IsNullOrEmpty(EditorL10nPreferences.GetScopeLocale(scope)));
+                EditorL10nUiKit.SetBadge(_scopeSummary,
+                    total == 0 ? "" : Tr("scope.summary", total, overrides),
+                    EditorL10nBadgeKind.Neutral);
+            }
+
+            // ===== カタログ（作成 / 検証 / 再読み込み / scope 別のファイル一覧＋検証結果）=====
+            // scope ごとのグループに「カタログのファイル一覧（常時）」と「検証結果（スナップショット）」を
+            // 同居させ、どの scope のどのファイル・どの警告かを 1 箇所で追えるようにする。
+            private VisualElement BuildCatalogs()
+            {
+                var card = BuildSection("catalogs.title", "catalogs", true, out var content, out var summary);
+
+                // 畳んだ状態でも最終検証の概況が分かる件数ピル（未検証の間は非表示）。
+                _catalogsSummaryErrors = EditorL10nUiKit.Pill("", EditorL10nBadgeKind.Error);
+                _catalogsSummaryWarnings = EditorL10nUiKit.Pill("", EditorL10nBadgeKind.Warning);
+                summary.Add(_catalogsSummaryErrors);
+                summary.Add(_catalogsSummaryWarnings);
+                UpdateCatalogsSummaryPills();
+
+                var row = new VisualElement();
+                row.AddToClassList("l10n-catalogs");
+
+                var result = new Label { name = "l10n-catalogs-result" };
+                result.AddToClassList("l10n-catalogs__result");
+                result.style.display = DisplayStyle.None;
+                _catalogsResult = result;
+
+                // 検証結果の鮮度を示す時刻行（スナップショットがいつ時点かを正直に出す）。
+                _validatedAtHint = EditorL10nUiKit.HintRow("");
+                _validatedAtHint.style.display = DisplayStyle.None;
+                EditorL10nUi.RegisterLocaleCallback(_validatedAtHint, UpdateValidatedAtHint);
+
+                // scope 別グループ（ファイル一覧＋検証結果）の描画先。
+                var groups = new VisualElement();
+                groups.AddToClassList("l10n-validation-groups");
+                _catalogGroups = groups;
+
+                // カタログが 1 つも無いときの空状態（次の一手＝作成ウィザードへの導線を添える）。
+                _catalogsEmpty = EditorL10nUiKit.InfoBox(Tr("catalogs.empty"));
+                _catalogsEmpty.style.display = DisplayStyle.None;
+                EditorL10nUi.RegisterLocaleCallback(_catalogsEmpty, () => _catalogsEmpty.text = Tr("catalogs.empty"));
+
+                // この節の主操作は「検証」。先頭に置き、保守（再読み込み）と作成をその後ろに並べる。
+                var validate = EditorL10nUiKit.ActionButton(Tr("catalogs.validate"), RunValidation, Tr("catalogs.validate.tooltip"));
+                BindButtonText(validate, "catalogs.validate", "catalogs.validate.tooltip");
+
+                var reload = EditorL10nUiKit.ActionButton(Tr("catalogs.reload"), () =>
+                {
+                    // Reload でカタログが入れ替わると前回の検証結果は古くなる。先に破棄してから再読込することで、
+                    // Reload が同期発火する LocaleChanged（→OnLocaleChanged）が古い検証結果を描き直さないようにする。
+                    _lastValidation = null;
+                    EditorL10n.Reload();
+                    SetResult(result, Tr("catalogs.reloaded"), EditorL10nBadgeKind.Neutral);
+                }, Tr("catalogs.reload.tooltip"));
+                BindButtonText(reload, "catalogs.reload", "catalogs.reload.tooltip");
+
+                // カタログ作成ウィザードへの導線（初回導線。空状態の「次の一手」でもある）。
+                // ボタン文言はウィザードのタイトルを共有し、ダイアログを開く操作の慣習として「…」を添える。
+                var create = EditorL10nUiKit.ActionButton(Tr("wizard.title") + "…", EditorL10nCatalogWizard.Open, Tr("catalogs.create.tooltip"));
+                void ApplyCreateText()
+                {
+                    create.text = Tr("wizard.title") + "…";
+                    create.tooltip = Tr("catalogs.create.tooltip");
+                }
+                EditorL10nUi.RegisterLocaleCallback(create, ApplyCreateText);
+
+                // 両操作の意味を説明する HelpBox（既定は非表示）。下の ⓘ ボタンで開閉する。
+                var help = EditorL10nUiKit.InfoBox(Tr("catalogs.help.tooltip"));
+                help.style.display = DisplayStyle.None;
+                EditorL10nUi.RegisterLocaleCallback(help, () => help.text = Tr("catalogs.help.tooltip"));
+
+                // 説明トグル（ⓘ）。クリック/キーボードで上の HelpBox を開閉でき（キーボード到達可）、
+                // ホバーの tooltip でも要約を確認できる（マウス）。これで説明性を入力手段に依らず確保する。
+                var helpToggle = EditorL10nUiKit.IconLinkButton("console.infoicon", Tr("catalogs.help.tooltip"), () =>
+                {
+                    help.style.display = help.style.display == DisplayStyle.None ? DisplayStyle.Flex : DisplayStyle.None;
+                });
+                BindTooltip(helpToggle, "catalogs.help.tooltip");
+
+                row.Add(validate);
+                row.Add(reload);
+                row.Add(create);
+                row.Add(helpToggle);
+                row.Add(result);
+
+                content.Add(row);
+                content.Add(_validatedAtHint);
+                content.Add(help);
+                content.Add(_catalogsEmpty);
+                content.Add(groups);
+                return card;
+            }
+
+            // 検証を実行し、結果表示（要約行・時刻・scope 別グループ・要約ピル・ヘッダーバッジ）を更新する。
+            private void RunValidation()
+            {
+                // ValidateAndLog 内の Reload が LocaleChanged を同期発火し OnLocaleChanged が先に走るため、
+                // 古い結果を先に破棄しておく（過渡状態でも古い結果を新鮮な顔で描かない）。
+                _lastValidation = null;
+                var validation = EditorL10nValidator.ValidateAndLog();
+                _lastValidation = validation;
+                _lastValidatedAt = DateTime.Now;
+                UpdateCatalogsResultLine();
+                UpdateValidatedAtHint();
+                RenderCatalogGroups();
+                UpdateCatalogsSummaryPills();
+                UpdateOverviewBadge();
+            }
+
+            // 検証結果の要約行を現在のスナップショット（_lastValidation）から（再）描画する。言語変更にも追従させる。
+            // 色は内容と矛盾させない: エラーあり=エラー色 / 警告のみ=警告色 / 問題なし=OK 色。
+            private void UpdateCatalogsResultLine()
+            {
+                if (_catalogsResult == null || _lastValidation == null)
+                    return;
+                if (_lastValidation.ErrorCount > 0)
+                    SetResult(_catalogsResult, Tr("catalogs.result.issues", _lastValidation.ErrorCount, _lastValidation.WarningCount), EditorL10nBadgeKind.Error);
+                else if (_lastValidation.WarningCount > 0)
+                    SetResult(_catalogsResult, Tr("catalogs.result.warnings", _lastValidation.WarningCount), EditorL10nBadgeKind.Warning);
+                else
+                    SetResult(_catalogsResult, Tr("catalogs.result.ok"), EditorL10nBadgeKind.Ok);
+            }
+
+            // 検証時刻の表示（スナップショットが無ければ隠す）。
+            private void UpdateValidatedAtHint()
+            {
+                if (_validatedAtHint == null)
+                    return;
+                if (_lastValidation == null)
+                {
+                    _validatedAtHint.style.display = DisplayStyle.None;
+                    return;
+                }
+
+                _validatedAtHint.text = Tr("catalogs.validatedAt", _lastValidatedAt.ToString("HH:mm:ss"));
+                _validatedAtHint.style.display = DisplayStyle.Flex;
+            }
+
+            // カタログ節の見出し要約ピル（エラー/警告件数）。未検証なら両方隠す。
+            private void UpdateCatalogsSummaryPills()
+            {
+                if (_catalogsSummaryErrors == null || _catalogsSummaryWarnings == null)
+                    return;
+
+                var errors = _lastValidation?.ErrorCount ?? 0;
+                var warnings = _lastValidation?.WarningCount ?? 0;
+                EditorL10nUiKit.SetBadge(_catalogsSummaryErrors,
+                    errors > 0 ? Tr("catalogs.count.errors", errors) : "", EditorL10nBadgeKind.Error);
+                EditorL10nUiKit.SetBadge(_catalogsSummaryWarnings,
+                    warnings > 0 ? Tr("catalogs.count.warnings", warnings) : "", EditorL10nBadgeKind.Warning);
+            }
+
+            // scope 別グループ（ファイル一覧＋検証結果）を現在のカタログ構成から描き直す。
+            // 検証結果は point-in-time のスナップショット（_lastValidation。null なら未検証＝ファイル一覧のみ）。
+            // 言語変更時にも呼び直して行の文言・tooltip を新しい表示言語で作り直す（行ごとの言語バインドは
+            // 張らない＝購読リークを避ける）。
+            private void RenderCatalogGroups()
+            {
+                if (_catalogGroups == null)
+                    return;
+
+                _catalogGroups.Clear();
+
+                var scopes = EditorL10n.GetScopes();
+                if (scopes.Count == 0)
+                {
+                    _catalogGroups.style.display = DisplayStyle.None;
+                    if (_catalogsEmpty != null)
+                        _catalogsEmpty.style.display = DisplayStyle.Flex;
+                    return;
+                }
+
+                if (_catalogsEmpty != null)
+                    _catalogsEmpty.style.display = DisplayStyle.None;
+                _catalogGroups.style.display = DisplayStyle.Flex;
+
+                // scope -> issue 群（scope 内の追加順は維持）。
+                var byScope = new Dictionary<string, List<EditorL10nValidationIssue>>();
+                if (_lastValidation != null)
+                {
+                    foreach (var issue in _lastValidation.Issues)
+                    {
+                        if (!byScope.TryGetValue(issue.Scope, out var list))
+                        {
+                            list = new List<EditorL10nValidationIssue>();
+                            byScope[issue.Scope] = list;
+                        }
+                        list.Add(issue);
+                    }
+                }
+
+                foreach (var scope in scopes)
+                {
+                    byScope.TryGetValue(scope, out var issues);
+                    _catalogGroups.Add(BuildCatalogGroup(scope, issues));
+                }
+            }
+
+            // 1 scope ぶんのグループ（折りたたみ可能）。ヘッダーに件数ピル（検証済みで問題なしは ✓）、
+            // 本文にファイル一覧（manifest → 各 locale テーブル）と検証 issue 行を並べる。
+            private VisualElement BuildCatalogGroup(string scope, List<EditorL10nValidationIssue> issues)
+            {
+                // 1 深刻度あたりの表示上限。巨大な scope（数十 key 欠落など）で UI が縦に伸び切るのを防ぐ。
+                // 全件は常に Console（ValidateAndLog）へ出ているので、超過分は件数だけ示して Console へ誘導する。
+                const int maxRowsPerSeverity = 30;
+
+                var errors = issues?.Where(issue => issue.Severity == EditorL10nValidationSeverity.Error).ToList()
+                             ?? new List<EditorL10nValidationIssue>();
+                var warnings = issues?.Where(issue => issue.Severity == EditorL10nValidationSeverity.Warning).ToList()
+                               ?? new List<EditorL10nValidationIssue>();
+
+                var group = new VisualElement();
+                group.AddToClassList("l10n-vgroup");
+
+                var head = new VisualElement();
+                head.AddToClassList("l10n-vgroup__head");
+
+                var chevron = EditorL10nUiKit.Chevron();
+
+                var body = new VisualElement();
+                body.AddToClassList("l10n-vgroup__body");
+
+                // 開閉はユーザー操作を scope 単位で記憶し、再描画（検証/言語変更）でも保持する。
+                // 触られていない scope の既定は「エラーを含むなら展開、それ以外は畳む」（ファイル一覧は二次的詳細）。
+                var expanded = _groupExpanded.TryGetValue(scope, out var stored) ? stored : errors.Count > 0;
+                void SetExpanded(bool value)
+                {
+                    expanded = value;
+                    _groupExpanded[scope] = value;
+                    body.style.display = value ? DisplayStyle.Flex : DisplayStyle.None;
+                    chevron.text = value ? "▾" : "▸";
+                }
+                chevron.clicked += () => SetExpanded(!expanded);
+
+                var name = new Label(EditorL10nUiKit.InsertWrapOpportunities(scope));
+                name.AddToClassList("l10n-vgroup__name");
+                name.tooltip = scope;
+
+                // 件数ピル（畳んだ状態でも深刻度の概況が分かる）。数を含むので未翻訳化されず多言語でも一意。
+                // 検証済みで問題の無い scope は言語非依存の ✓（記号なので翻訳キーにしない）で「検査済み・問題なし」を示す。
+                var pills = new VisualElement();
+                pills.AddToClassList("l10n-scope-card__pills");
+                if (errors.Count > 0)
+                    pills.Add(EditorL10nUiKit.Pill(Tr("catalogs.count.errors", errors.Count), EditorL10nBadgeKind.Error));
+                if (warnings.Count > 0)
+                    pills.Add(EditorL10nUiKit.Pill(Tr("catalogs.count.warnings", warnings.Count), EditorL10nBadgeKind.Warning));
+                if (_lastValidation != null && errors.Count == 0 && warnings.Count == 0)
+                    pills.Add(EditorL10nUiKit.Pill("✓", EditorL10nBadgeKind.Ok));
+
+                head.Add(chevron);
+                head.Add(name);
+                head.Add(pills);
+                // head 行のどこをクリックしても開閉できる（ヒット領域拡大）。チェブロンは自前で処理するため除外。
+                head.RegisterCallback<ClickEvent>(evt =>
+                {
+                    if (evt.target == chevron)
+                        return;
+                    SetExpanded(!expanded);
+                });
+
+                // 本文前半: カタログのファイル一覧（manifest 行 → 各 locale テーブル行）。クリックで選択+Ping。
+                if (EditorL10n.TryGetScopeInfo(scope, out var info) && !string.IsNullOrEmpty(info.ManifestPath))
+                {
+                    var manifestPath = info.ManifestPath;
+                    body.Add(EditorL10nUiKit.AssetRow(manifestPath, Tr("scope.manifest.tooltip"), () => PingAsset(manifestPath)));
+                }
+                foreach (var locale in EditorL10n.GetLocales(scope))
+                    body.Add(BuildTableFileRow(scope, info, locale));
+
+                // 本文後半: 検証結果（エラー → 警告 の順に深刻なものを上に）。ファイル一覧と区切って示す。
+                if (errors.Count > 0 || warnings.Count > 0)
+                {
+                    body.Add(EditorL10nUiKit.Separator());
+                    foreach (var issue in errors.Take(maxRowsPerSeverity))
+                        body.Add(BuildValidationIssueRow(issue));
+                    if (errors.Count > maxRowsPerSeverity)
+                        body.Add(EditorL10nUiKit.HintRow(Tr("catalogs.more", errors.Count - maxRowsPerSeverity)));
+                    foreach (var issue in warnings.Take(maxRowsPerSeverity))
+                        body.Add(BuildValidationIssueRow(issue));
+                    if (warnings.Count > maxRowsPerSeverity)
+                        body.Add(EditorL10nUiKit.HintRow(Tr("catalogs.more", warnings.Count - maxRowsPerSeverity)));
+                }
+
+                SetExpanded(expanded);
+
+                group.Add(head);
+                group.Add(body);
+                return group;
+            }
+
+            // locale テーブル 1 行: [locale タグ][既定ピル][パス行（クリックで選択）][key 数]。
+            // manifest が宣言しているのにファイルが無いテーブルは、パスを淡色表示し欠落マーカー（×）を添える
+            // （検証を走らせる前から異常が見える）。
+            private VisualElement BuildTableFileRow(string scope, EditorL10nScopeInfo info, EditorL10nLocaleInfo locale)
+            {
+                var row = new VisualElement();
+                row.AddToClassList("l10n-file-row");
+
+                var tagPill = EditorL10nUiKit.Pill(locale.Tag, EditorL10nBadgeKind.Neutral);
+                tagPill.tooltip = locale.DisplayName;
+                row.Add(tagPill);
+
+                if (info != null && locale.Tag == info.DefaultLocale)
+                    row.Add(EditorL10nUiKit.Pill(Tr("catalogs.pill.default"), EditorL10nBadgeKind.Accent));
+
+                EditorL10n.TryGetLocaleTablePath(scope, locale.Tag, out var tablePath);
+                var exists = !string.IsNullOrEmpty(tablePath) && AssetDatabase.LoadAssetAtPath<TextAsset>(tablePath) != null;
+                if (exists)
+                {
+                    var pathToPing = tablePath;
+                    row.Add(EditorL10nUiKit.AssetRow(tablePath, Tr("catalogs.table.tooltip"), () => PingAsset(pathToPing)));
+
+                    // key 数（翻訳の進み具合の一目把握）。数値のみの表示なので翻訳キーにしない（tooltip で意味を回復）。
+                    if (EditorL10n.TryGetEntryCount(scope, locale.Tag, out var count))
+                    {
+                        var countPill = EditorL10nUiKit.Pill(count.ToString(), EditorL10nBadgeKind.Neutral);
+                        countPill.tooltip = Tr("catalogs.entries.tooltip");
+                        row.Add(countPill);
+                    }
+                }
+                else
+                {
+                    var missing = new Label(EditorL10nUiKit.InsertWrapOpportunities(
+                        string.IsNullOrEmpty(tablePath) ? locale.Tag : tablePath));
+                    missing.AddToClassList("l10n-file-row__missing");
+                    missing.tooltip = Tr("catalogs.table.missing.tooltip");
+                    row.Add(missing);
+
+                    var mark = EditorL10nUiKit.Pill("×", EditorL10nBadgeKind.Error);
+                    mark.tooltip = Tr("catalogs.table.missing.tooltip");
+                    row.Add(mark);
+                }
+
+                return row;
+            }
+
+            // issue 1 件の行: 深刻度マーカー（色＋形）／locale チップ／詳細メッセージ／行末のクイックfix。
+            // マーカーを行頭に固定し（縦の走査線を崩さない）、操作ボタンは行末に置く（IDE の慣習）。長文は折り返す。
+            private VisualElement BuildValidationIssueRow(EditorL10nValidationIssue issue)
+            {
+                var row = new VisualElement();
+                row.AddToClassList("l10n-vissue");
+
+                var isError = issue.Severity == EditorL10nValidationSeverity.Error;
+                // 色だけに頼らず形（× / !）でも深刻度が伝わるマーカー（色覚配慮）。文言ではないので未翻訳化しない。
+                var mark = EditorL10nUiKit.Pill(isError ? "×" : "!",
+                    isError ? EditorL10nBadgeKind.Error : EditorL10nBadgeKind.Warning);
+                mark.AddToClassList("l10n-vissue__mark");
+                row.Add(mark);
+
+                // どの locale 由来かを示すチップ（scope 全体の問題など locale が無いときは省略）。
+                if (!string.IsNullOrEmpty(issue.Locale))
+                {
+                    var locale = EditorL10nUiKit.Pill(issue.Locale, EditorL10nBadgeKind.Neutral);
+                    locale.AddToClassList("l10n-vissue__locale");
+                    row.Add(locale);
+                }
+
+                var message = new Label(issue.Message);
+                message.AddToClassList("l10n-vissue__msg");
+                row.Add(message);
+
+                // 不足キーはその場で追加できるクイックfix（"+"。defaultLocale の値をコピーして種にする）。
+                Button addButton = null;
+                if (issue.Kind == EditorL10nValidationMessageKind.MissingKey
+                    && !string.IsNullOrEmpty(issue.Locale) && issue.Args.Count > 0)
+                {
+                    var missingKey = issue.Args[0];
+                    addButton = new Button(() => QuickAddMissingKey(issue.Scope, issue.Locale, missingKey)) { text = "+" };
+                    addButton.AddToClassList("l10n-vissue__add");
+                    addButton.tooltip = Tr("quickfix.addKey.tooltip");
+                    row.Add(addButton);
+                }
+
+                // クリックで由来アセット（locale テーブル、無ければ manifest）を選択+Ping し、原因箇所へ素早く辿れるようにする。
+                if (TryResolveIssueAsset(issue, out var assetPath))
+                {
+                    row.AddToClassList("l10n-vissue--clickable");
+                    row.tooltip = Tr("catalogs.issue.openAsset.tooltip");
+                    var quickAdd = addButton;
+                    row.RegisterCallback<ClickEvent>(evt =>
+                    {
+                        // 追加ボタンのクリックはクイックfixが処理するので、行のジャンプは発火させない。
+                        if (quickAdd != null && evt.target == quickAdd)
+                            return;
+                        PingAsset(assetPath);
+                    });
+                }
+
+                return row;
+            }
+
+            // 不足キーをその locale テーブルへ追加する（値は defaultLocale からコピー）。
+            // 正準ライターでファイルを書き戻し、再 import → 再検証して結果表示を更新する。
+            private void QuickAddMissingKey(string scope, string locale, string key)
+            {
+                try
+                {
+                    if (!EditorL10n.TryGetLocaleTablePath(scope, locale, out var tablePath))
+                        throw new Exception($"locale テーブルのパスが見つかりません: {scope}/{locale}");
+
+                    var entries = LoadTableEntries(tablePath);
+                    if (entries.All(entry => entry.Key != key))
+                    {
+                        entries.Add(new KeyValuePair<string, string>(key, GetDefaultLocaleValue(scope, key)));
+                        File.WriteAllText(FileUtil.GetPhysicalPath(tablePath), EditorL10nCatalogWriter.WriteTable(locale, entries));
+                        AssetDatabase.ImportAsset(tablePath);
+                    }
+
+                    EditorL10n.Reload();
+                    // 再検証して結果表示を更新する。RenderCatalogGroups はこの行ボタン自身も作り直すが、
+                    // 上の書き込み〜Reload は同期完了しており、このコールバックは既に return 済みなので安全
+                    // （いずれかの工程を非同期化する場合は detach 済み要素の使用に注意）。
+                    _lastValidation = EditorL10nValidator.ValidateAll();
+                    _lastValidatedAt = DateTime.Now;
+                    UpdateCatalogsResultLine();
+                    UpdateValidatedAtHint();
+                    RenderCatalogGroups();
+                    UpdateCatalogsSummaryPills();
+                    UpdateOverviewBadge();
+                    Debug.Log($"EditorLocalization: {scope}/{locale} に key を追加しました: {key}");
+                }
+                catch (Exception exception)
+                {
+                    Debug.LogError($"EditorLocalization: key の追加に失敗しました: {exception}");
+                    if (_catalogsResult != null)
+                        SetResult(_catalogsResult, Tr("quickfix.failed"), EditorL10nBadgeKind.Error);
+                }
+            }
+
+            // locale テーブルの全エントリを出現順で読み出す（追加時に既存順を保つため）。
+            private static List<KeyValuePair<string, string>> LoadTableEntries(string tablePath)
+            {
+                var result = new List<KeyValuePair<string, string>>();
+                var asset = AssetDatabase.LoadAssetAtPath<TextAsset>(tablePath);
+                if (asset == null)
+                    return result;
+
+                var document = JsonUtility.FromJson<EditorL10nTableDocument>(asset.text);
+                if (document?.entries == null)
+                    return result;
+
+                foreach (var entry in document.entries)
+                    if (entry != null && !string.IsNullOrEmpty(entry.key))
+                        result.Add(new KeyValuePair<string, string>(entry.key, entry.value ?? ""));
+                return result;
+            }
+
+            // 種にする defaultLocale の値を取得する（無ければ空）。
+            private static string GetDefaultLocaleValue(string scope, string key)
+            {
+                if (!EditorL10n.TryGetScopeInfo(scope, out var info) || string.IsNullOrEmpty(info.DefaultLocale))
+                    return "";
+                if (!EditorL10n.TryGetLocaleTablePath(scope, info.DefaultLocale, out var path))
+                    return "";
+                foreach (var entry in LoadTableEntries(path))
+                    if (entry.Key == key)
+                        return entry.Value;
+                return "";
+            }
+
+            // issue の由来アセットを解決する。locale 由来はその locale テーブル、scope 由来（locale 空）は manifest。
+            private static bool TryResolveIssueAsset(EditorL10nValidationIssue issue, out string assetPath)
+            {
+                if (!string.IsNullOrEmpty(issue.Locale)
+                    && EditorL10n.TryGetLocaleTablePath(issue.Scope, issue.Locale, out assetPath)
+                    && !string.IsNullOrEmpty(assetPath))
+                    return true;
+
+                if (EditorL10n.TryGetScopeInfo(issue.Scope, out var info) && !string.IsNullOrEmpty(info.ManifestPath))
+                {
+                    assetPath = info.ManifestPath;
+                    return true;
+                }
+
+                assetPath = "";
+                return false;
+            }
+
+            private static void SetResult(Label result, string text, EditorL10nBadgeKind kind)
+            {
+                result.text = text;
+                result.style.display = string.IsNullOrEmpty(text) ? DisplayStyle.None : DisplayStyle.Flex;
+                result.style.color = ResolveColor(kind);
+            }
+
             // ===== AIエージェント連携スキル（同梱スキルの登録）=====
             private VisualElement BuildSkillsSection()
             {
-                var card = EditorL10nUiKit.Section(Tr("skills.title"), out var content);
-                BindLabel(card.Q<Label>(className: "eui-section__title"), "skills.title");
+                var card = BuildSection("skills.title", "skills", true, out var content, out _);
                 content.Add(EditorL10nUiKit.Note(Tr("skills.note")).Also(label => BindLabel(label, "skills.note")));
 
                 content.Add(BuildSkillRow("skills.translation.name", "skills.translation.desc"));
                 content.Add(BuildSkillRow("skills.optional.name", "skills.optional.desc"));
 
-                // 操作結果のインライン表示（登録/コピーの両方からここへ出す）。
+                // 操作結果のインライン表示（登録/コピーの両方からここへ出す）。列フローに直接置くため
+                // 行専用（flex-basis:100%）の class ではなく列用の class を使う（軸反転で他要素を潰さない）。
                 var result = new Label { name = "l10n-skills-result" };
-                result.AddToClassList("l10n-catalogs__result");
-                // l10n-catalogs__result は横並び行（l10n-catalogs）内で全幅にするための flex-basis:100% を持つ。
-                // この節では result を列フローに直接置くため、flex-basis:100% だと全高を占めて他要素を潰す。auto へ戻す。
-                result.style.flexBasis = StyleKeyword.Auto;
+                result.AddToClassList("eui-inline-result");
                 result.style.display = DisplayStyle.None;
 
-                // 登録ボタン行（ボタン文言でどこへ登録するかを明示）。
-                var installRow = new VisualElement();
-                installRow.AddToClassList("l10n-catalogs");
+                // 登録先ごとに「登録ボタン＋登録状態ピル」を 1 行で並べ、押す前から状態が見えるようにする。
+                _userSkillStatePill = EditorL10nUiKit.Pill("", EditorL10nBadgeKind.Neutral);
+                _projectSkillStatePill = EditorL10nUiKit.Pill("", EditorL10nBadgeKind.Neutral);
 
                 var installUser = EditorL10nUiKit.ActionButton(Tr("skills.install.user"), () =>
                 {
                     Debug.Log(EditorL10nSkillInstaller.InstallToUser());
                     SetResult(result, Tr("skills.result.installed"), EditorL10nBadgeKind.Ok);
+                    UpdateSkillStatePills();
                 }, Tr("skills.install.user.tooltip"));
                 BindButtonText(installUser, "skills.install.user", "skills.install.user.tooltip");
 
@@ -672,27 +896,36 @@ namespace Kajitaharuka.EditorLocalization
                 {
                     Debug.Log(EditorL10nSkillInstaller.InstallToProject());
                     SetResult(result, Tr("skills.result.installed"), EditorL10nBadgeKind.Ok);
+                    UpdateSkillStatePills();
                 }, Tr("skills.install.project.tooltip"));
                 BindButtonText(installProject, "skills.install.project", "skills.install.project.tooltip");
 
-                installRow.Add(installUser);
-                installRow.Add(installProject);
-                content.Add(installRow);
+                var userRow = new VisualElement();
+                userRow.AddToClassList("l10n-install-row");
+                userRow.Add(installUser);
+                userRow.Add(_userSkillStatePill);
+                content.Add(userRow);
+
+                var projectRow = new VisualElement();
+                projectRow.AddToClassList("l10n-install-row");
+                projectRow.Add(installProject);
+                projectRow.Add(_projectSkillStatePill);
+                content.Add(projectRow);
+
+                // 状態ピルの文言は言語変更にも追従させる（文言・状態とも UpdateSkillStatePills に一本化）。
+                EditorL10nUi.RegisterLocaleCallback(_userSkillStatePill, UpdateSkillStatePills);
+                UpdateSkillStatePills();
 
                 // CLI で追加したい場合の案内＋コマンド明示＋横のコピーボタン。
                 content.Add(EditorL10nUiKit.Note(Tr("skills.cli.note")).Also(label => BindLabel(label, "skills.cli.note")));
 
                 var cliRow = new VisualElement();
-                cliRow.style.flexDirection = FlexDirection.Row;
-                cliRow.style.alignItems = Align.FlexStart;
+                cliRow.AddToClassList("l10n-cli-row");
 
                 // 読み取り専用の複数行フィールドにコマンドを表示（選択もできる）。値変更時は再表示するだけ。
                 var cliField = new TextField { multiline = true, isReadOnly = true };
+                cliField.AddToClassList("l10n-cli-field");
                 cliField.value = EditorL10nSkillInstaller.CliSnippetForUser() + "\n" + EditorL10nSkillInstaller.CliSnippetForProject();
-                cliField.style.flexGrow = 1;
-                cliField.style.flexShrink = 1;
-                cliField.style.fontSize = 10;
-                cliField.style.marginRight = 4;
 
                 var copyCli = EditorL10nUiKit.ActionButton(Tr("skills.cli.copy"), () =>
                 {
@@ -710,15 +943,42 @@ namespace Kajitaharuka.EditorLocalization
                 return card;
             }
 
+            // 登録先 2 スコープの登録状態を確認してピルへ反映する（登録操作後・言語変更時に呼ぶ）。
+            private void UpdateSkillStatePills()
+            {
+                ApplySkillStatePill(_userSkillStatePill, EditorL10nSkillInstaller.GetUserInstallState());
+                ApplySkillStatePill(_projectSkillStatePill, EditorL10nSkillInstaller.GetProjectInstallState());
+            }
+
+            private static void ApplySkillStatePill(Label pill, EditorL10nSkillInstallState state)
+            {
+                if (pill == null)
+                    return;
+
+                switch (state)
+                {
+                    case EditorL10nSkillInstallState.Installed:
+                        EditorL10nUiKit.SetBadge(pill, Tr("skills.status.installed"), EditorL10nBadgeKind.Ok);
+                        break;
+                    case EditorL10nSkillInstallState.NeedsReinstall:
+                        EditorL10nUiKit.SetBadge(pill, Tr("skills.status.reinstall"), EditorL10nBadgeKind.Warning);
+                        break;
+                    default:
+                        EditorL10nUiKit.SetBadge(pill, Tr("skills.status.notInstalled"), EditorL10nBadgeKind.Neutral);
+                        break;
+                }
+
+                pill.tooltip = Tr("skills.status.tooltip");
+            }
+
             // 同梱スキル 1 件の表示（名前＋説明）。言語変更に追従させる。
             private VisualElement BuildSkillRow(string nameKey, string descKey)
             {
                 var box = new VisualElement();
-                box.style.marginBottom = 4;
+                box.AddToClassList("l10n-skill");
 
                 var name = new Label(Tr(nameKey));
-                name.style.unityFontStyleAndWeight = FontStyle.Bold;
-                name.style.fontSize = 11;
+                name.AddToClassList("l10n-skill__name");
                 BindLabel(name, nameKey);
 
                 box.Add(name);
@@ -726,25 +986,23 @@ namespace Kajitaharuka.EditorLocalization
                 return box;
             }
 
-            // ===== 開発者向け（段階的開示）=====
+            // ===== 開発者向け =====
             private VisualElement BuildDeveloperSection()
             {
-                var card = EditorL10nUiKit.Card();
-                var foldout = new Foldout { text = Tr("dev.title"), value = false };
-                EditorL10nUi.RegisterLocaleCallback(foldout, () => foldout.text = Tr("dev.title"));
+                // 他の大項目と同じ折りたたみ語彙に統一する（以前は Foldout）。二次的詳細なので既定は畳む。
+                var card = BuildSection("dev.title", "developer", false, out var content, out _);
 
                 var toggle = new Toggle(Tr("diagnostics.label")) { value = EditorL10nPreferences.DiagnosticsEnabled };
                 EditorL10nUiKit.AlignField(toggle);
                 BindTooltip(toggle, "diagnostics.tooltip");
                 EditorL10nUi.RegisterLocaleCallback(toggle, () => toggle.label = Tr("diagnostics.label"));
                 toggle.RegisterValueChangedCallback(evt => EditorL10nPreferences.DiagnosticsEnabled = evt.newValue);
-                foldout.Add(toggle);
+                content.Add(toggle);
 
                 // トグルの意味が一目で分かるよう、何を・いつ・どう振る舞うかを永続のノートで添える
                 // （tooltip だけだと開発者でも用途が分からない、という指摘への対応）。
-                foldout.Add(EditorL10nUiKit.HintRow(Tr("diagnostics.note")).Also(label => BindLabel(label, "diagnostics.note")));
+                content.Add(EditorL10nUiKit.HintRow(Tr("diagnostics.note")).Also(label => BindLabel(label, "diagnostics.note")));
 
-                card.Add(foldout);
                 return card;
             }
 
@@ -758,9 +1016,8 @@ namespace Kajitaharuka.EditorLocalization
                     _builtScopes = scopes;
                     RebuildScopeList(scopes);
 
-                    // カタログ構成が変わったので前回の検証結果は古い。要約行と分類表示を畳む。
+                    // カタログ構成が変わったので前回の検証結果は古い。破棄して要約行を畳む。
                     _lastValidation = null;
-                    RenderValidationGroups(null);
                     if (_catalogsResult != null)
                         _catalogsResult.style.display = DisplayStyle.None;
                 }
@@ -776,11 +1033,17 @@ namespace Kajitaharuka.EditorLocalization
                     // 検索文字列は不変なので在不在の判定（どのカードを出すか）は変わらない。
                     ApplyFilter();
 
-                    // 検証結果（要約行・scope 別分類）も保持スナップショットから新しい画面言語で再描画する。
+                    // 検証結果の要約行も保持スナップショットから新しい画面言語で再描画する。
                     UpdateCatalogsResultLine();
-                    RenderValidationGroups(_lastValidation);
                 }
 
+                // カタログ節の scope 別グループはどちらの場合も現在の構成・現在の言語で描き直す
+                // （ファイル一覧は構成に、文言・tooltip は表示言語に追従させる）。要約表示も更新する。
+                RenderCatalogGroups();
+                UpdateValidatedAtHint();
+                UpdateCatalogsSummaryPills();
+                UpdateGlobalSummary();
+                UpdateScopeSummary();
                 UpdateOverviewBadge();
             }
 
@@ -806,10 +1069,19 @@ namespace Kajitaharuka.EditorLocalization
                         hasIssue = true;
                 }
 
+                // 要約（ヘッダーバッジ）は個々の表示と矛盾させない総合判定にする:
+                // 検証でエラーが出ていれば Error、検証警告または「要求ロケールへ fallback 中」の scope が
+                // あれば Warning、それ以外は Neutral。
+                var kind = EditorL10nBadgeKind.Neutral;
+                if (_lastValidation != null && _lastValidation.ErrorCount > 0)
+                    kind = EditorL10nBadgeKind.Error;
+                else if (hasIssue || (_lastValidation != null && _lastValidation.WarningCount > 0))
+                    kind = EditorL10nBadgeKind.Warning;
+
                 EditorL10nUiKit.SetBadge(
                     _overviewBadge,
                     Tr("header.overview", scopes.Count, locales.Count),
-                    hasIssue ? EditorL10nBadgeKind.Warning : EditorL10nBadgeKind.Neutral);
+                    kind);
             }
 
             private void BindButtonText(Button button, string textKey, string tooltipKey)
@@ -824,7 +1096,10 @@ namespace Kajitaharuka.EditorLocalization
             }
         }
 
-        /// <summary>scope 1 件ぶんのカード。状態（pill/meta）は常時表示、言語ドロップダウンは折りたたみ。</summary>
+        /// <summary>
+        /// scope 1 件ぶんの設定カード。状態（pill/meta）は常時表示、言語ドロップダウンは折りたたみ。
+        /// データ資産（manifest / テーブル）への導線はカタログ節が受け持ち、このカードは表示設定に徹する。
+        /// </summary>
         private sealed class ScopeCard
         {
             public string Scope { get; }
@@ -852,8 +1127,7 @@ namespace Kajitaharuka.EditorLocalization
                 var body = new VisualElement();
                 body.AddToClassList("l10n-scope-body");
 
-                var chevron = new Button { text = "▾" };
-                chevron.AddToClassList("l10n-chevron");
+                var chevron = EditorL10nUiKit.Chevron();
 
                 // 展開/折りたたみの切替。チェブロン（キーボード操作可）と head 行全体のクリック（広いヒット領域）の
                 // 双方から呼べるよう単一メソッドにまとめる。
@@ -900,15 +1174,6 @@ namespace Kajitaharuka.EditorLocalization
                 Root.Add(head);
                 Root.Add(_meta);
                 Root.Add(_fallbackNote);
-
-                // manifest を選択+Ping できる行（認識>想起・利便）。
-                if (EditorL10n.TryGetScopeInfo(scope, out var info) && !string.IsNullOrEmpty(info.ManifestPath))
-                {
-                    var manifestPath = info.ManifestPath;
-                    var manifestRow = EditorL10nUiKit.AssetRow(manifestPath, Tr("scope.manifest.tooltip"), () => PingAsset(manifestPath));
-                    BindTooltip(manifestRow, "scope.manifest.tooltip");
-                    Root.Add(manifestRow);
-                }
 
                 if (locales.Length == 0)
                 {
