@@ -1,6 +1,7 @@
 {
     "scope": "com.kajitaharuka.unity-editor-localization",
     "defaultLocale": "en",
+    "fixedTerms": ["summary.localeWithSource"],
     "locales": [
         {
             "tag": "en",
