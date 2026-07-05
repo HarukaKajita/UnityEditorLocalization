@@ -151,6 +151,33 @@ namespace Kajitaharuka.EditorLocalization
             return badge;
         }
 
+        /// <summary>状態種別に対応するインライン文字色（USS トークンに合わせた近似値。両スキンで可読）。</summary>
+        internal static Color ResolveStatusColor(EditorL10nBadgeKind kind)
+        {
+            var pro = EditorGUIUtility.isProSkin;
+            return kind switch
+            {
+                EditorL10nBadgeKind.Ok => pro ? new Color(0.475f, 0.816f, 0.541f) : new Color(0.145f, 0.416f, 0.173f),
+                EditorL10nBadgeKind.Warning => pro ? new Color(0.902f, 0.757f, 0.361f) : new Color(0.541f, 0.427f, 0.063f),
+                EditorL10nBadgeKind.Error => pro ? new Color(0.941f, 0.549f, 0.510f) : new Color(0.698f, 0.188f, 0.149f),
+                _ => pro ? new Color(0.604f, 0.604f, 0.604f) : new Color(0.353f, 0.353f, 0.353f),
+            };
+        }
+
+        /// <summary>
+        /// 操作結果のインライン 1 行表示を更新する。文言が空のときは非表示。
+        /// 色は内容と一致させること（エラー=Error / 警告のみ=Warning / 問題なし=Ok / 中立の完了=Neutral）。
+        /// 同じ「操作結果」の概念を画面ごとに別の見た目にしない（一貫性）。
+        /// </summary>
+        internal static void SetInlineResult(Label result, string text, EditorL10nBadgeKind kind)
+        {
+            if (result == null)
+                return;
+            result.text = text;
+            result.style.display = string.IsNullOrEmpty(text) ? DisplayStyle.None : DisplayStyle.Flex;
+            result.style.color = new StyleColor(ResolveStatusColor(kind));
+        }
+
         /// <summary>
         /// 汎用 chrome に置く、組み込みアイコンのみのメタ操作ボタン。アイコンのみなので用途は
         /// 必ず tooltip で補う。組み込みアイコンはスキン別画像が返るため tint しない。

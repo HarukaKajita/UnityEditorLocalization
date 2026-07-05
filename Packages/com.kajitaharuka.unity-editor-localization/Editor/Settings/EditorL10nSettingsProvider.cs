@@ -431,7 +431,7 @@ namespace Kajitaharuka.EditorLocalization
                     // Reload が同期発火する LocaleChanged（→OnLocaleChanged）が古い検証結果を描き直さないようにする。
                     _lastValidation = null;
                     EditorL10n.Reload();
-                    SetResult(result, Tr("catalogs.reloaded"), EditorL10nBadgeKind.Neutral);
+                    EditorL10nUiKit.SetInlineResult(result, Tr("catalogs.reloaded"), EditorL10nBadgeKind.Neutral);
                 }, Tr("catalogs.reload.tooltip"));
                 BindButtonText(reload, "catalogs.reload", "catalogs.reload.tooltip");
 
@@ -495,11 +495,11 @@ namespace Kajitaharuka.EditorLocalization
                 if (_catalogsResult == null || _lastValidation == null)
                     return;
                 if (_lastValidation.ErrorCount > 0)
-                    SetResult(_catalogsResult, Tr("catalogs.result.issues", _lastValidation.ErrorCount, _lastValidation.WarningCount), EditorL10nBadgeKind.Error);
+                    EditorL10nUiKit.SetInlineResult(_catalogsResult, Tr("catalogs.result.issues", _lastValidation.ErrorCount, _lastValidation.WarningCount), EditorL10nBadgeKind.Error);
                 else if (_lastValidation.WarningCount > 0)
-                    SetResult(_catalogsResult, Tr("catalogs.result.warnings", _lastValidation.WarningCount), EditorL10nBadgeKind.Warning);
+                    EditorL10nUiKit.SetInlineResult(_catalogsResult, Tr("catalogs.result.warnings", _lastValidation.WarningCount), EditorL10nBadgeKind.Warning);
                 else
-                    SetResult(_catalogsResult, Tr("catalogs.result.ok"), EditorL10nBadgeKind.Ok);
+                    EditorL10nUiKit.SetInlineResult(_catalogsResult, Tr("catalogs.result.ok"), EditorL10nBadgeKind.Ok);
             }
 
             // 検証時刻の表示（スナップショットが無ければ隠す）。
@@ -805,7 +805,7 @@ namespace Kajitaharuka.EditorLocalization
                 {
                     Debug.LogError($"EditorLocalization: key の追加に失敗しました: {exception}");
                     if (_catalogsResult != null)
-                        SetResult(_catalogsResult, Tr("quickfix.failed"), EditorL10nBadgeKind.Error);
+                        EditorL10nUiKit.SetInlineResult(_catalogsResult, Tr("quickfix.failed"), EditorL10nBadgeKind.Error);
                 }
             }
 
@@ -858,13 +858,6 @@ namespace Kajitaharuka.EditorLocalization
                 return false;
             }
 
-            private static void SetResult(Label result, string text, EditorL10nBadgeKind kind)
-            {
-                result.text = text;
-                result.style.display = string.IsNullOrEmpty(text) ? DisplayStyle.None : DisplayStyle.Flex;
-                result.style.color = ResolveColor(kind);
-            }
-
             // ===== AIエージェント連携スキル（同梱スキルの登録）=====
             private VisualElement BuildSkillsSection()
             {
@@ -887,7 +880,7 @@ namespace Kajitaharuka.EditorLocalization
                 var installUser = EditorL10nUiKit.ActionButton(Tr("skills.install.user"), () =>
                 {
                     Debug.Log(EditorL10nSkillInstaller.InstallToUser());
-                    SetResult(result, Tr("skills.result.installed"), EditorL10nBadgeKind.Ok);
+                    EditorL10nUiKit.SetInlineResult(result, Tr("skills.result.installed"), EditorL10nBadgeKind.Ok);
                     UpdateSkillStatePills();
                 }, Tr("skills.install.user.tooltip"));
                 BindButtonText(installUser, "skills.install.user", "skills.install.user.tooltip");
@@ -895,7 +888,7 @@ namespace Kajitaharuka.EditorLocalization
                 var installProject = EditorL10nUiKit.ActionButton(Tr("skills.install.project"), () =>
                 {
                     Debug.Log(EditorL10nSkillInstaller.InstallToProject());
-                    SetResult(result, Tr("skills.result.installed"), EditorL10nBadgeKind.Ok);
+                    EditorL10nUiKit.SetInlineResult(result, Tr("skills.result.installed"), EditorL10nBadgeKind.Ok);
                     UpdateSkillStatePills();
                 }, Tr("skills.install.project.tooltip"));
                 BindButtonText(installProject, "skills.install.project", "skills.install.project.tooltip");
@@ -930,7 +923,7 @@ namespace Kajitaharuka.EditorLocalization
                 var copyCli = EditorL10nUiKit.ActionButton(Tr("skills.cli.copy"), () =>
                 {
                     EditorGUIUtility.systemCopyBuffer = cliField.value;
-                    SetResult(result, Tr("skills.result.copied"), EditorL10nBadgeKind.Neutral);
+                    EditorL10nUiKit.SetInlineResult(result, Tr("skills.result.copied"), EditorL10nBadgeKind.Neutral);
                 }, Tr("skills.cli.copy.tooltip"));
                 copyCli.style.flexShrink = 0;
                 BindButtonText(copyCli, "skills.cli.copy", "skills.cli.copy.tooltip");
@@ -1404,18 +1397,6 @@ namespace Kajitaharuka.EditorLocalization
             }
         }
 
-        private static StyleColor ResolveColor(EditorL10nBadgeKind kind)
-        {
-            // 検証結果テキストの色。USS トークンに合わせた近似値（両スキンで可読）。
-            var pro = EditorGUIUtility.isProSkin;
-            return kind switch
-            {
-                EditorL10nBadgeKind.Ok => new StyleColor(pro ? new Color(0.475f, 0.816f, 0.541f) : new Color(0.145f, 0.416f, 0.173f)),
-                EditorL10nBadgeKind.Warning => new StyleColor(pro ? new Color(0.902f, 0.757f, 0.361f) : new Color(0.541f, 0.427f, 0.063f)),
-                EditorL10nBadgeKind.Error => new StyleColor(pro ? new Color(0.941f, 0.549f, 0.510f) : new Color(0.698f, 0.188f, 0.149f)),
-                _ => new StyleColor(pro ? new Color(0.604f, 0.604f, 0.604f) : new Color(0.353f, 0.353f, 0.353f)),
-            };
-        }
     }
 
     internal static class VisualElementExtensions
