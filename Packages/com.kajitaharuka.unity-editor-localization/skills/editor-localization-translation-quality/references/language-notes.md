@@ -13,6 +13,11 @@ Variants such as `es-ES`/`es-419`, `pt-BR`/`pt-PT`, and `zh-Hans`/`zh-Hant` shou
 - Avoid awkward punctuation such as `。:`.
 - Keep spaces around Latin fixed terms when readability improves: `<FixedTerm> を指定してください。`
 - Keep file extensions with the dot when referring to formats, such as `.json`, `.asset`, or `.zip`.
+- Write "fallback" as katakana `フォールバック` in user-facing catalog strings, and do not
+  mix the Latin spelling into UI text. The always-visible settings UI set the precedent
+  (`system.fallback.*`, `pill.fallback`), and katakana reads as natural Japanese in both
+  noun and verb use (`フォールバックしました`). Developer-facing docs and technical prose
+  (for example "fallback 連鎖" or API names) may keep the Latin term.
 
 ## English `en`
 
@@ -60,7 +65,10 @@ Variants such as `es-ES`/`es-419`, `pt-BR`/`pt-PT`, and `zh-Hans`/`zh-Hant` shou
 
 - Expect long compounds. Keep labels short and move detail to tooltip.
 - `Assets` is acceptable in Unity contexts.
-- Use formal imperative for user instructions: `Geben Sie...`
+- Address the user consistently in the formal Sie form across the whole catalog:
+  `Geben Sie…`, `Wählen Sie…`, `Ihre Erweiterung`. Never mix du forms (`Gib…`, `deine…`)
+  into the same catalog — mixed address reads as sloppy in German tool UI, and formal
+  address matches the convention of professional developer tools.
 
 ## Italian `it`
 
