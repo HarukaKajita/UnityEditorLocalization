@@ -36,6 +36,7 @@ Use this skill for EditorLocalization locale work, especially `*.l10n-manifest.j
 
 5. Check language-specific risks.
    - Read `references/language-notes.md` when working on any supported locale beyond quick typo fixes.
+   - When the source language is Japanese, apply the "Translating from a Japanese source" section of that file (punctuation leakage, kanji false-friend borrowings, broken collocations, parenthesis re-attachment, metalinguistic false friends) to every target locale.
    - Pay attention to regional variants such as `es-ES` vs `es-419` and `pt-BR` vs `pt-PT`. Differentiate where usage genuinely differs; do not fabricate differences for terse technical strings where the variants legitimately coincide.
    - When a native speaker or another agent reviews and proposes a change, verify the underlying grammar rule before applying it — reviewers can be confidently wrong. Example: a reviewer may "fix" a Korean particle after a Latin term by its spelling, but particle choice follows pronunciation (`Locale`→로케일 ends in ㄹ, a consonant, so `이`/`과`, not `가`/`와`). Apply only changes you can justify.
 
@@ -43,6 +44,7 @@ Use this skill for EditorLocalization locale work, especially `*.l10n-manifest.j
    - Run `scripts/validate_locale_quality.py` against the locale directory.
    - Also run the project’s existing catalog validator or compile/test gate when available.
    - Investigate every unexpected English duplicate, placeholder mismatch, missing key, and extra key.
+   - Grep each glossary fixed term (`key`, `scope`, `fallback`, …) in every locale output for accidental translation, and — when the source is Japanese — grep `[・「」【】]` for leaked source punctuation (see `references/terminology-and-style.md` and `references/language-notes.md`).
 
 ## Localizing diagnostic and log messages
 

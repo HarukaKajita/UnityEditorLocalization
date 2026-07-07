@@ -38,6 +38,21 @@ Keep these terms unchanged unless the current project already documents a locali
 
 If a term is both a natural user-facing noun and a code/type-like concept, decide once per project and apply the same treatment across all locales.
 
+After translating, **grep every glossary fixed term in the output** (for example `key`, `scope`, `fallback`, `manifest`, `gate`). Fixed-term breaks concentrate in dense prose such as changelogs and long descriptions, where a fixed term appears unquoted mid-sentence and gets translated by momentum (`key` → `klucze`, `Schlüssel`, `клавиши`, …). One grep per term per locale catches these reliably and cheaply.
+
+## The UI Catalog Is the Source of Truth for Quoted UI Text
+
+When prose (documentation, product pages, release notes) quotes a UI element — a Preferences section name, a status label, a toggle — quote the exact value from that locale's catalog, not a fresh translation. Users will look for the quoted string in the actual UI.
+
+Two consequences:
+
+- **Check the catalog itself first.** If the catalog has a regional-vocabulary slip or an inconsistent term, every downstream document inherits it, and a document-level review cannot fix it. Auditing the catalog (variant purity, one term per concept per language) is a prerequisite step, not an afterthought.
+- **Concept words may legitimately split.** The catalog's UI label and the natural prose term can differ (a section is labeled with a noun while prose uses a verb phrase). Use the catalog value only where the text points the user at the UI; use natural prose wording elsewhere, and keep that split consistent.
+
+## Source-Structure Ambiguity Is Fixed in the Source
+
+If several translators independently produce the same misreading — a parenthetical note attaching to the wrong noun, an unclear antecedent — the source sentence is the defect. Rewrite or annotate the source (mark "do not translate literally" spots, move the parenthesis next to its head noun) before translating into many languages; fixing one source line is cheaper than fixing N translations.
+
 When a fixed term legitimately keeps the same value in every locale (including the default locale), declare its key in the manifest's `fixedTerms` array. Both the in-editor C# validator and the validation script then skip the "same as default (possibly untranslated)" warning for it, so the intentional fixed term is not mistaken for a missed translation.
 
 ## Quality Bar

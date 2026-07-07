@@ -2,6 +2,16 @@
 
 Use these notes as review prompts, not as a substitute for native-speaker review.
 
+## Translating from a Japanese source
+
+These failure modes recur across *all* target languages when the source text is Japanese. Check them explicitly; they account for most review findings in practice.
+
+- **Punctuation and symbols do not travel.** Japanese middle dot `・`, corner brackets `「」`, lenticular brackets `【】`, and fullwidth parentheses must be replaced by the target language's own conventions (and, for quoted UI text, by the style the project's own locale catalog already uses). Concretely: `・` enumerations become `、` in Chinese only when listing parallel nouns (clause breaks take `，`), a comma/slash elsewhere; quotes become `“ ”` in zh-Hans, `「」` stays legitimate in zh-Hant, `' '` or `" "` in Korean, `« »` in Russian/French, etc. After translating, grep the output for `[・「」【】]` — any hit outside code spans and deliberate Japanese quotations is a bug.
+- **Kanji words must not be borrowed by their characters.** Japanese Sino-vocabulary often does not exist, or means something else, in Chinese and Korean. Observed examples: 組入 (not Chinese; use 嵌入/集成/整合), 表記 (zh 表记 does not mean "notation"; use 写法/寫法), 推定 (legal register in zh; use 推测/检测), 節 (ko 절 is unnatural for a UI section; use 섹션), 概況 (ko 개황 is stiff; use 상태 요약), 正準 (ko 정준 is mathematics jargon; use 표준/정규). When translating ja → zh/ko, treat every directly reused two-character compound as suspect until confirmed.
+- **Collocations break under literal transfer.** Recurring Japanese phrasings that must be re-expressed by intent, not word-for-word: 「リークを改善」 (say *reduce* the leaks — "improve the leaks" is illogical in most languages), 「（機能が）点灯する」 (say the feature *becomes active / lights up as available*, not literal ignition), 「例外で落ちる」 (say it *crashes / fails with an exception*, not "falls"). When the same source sentence reads oddly in your draft for two different languages, the source idiom is the cause — re-express the meaning.
+- **Parenthetical notes re-attach to the nearest noun.** A Japanese pattern like 「X 以外の外部ライブラリ（A・B を含む）に依存しません」 must keep the parenthesis directly after the noun it qualifies. If the translation moves it after "X", the sentence claims the opposite dependency ("depends on X (including A and B)"). Place the note immediately after its head noun, or expand it into a relative clause.
+- **Metalinguistic terms are false-friend traps.** 「敬称」/"form of address" (as in German Sie vs du): fr *forme de politesse* / *vouvoiement* (not *adresse*), it *forma di cortesia* (not *allocuzione*), es *tratamiento*, pl *forma grzecznościowa*, pt *forma de tratamento*, vi *cách xưng hô*. Verify any sentence that talks *about* a language rather than in it.
+
 ## Regional variants
 
 Variants such as `es-ES`/`es-419`, `pt-BR`/`pt-PT`, and `zh-Hans`/`zh-Hant` should differ where real usage differs (vocabulary, spelling, idiom). But for terse, code-adjacent strings (short diagnostics, messages built mostly from fixed terms) the variants legitimately coincide. Differentiate where natural; do not fabricate differences just to make the files non-identical. Identical variant values are acceptable when no genuine regional difference exists.
@@ -32,6 +42,9 @@ Variants such as `es-ES`/`es-419`, `pt-BR`/`pt-PT`, and `zh-Hans`/`zh-Hant` shou
   - `zh-Hant`: `匯出`, `檔案`, `設定`, `相依項目`, `資產`.
 - Keep UI labels short; Chinese can often be more compact than English.
 - Keep fixed product/type names in Latin script.
+- Quotes: `zh-Hans` uses `“ ”`; `「」` is legitimate in `zh-Hant` (Taiwan convention). Never carry the Japanese middle dot `・` over; the enumeration mark `、` joins parallel nouns only, and clause-level breaks take `，`.
+- Watch mainland-vs-Taiwan register: `接入` reads mainland-only — prefer `整合`/`串接`/`導入` for `zh-Hant`.
+- Audit any two-character compound copied from a Japanese source (see "Translating from a Japanese source"); 組入/表記/推定 are known offenders.
 
 ## Korean `ko`
 
@@ -39,6 +52,7 @@ Variants such as `es-ES`/`es-419`, `pt-BR`/`pt-PT`, and `zh-Hans`/`zh-Hant` shou
 - `에셋` is natural in Unity contexts.
 - Keep fixed product/type names in Latin script and attach particles naturally: `<FixedTerm>을`, `<FixedTerm>에서`.
 - Choose particles by the Korean *pronunciation* of a Latin term, not its spelling. A word ending in a silent `e` can still be consonant-final when read: `Locale`→로케일 ends in ㄹ, so use consonant-form particles (`이`/`과`/`을`), as in `URL을`, `Google이`. Do not switch to `가`/`와`/`를` just because the Latin spelling ends in a vowel letter.
+- Quotes are `' '` / `" "`, never Japanese `「」`. Sino-Korean readings of Japanese compounds are frequent false friends: 절 (節) → 섹션, 개황 (概況) → 상태 요약, 정준 (正準) → 표준/정규, 표기 흔들림 (表記ゆれ) → 표기 불일치.
 
 ## Spanish `es-ES` / `es-419`
 
