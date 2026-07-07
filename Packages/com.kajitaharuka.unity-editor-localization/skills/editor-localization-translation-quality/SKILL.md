@@ -44,7 +44,7 @@ Use this skill for EditorLocalization locale work, especially `*.l10n-manifest.j
    - Run `scripts/validate_locale_quality.py` against the locale directory.
    - Also run the project’s existing catalog validator or compile/test gate when available.
    - Investigate every unexpected English duplicate, placeholder mismatch, missing key, and extra key.
-   - Grep each glossary fixed term (`key`, `scope`, `fallback`, …) in every locale output for accidental translation, and — when the source is Japanese — grep `[・「」【】]` for leaked source punctuation (see `references/terminology-and-style.md` and `references/language-notes.md`).
+   - Check each glossary fixed term in every locale output for accidental translation (compare occurrence counts with the source, or grep the known translated forms — a bare grep for the term itself proves nothing; see `references/terminology-and-style.md`). When the source is Japanese, grep `[・「」【】]` for leaked source punctuation, excluding `「」` for zh-Hant where corner brackets are native (see `references/language-notes.md`).
 
 ## Localizing diagnostic and log messages
 

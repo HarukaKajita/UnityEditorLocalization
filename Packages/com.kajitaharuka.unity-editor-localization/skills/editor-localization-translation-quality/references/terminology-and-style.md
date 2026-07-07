@@ -38,7 +38,12 @@ Keep these terms unchanged unless the current project already documents a locali
 
 If a term is both a natural user-facing noun and a code/type-like concept, decide once per project and apply the same treatment across all locales.
 
-After translating, **grep every glossary fixed term in the output** (for example `key`, `scope`, `fallback`, `manifest`, `gate`). Fixed-term breaks concentrate in dense prose such as changelogs and long descriptions, where a fixed term appears unquoted mid-sentence and gets translated by momentum (`key` → `klucze`, `Schlüssel`, `клавиши`, …). One grep per term per locale catches these reliably and cheaply.
+After translating, **check every glossary fixed term in the output**. A bare grep for the term itself only proves it survived *somewhere* — it cannot show that an occurrence was translated away. Use one of these mechanical checks instead:
+
+- Compare the term's occurrence count in the translation against the source text (counts should match unless a sentence was legitimately restructured), or
+- Grep for the *known translated forms* of the term (`key` → `klucz*`, `Schlüssel`, `ключ*`, 鍵, 키, …) and treat any hit as a suspect.
+
+Fixed-term breaks concentrate in dense prose such as changelogs and long descriptions, where the term appears unquoted mid-sentence and gets translated by momentum. Note that whether a term is fixed at all is a **per-project glossary decision, and it can differ by language**: a project may keep `fallback` in Latin script for most languages while deliberately using a natural word in others (e.g. a native term chosen to match the UI catalog). Do not "fix" a deliberate natural translation back to the Latin term — check the project glossary and the locale catalog before flagging.
 
 ## The UI Catalog Is the Source of Truth for Quoted UI Text
 

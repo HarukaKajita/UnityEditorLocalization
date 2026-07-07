@@ -62,7 +62,7 @@
         { "key": "global.resolve.default", "value": "Якщо не задано, використовується типова мова кожного scope." },
         { "key": "system.detected", "value": "Мова системи: {0}" },
         { "key": "system.detected.none", "value": "Мова системи: не визначено" },
-        { "key": "system.fallback.label", "value": "Використовувати резерв на мову системи" },
+        { "key": "system.fallback.label", "value": "Використовувати мову системи як резервну" },
         { "key": "system.fallback.tooltip", "value": "Коли глобальне налаштування не задано, підлаштовується під мову ОС і повертається до типової мови кожного scope, якщо немає відповідного перекладу." },
         { "key": "outOfCatalog", "value": "{0} (поза завантаженими каталогами)" },
         { "key": "menu.noCatalog.tooltip", "value": "Каталог перекладів не завантажено, тому немає мови для вибору." },

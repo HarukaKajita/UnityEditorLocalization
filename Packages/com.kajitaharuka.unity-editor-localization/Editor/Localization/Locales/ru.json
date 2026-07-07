@@ -62,7 +62,7 @@
         { "key": "global.resolve.default", "value": "Если не задано, используется язык по умолчанию каждого scope." },
         { "key": "system.detected", "value": "Язык системы: {0}" },
         { "key": "system.detected.none", "value": "Язык системы: не определён" },
-        { "key": "system.fallback.label", "value": "Использовать резерв на язык системы" },
+        { "key": "system.fallback.label", "value": "Использовать язык системы как резервный" },
         { "key": "system.fallback.tooltip", "value": "Когда глобальная настройка не задана, подстраивается под язык ОС и переходит на резервный язык (язык по умолчанию) каждого scope, если перевода нет." },
         { "key": "outOfCatalog", "value": "{0} (вне загруженных каталогов)" },
         { "key": "menu.noCatalog.tooltip", "value": "Каталог переводов не загружен, поэтому выбрать язык нельзя." },
