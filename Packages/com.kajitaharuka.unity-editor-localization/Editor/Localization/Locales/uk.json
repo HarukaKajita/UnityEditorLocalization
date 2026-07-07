@@ -87,7 +87,7 @@
         { "key": "source.global", "value": "глобальне налаштування" },
         { "key": "source.default", "value": "типова locale" },
         { "key": "source.system", "value": "мова системи" },
-        { "key": "scope.fallbackNote", "value": "Запитаний {0} недоступний; виконано резерв." },
+        { "key": "scope.fallbackNote", "value": "Запитаний {0} недоступний; використано резервну мову." },
         { "key": "scope.outOfCatalogNote", "value": "Запитаний {0} поза завантаженими каталогами." },
         { "key": "scope.manifest.tooltip", "value": "Натисніть, щоб вибрати ассет маніфесту." },
         { "key": "skills.title", "value": "Навички для ШІ-агентів" },

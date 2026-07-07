@@ -4,7 +4,7 @@
         { "key": "header.subtitle", "value": "Ngôn ngữ hiển thị của Editor, lưu theo từng người dùng." },
         { "key": "header.overview", "value": "{0} scope · {1} locale" },
         { "key": "header.overview.empty", "value": "Chưa có catalog" },
-        { "key": "header.overview.fallback", "value": "Một số scope dùng fallback vì ngôn ngữ yêu cầu không khả dụng." },
+        { "key": "header.overview.fallback", "value": "Một số scope dùng ngôn ngữ dự phòng vì ngôn ngữ yêu cầu không khả dụng." },
         { "key": "doc.tooltip", "value": "Mở tài liệu trực tuyến" },
         { "key": "note", "value": "Ngôn ngữ hiển thị được lưu theo từng người dùng trong EditorPrefs, không ghi vào asset của dự án. Thứ tự phân giải: ghi đè theo scope → cài đặt toàn cục → ngôn ngữ hệ thống → ngôn ngữ mặc định của mỗi scope." },
         { "key": "catalogs.reload", "value": "Tải lại" },

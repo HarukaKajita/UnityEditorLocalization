@@ -78,7 +78,7 @@
         { "key": "scope.followGlobal", "value": "Seguir a configuração global" },
         { "key": "scope.noLocales", "value": "Este scope não tem nenhuma locale disponível. Verifique as locales do manifest." },
         { "key": "pill.override", "value": "ajuste próprio" },
-        { "key": "pill.fallback", "value": "alternativa" },
+        { "key": "pill.fallback", "value": "fallback" },
         { "key": "scope.meta", "value": "Atual: {0} ({1}) · padrão: {2}" },
         { "key": "chain.label", "value": "Resolução" },
         { "key": "chain.tooltip", "value": "Procura a locale solicitada, seus pais e depois defaultLocale, e mostra o primeiro idioma que tem tradução." },
