@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.1] - 2026-07-08
+
+### Changed
+- 翻訳カタログの fallback 訳語を言語内で統一した。it / es-ES / es-419 / pt-BR / pt-PT / pl / th / id は既に多数派だったラテン語 "fallback" へ（`pill.fallback` ほか少数派の ripiego / respaldo / alternativa / rezerwa / ถอยกลับ / cadangan を置換）、vi は自然語 dự phòng へ、ru / uk は резерв 系名詞へ統一（откат 等の別語を解消し、`system.fallback.label` の不自然な格支配も修正）。zh-Hant の「後援」は Microsoft 用語集（後援字型）の確立語のため維持。
+- pt-PT カタログの pt-BR 語彙混入を修正した（`Desenvolvedor`→`Programador`、`Registra`/`registrar`→`Regista`/`registar`、`detectado`→`detetado`（性一致は `detetada`）、`idioma de exibição`→`idioma de apresentação`）。
+- pl カタログの locale の文法性を女性形へ統一した（`Domyślna locale` / `tej locale` / `żadnej locale` / `nieustawiona`。コード識別子 `defaultLocale` は男性のまま。方針は翻訳品質スキルの language-notes に明記）。
+- 同梱の翻訳品質スキル（`editor-localization-translation-quality`）を強化した。日本語原文由来の系統的な誤訳パターン（句読点・記号の伝播 / 漢語の同形借用 / コロケーション破壊 / 括弧注記の係り先反転 / メタ言語表現の偽友）の検査項目を language-notes へ、固定語検査の具体的な機構（原文との出現回数比較・既知誤訳形の grep）と「UI 引用の正はカタログ側」の工程順を terminology-and-style へ追加し、SKILL.md の workflow から参照するようにした。
+
 ## [1.2.0] - 2026-07-06
 
 ### Changed

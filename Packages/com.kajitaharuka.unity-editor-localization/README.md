@@ -35,7 +35,7 @@ https://github.com/HarukaKajita/UnityEditorLocalization.git?path=Packages/com.ka
 バージョンを固定する場合は、末尾にリリースタグを付けます。
 
 ```text
-https://github.com/HarukaKajita/UnityEditorLocalization.git?path=Packages/com.kajitaharuka.unity-editor-localization#1.2.0
+https://github.com/HarukaKajita/UnityEditorLocalization.git?path=Packages/com.kajitaharuka.unity-editor-localization#1.2.1
 ```
 
 このリポジトリ自体をUnityプロジェクトとして開く場合は、Embedded UPM packageとして`Packages/`配下にすでに配置されているため、追加のインストールは不要です。
