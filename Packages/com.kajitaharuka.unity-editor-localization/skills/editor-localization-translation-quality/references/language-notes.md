@@ -45,6 +45,7 @@ Variants such as `es-ES`/`es-419`, `pt-BR`/`pt-PT`, and `zh-Hans`/`zh-Hant` shou
 - Quotes: `zh-Hans` uses `“ ”`; `「」` is legitimate in `zh-Hant` (Taiwan convention). Never carry the Japanese middle dot `・` over; the enumeration mark `、` joins parallel nouns only, and clause-level breaks take `，`.
 - Watch mainland-vs-Taiwan register: `接入` reads mainland-only — prefer `整合`/`串接`/`導入` for `zh-Hant`.
 - Audit any two-character compound copied from a Japanese source (see "Translating from a Japanese source"); 組入/表記/推定 are known offenders.
+- **Terse pill/button labels can coincide with the Japanese source character-for-character** even when the borrowing is a *correct* Chinese word (observed: 背面, 保存), which then trips the validator's same-as-default (untranslated-suspect) check. Prefer an equally natural non-identical synonym (背面→背后/背後, 保存→保存预设 or 儲存) instead of registering the key as a fixed term — fixed terms are for values that *should* stay identical in every locale, not for coincidental overlaps in one language.
 
 ## Korean `ko`
 
