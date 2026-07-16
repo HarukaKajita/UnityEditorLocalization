@@ -116,7 +116,12 @@ InitTestScene*.unity*
 .maestri/
 .idea/.idea.UnityEditorLocalization/.idea/
 
-# Claude Code / agent skill links (各環境でメニュー/CLI から生成。core.symlinks 依存で
-# コミットには向かないため無視する)
-/.claude/skills/
-/.agents/
+# .claude/ と .agents/ は Git 追跡する（GOLD_STANDARD §2.9）。
+# .claude/skills・.agents/skills は scripts/sync-agent-skills.mjs による生成ミラー
+# （正本は Packages/*/skills/）。直接編集せず sync で再生成する。
+# ローカル固有の Claude Code 状態はコミットしない。
+/.claude/settings.local.json
+# 開発者ローカルのプレビュー用 launch 設定（他リポジトリには無い MySite 由来の設定で、
+# 参照先 .claude/mysite も公開リポジトリには存在しないため追跡しない）。
+/.claude/launch.json
+/.claude/mysite/
