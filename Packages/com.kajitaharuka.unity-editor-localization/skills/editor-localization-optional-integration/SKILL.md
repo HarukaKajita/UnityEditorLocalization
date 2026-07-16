@@ -79,6 +79,19 @@ Replace every `{{TOKEN}}` occurrence (in file contents and in output file names)
   assembly must not reference the seam, the integration assembly, or the base package — runtime user-facing text
   is out of scope for editor localization. If a string is shown both at runtime and in the editor, localize only
   the editor-side presentation.
+- **Multi-assembly / suite packages** (core + companion editor asmdefs sharing one product): keep **one scope**
+  and place the seam in the **lowest-level editor asmdef that every consumer references** (e.g. `Core`). Then
+  choose how companions reach the facade: same-package consumer asmdefs → keep the facade `internal` and add them
+  to the facade's `InternalsVisibleTo`; a companion in a *different package* cannot receive `InternalsVisibleTo`
+  practically → make the facade (`{{PREFIX}}L10n`, `{{PREFIX}}TextKey`) `public` while keeping the bridge seam
+  types internal. Proven in TextureAssetExtension (IVT across suite editors) and UberMaterialPropertyDrawer
+  (public facade for a separate companion package), 2026-07.
+- **Choosing `defaultLocale`**: match the language of the *current* hard-coded UI strings so the no-base display
+  stays byte-identical after routing. Existing UI in Japanese → `ja` (EPE). Existing UI in English → `en` and add
+  `ja` as a translation (UMPD). Do not translate strings while routing them.
+- **Seam-unusable zones**: code that only runs when the seam itself may be absent — e.g. an InstallGuard assembly
+  compiled when the *core* package is missing — must keep plain string literals. Never route such strings through
+  the facade.
 
 ## Verify
 
