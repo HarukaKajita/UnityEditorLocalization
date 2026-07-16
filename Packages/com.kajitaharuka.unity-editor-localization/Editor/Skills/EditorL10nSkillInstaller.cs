@@ -217,6 +217,13 @@ namespace Kajitaharuka.EditorLocalization
             message = "";
             try
             {
+                // 登録先に「実体ディレクトリ」（symlink ではない本物のフォルダ）が既にある場合は、
+                // 有効な登録（実体コピーのミラー）として扱い、何もせず成功にする。開発リポジトリでは
+                // sync スクリプトがコミット済みの実体ミラーを生成しており、ここで ln -sfn を実行すると
+                // 既存実ディレクトリの内部へ入れ子の symlink を作ってミラーを汚してしまうため。
+                if (Directory.Exists(link) && !IsReparsePoint(link))
+                    return true;
+
                 if (Application.platform == RuntimePlatform.WindowsEditor)
                 {
                     // cmd の mklink は区切りが '\' 前提。Unity のパスは '/' のことがあるため正規化する。
