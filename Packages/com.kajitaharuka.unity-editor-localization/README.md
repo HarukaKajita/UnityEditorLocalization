@@ -44,7 +44,7 @@ https://github.com/HarukaKajita/UnityEditorLocalization.git?path=Packages/com.ka
 
 このパッケージはEmbedded UPM packageとして、Unityプロジェクトの
 `Packages/com.kajitaharuka.unity-editor-localization/`配下に配置する構成です。
-`README.md`、`CHANGELOG.md`、`LICENSE.txt`、`package.json`はpackage rootに置き、補助資料は
+`README.md`、`CHANGELOG.md`、`LICENSE.md`、`package.json`はpackage rootに置き、補助資料は
 `Documentation~/`配下に置いてUnityのAsset import対象から外します。
 
 `Samples~/LocalizedEditorWindow/`には、UnityEditorLocalizationを使ってUI ToolkitのEditorWindowを多言語対応させる
@@ -274,4 +274,4 @@ MIT ライセンスなのでクレジット表示の義務はありません。�
 
 ## ライセンス
 
-MIT License です。詳細は `LICENSE.txt` を参照してください。
+MIT License です。詳細は `LICENSE.md` を参照してください。
