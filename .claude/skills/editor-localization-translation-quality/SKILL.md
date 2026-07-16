@@ -42,6 +42,11 @@ Use this skill for EditorLocalization locale work, especially `*.l10n-manifest.j
 
 6. Validate mechanically before reporting done.
    - Run `scripts/validate_locale_quality.py` against the locale directory.
+   - When C# code calls the catalog through a `Tr(...)` facade, also run
+     `scripts/check_tr_placeholder_parity.py` (see below): it catches call sites that pass fewer
+     format arguments than the catalog template's `{n}` placeholders require — a runtime
+     `FormatException` / raw-`{n}` bug that neither the compiler nor the locale validator detects
+     (generalized from the 2026-07 UMPD companion routing, 198 call sites).
    - Also run the project’s existing catalog validator or compile/test gate when available.
    - Investigate every unexpected English duplicate, placeholder mismatch, missing key, and extra key.
    - Check each glossary fixed term in every locale output for accidental translation (compare occurrence counts with the source, or grep the known translated forms — a bare grep for the term itself proves nothing; see `references/terminology-and-style.md`). When the source is Japanese, grep `[・「」【】]` for leaked source punctuation, excluding `「」` for zh-Hant where corner brackets are native (see `references/language-notes.md`).
@@ -67,6 +72,21 @@ python3 scripts/validate_locale_quality.py \
 ```
 
 Use `--allow-same-key` only for deliberate fixed terms. Do not allow broad categories just to silence failures. The script also auto-loads `fixedTerms` from the `*.l10n-manifest.json` next to the `Locales/` directory — the same declaration the C# `EditorL10nValidator` reads — and treats those keys like `--allow-same-key`. Prefer declaring fixed terms in the manifest (one source, both validators) over passing flags.
+
+## Tr-call / placeholder parity check
+
+For consumers that call the catalog through a facade (e.g. `EpeL10n.Tr`, `TaeL10n.Tr`, `UmpdL10n.Tr`):
+
+```bash
+python3 scripts/check_tr_placeholder_parity.py \
+  --catalog path/to/Locales/<defaultLocale>.json \
+  --src path/to/Packages/<package-root> \
+  --method UmpdL10n.Tr [--method OtherFacade.Tr]
+```
+
+- Fails (exit 1) when a call passes fewer arguments than the template's `max({n})+1`, or uses a key missing from the catalog. Surplus arguments and statically unresolvable keys (dynamic variables) are reported as warnings only.
+- Resolves TextKey constants (`const string Xxx = "...";`) from the `--src` tree automatically; string-literal keys work as-is.
+- Placeholder count parity *across locales* is `validate_locale_quality.py`'s job; this script covers the *code side* of the same contract. Run both.
 
 The per-locale line reports `placeholder=` (placeholder set mismatch vs the default locale) and `gap=` (placeholder numbers that are not consecutive from `0`) as separate counts, mirroring the C# `EditorL10nValidator` so the two gates can cross-check. Add `--report-variant-duplicates` to print (non-failing) the keys whose value is identical across the locales of a regional-variant group (`es-ES`/`es-419`, `pt-BR`/`pt-PT`, `zh-Hans`/`zh-Hant`, grouped by primary subtag), to review for copy-paste left-overs — remembering that identical values are legitimate for terse technical strings.
 
