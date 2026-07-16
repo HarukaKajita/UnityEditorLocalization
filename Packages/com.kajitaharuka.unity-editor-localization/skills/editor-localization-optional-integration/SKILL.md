@@ -73,6 +73,12 @@ Replace every `{{TOKEN}}` occurrence (in file contents and in output file names)
 - Keep all code comments in Japanese (project rule).
 - Wrap every generated source file in `#if UNITY_EDITOR ... #endif`.
 - The main assembly must not reference `Kajitaharuka.EditorLocalization` in any way (asmdef, `using`, or API calls).
+- **Packages that also ship a Runtime assembly** (e.g. baking/runtime APIs alongside editor tooling): place the
+  bridge seam and every localized string lookup in the **Editor assembly only**. `{{MAIN_ASMDEF}}` in the token
+  table means the *editor* asmdef (e.g. `Kajitaharuka.XxxExtension.Editor`), never the Runtime asmdef. The Runtime
+  assembly must not reference the seam, the integration assembly, or the base package — runtime user-facing text
+  is out of scope for editor localization. If a string is shown both at runtime and in the editor, localize only
+  the editor-side presentation.
 
 ## Verify
 
