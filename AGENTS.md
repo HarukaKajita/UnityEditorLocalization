@@ -17,6 +17,47 @@ Unity Editor 上で開発・検証するための器に過ぎません。実装�
 - package 本体の asmdef は `Kajitaharuka.EditorLocalization`（`includePlatforms: ["Editor"]`、`references: []`）です。
   EditMode テストは `Kajitaharuka.EditorLocalization.Tests` asmdef で分離します。
 
+## ゴールド標準と開発フロー
+
+このリポジトリは、kajitaharuka 名義で開発・販売する Unity パッケージ／アセット共通の**ゴールド標準**に準拠します。
+標準の**正本**はテンプレートリポジトリ `UnityTemplate_2022_3_22f1` の `docs/GOLD_STANDARD.md` です
+（リポジトリ構成・ガイド文書・コード標準・多言語・リリース資材・URL 規約・エージェント運用の各標準を定義）。
+標準の変更は必ずテンプレートリポジトリ側で行い、本リポジトリへ反映します。本リポジトリ固有の逸脱は次のとおりです。
+
+- 本パッケージは MIT ライセンスで公開する OSS のため、`package.json` に `repository` を持ち、購入者向け文書からの
+  リポジトリ言及も正当です（標準 §2.2 の「公開 OSS は例外」に該当。有料販売のみのパッケージでは `repository` を入れない）。
+
+### 開発→リリース→商品化フローと使用スキル
+
+各フェーズでは該当スキルを必ず参照します。スキルに無い判断が必要になったら作業を止めず最良判断で進め、
+**暫定判断として最終報告で強調**します。
+
+| フェーズ | 内容 | 使用スキル |
+|---|---|---|
+| 開発 | 実装・Inspector 設計・多言語化・カタログ整備 | `unity-editor-ui-design` / `editor-localization-optional-integration` / `editor-localization-translation-quality` / `unity-mcp-skill` / `unity-cli` |
+| 検証 | Test Runner・手動チェック・スクリーンショット | `editor-window-capture` |
+| リリース | version 確定 → CHANGELOG 畳み込み → `Publish/` 書き出し → コミット/タグ → publish.json 追従 | `release-unity-package` |
+| 商品化 | promo 画像 → meta/pages（ja/en → 19 言語）→ publish.json → 出品下書き | `new-product-onboarding`（`write-my-promo-images` / `write-my-product-page` / `publish-to-platform` を束ねる） |
+| 出品・公開 | フォーム入力・添付まで自動、**公開ボタンは人間** | `publish-to-platform` |
+
+出品の保存・公開・削除の確定操作はエージェントが行いません（入力・添付・下書きまで）。
+
+### 同梱スキルとミラーの運用（正本と生成物の分離）
+
+- AI エージェント向けスキルの**正本**は package 同梱の
+  [`Packages/com.kajitaharuka.unity-editor-localization/skills/`](Packages/com.kajitaharuka.unity-editor-localization/skills/) です。
+- リポジトリ直下の `.claude/skills` / `.agents/skills` は `scripts/sync-agent-skills.mjs` が正本から生成する
+  **実体コピーのミラー**で、Git 追跡します（標準 §2.6-4 / §2.9）。**ミラーを直接編集しないこと。**
+  編集は必ず正本側で行い、`node scripts/sync-agent-skills.mjs` で再生成します（`--check` で drift 検査）。
+- エディタ拡張の**利用者**がスキルをローカル登録する導線は別途 `EditorL10nSkillInstaller`
+  （`Tools > UnityEditorLocalization > AI Agent Skills`）が symlink 方式で提供します（上記ミラーとは別機構）。
+
+### 改善提案の義務
+
+作業の中で、スキル化したほうがよい反復工程、既存スキルの一般に通用する改善点、ゴールド標準自体の改善点を
+発見したら、作業完了報告に「提案」としてまとめて積極的に共有してください。標準の変更はテンプレートリポジトリの
+`docs/GOLD_STANDARD.md` に反映してから各リポジトリへ展開します。
+
 ## よく使う操作
 
 このリポジトリには CLI ベースのビルド/テスト基盤はなく、検証は Unity Editor のメニューから行います。
@@ -27,7 +68,7 @@ Unity Editor 上で開発・検証するための器に過ぎません。実装�
   - defaultLocale テーブルの存在、各ロケールでの key 過不足、`string.Format` placeholder 番号の一致と連番欠落、defaultLocale と同値の未翻訳疑いを検査します（manifest の `fixedTerms` で宣言した固定語キーは同値疑いから除外）。
   - CI からは batchmode で `EditorL10nValidator.ValidateForCI()`（`-executeMethod`）を使います。エラーで非 0 終了し CI を止める。既定はエラーのみ、`-l10nFailOnWarnings` で警告も失敗。対話モードでは終了しません。終了コード判定は純関数 `ComputeExitCode` に分離。
 - 表示言語の確認/変更（グローバルおよび scope ごと）: `Preferences > UnityEditorLocalization`（`Tools > UnityEditorLocalization > Settings` から開いて選択状態にできる。`SettingsService.OpenUserPreferences`）
-- 同梱スキル（翻訳ワークフロー / 既存拡張の多言語化連携）の登録: `Tools > UnityEditorLocalization > AI Agent Skills`（user / project スコープ、CLI コマンドの明示・コピー）。Preferences の「AIエージェント連携スキル」節からも実行可。`.claude/skills` と `.agents/skills` へ symlink を張る（[Editor/Skills/EditorL10nSkillInstaller.cs](Packages/com.kajitaharuka.unity-editor-localization/Editor/Skills/EditorL10nSkillInstaller.cs)）。mac/Linux=`ln`、Windows=`mklink /D`（不可なら junction）でクロスプラットフォーム動作し、表示する CLI コマンドも OS 別。生成 symlink は `core.symlinks` 依存でコミットに向かないため `.gitignore` 対象。
+- 同梱スキル（翻訳ワークフロー / 既存拡張の多言語化連携）の登録: `Tools > UnityEditorLocalization > AI Agent Skills`（user / project スコープ、CLI コマンドの明示・コピー）。Preferences の「AIエージェント連携スキル」節からも実行可。`.claude/skills` と `.agents/skills` へ symlink を張る（[Editor/Skills/EditorL10nSkillInstaller.cs](Packages/com.kajitaharuka.unity-editor-localization/Editor/Skills/EditorL10nSkillInstaller.cs)）。mac/Linux=`ln`、Windows=`mklink /D`（不可なら junction）でクロスプラットフォーム動作し、表示する CLI コマンドも OS 別。この installer はエディタ拡張の**利用者**がローカルへスキルを登録するための機能。**このリポジトリ自身**が追跡する `.claude/skills`・`.agents/skills` は、それとは別に `scripts/sync-agent-skills.mjs` が package 同梱 `skills/` を正本として生成する実体コピーのミラー（symlink ではない）で、直接編集しない（後述「ゴールド標準と開発フロー」を参照）。
 - 翻訳テキスト品質の静的検証（Python、利用側の locale 群に対して実行）:
 
   ```bash
