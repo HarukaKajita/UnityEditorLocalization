@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Changed
+- 同梱の optional-integration スキルを更新: 連携 asmdef のファイル名を短縮形 `L10nIntegration.asmdef` に固定（assembly name は不変）。Unity Asset Store のファイルパス150字制約に適合するため。テンプレートフォルダ名も `templates/L10nIntegration/` へ短縮。
+
 ### Added
 - 対応 Unity バージョンの表記に `unityRelease`（`2022.3` 系の任意パッチで動作）を明記し、Package Manager での互換性判定がより正確になった。
 - サードパーティ成分の有無を明記する `Third Party Notices.md` を同梱した（本パッケージはサードパーティ成分を含まない）。

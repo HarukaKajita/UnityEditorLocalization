@@ -58,9 +58,9 @@ Place under `<package>/Editor/`:
 | `templates/Localization/ProductL10n.cs.txt` | `Localization/{{PREFIX}}L10n.cs` |
 | `templates/Localization/ProductL10nUi.cs.txt` | `Localization/{{PREFIX}}L10nUi.cs` |
 | `templates/Localization/ProductL10nAssemblyInfo.cs.txt` | `Localization/{{PREFIX}}L10nAssemblyInfo.cs` |
-| `templates/LocalizationIntegration/IntegrationAsmdef.asmdef.txt` | `LocalizationIntegration/{{INTEGRATION_ASMDEF}}.asmdef` |
-| `templates/LocalizationIntegration/EditorL10nBridge.cs.txt` | `LocalizationIntegration/EditorL10nBridge.cs` |
-| `templates/LocalizationIntegration/EditorL10nBridgeInstaller.cs.txt` | `LocalizationIntegration/EditorL10nBridgeInstaller.cs` |
+| `templates/L10nIntegration/IntegrationAsmdef.asmdef.txt` | `LocalizationIntegration/L10nIntegration.asmdef`（ファイル名は短縮固定。assembly `name` はテンプレ内で `{{INTEGRATION_ASMDEF}}` のまま） |
+| `templates/L10nIntegration/EditorL10nBridge.cs.txt` | `LocalizationIntegration/EditorL10nBridge.cs` |
+| `templates/L10nIntegration/EditorL10nBridgeInstaller.cs.txt` | `LocalizationIntegration/EditorL10nBridgeInstaller.cs` |
 
 If the package already has a `{{PREFIX}}L10n` facade, merge `Tr` to delegate to `{{PREFIX}}L10nRuntime`/`EditorL10nRuntime.Bridge` instead of calling `EditorL10n` directly, rather than overwriting unrelated members.
 
@@ -73,6 +73,7 @@ Replace every `{{TOKEN}}` occurrence (in file contents and in output file names)
 - Keep all code comments in Japanese (project rule).
 - Wrap every generated source file in `#if UNITY_EDITOR ... #endif`.
 - The main assembly must not reference `Kajitaharuka.EditorLocalization` in any way (asmdef, `using`, or API calls).
+- **Asmdef file names must stay short**: save the integration asmdef as `L10nIntegration.asmdef` (the assembly `name` field keeps the full `{{INTEGRATION_ASMDEF}}` value). Full-length file names such as `Kajitaharuka.X.EditorLocalizationIntegration.asmdef` push file paths past the Unity Asset Store 150-character limit (Submission Guidelines 2.1.e, measured including `.meta`). Existing integrations were renamed accordingly in 2026-07.
 - **Packages that also ship a Runtime assembly** (e.g. baking/runtime APIs alongside editor tooling): place the
   bridge seam and every localized string lookup in the **Editor assembly only**. `{{MAIN_ASMDEF}}` in the token
   table means the *editor* asmdef (e.g. `Kajitaharuka.XxxExtension.Editor`), never the Runtime asmdef. The Runtime
