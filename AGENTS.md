@@ -26,6 +26,8 @@ Unity Editor 上で開発・検証するための器に過ぎません。実装�
 
 - 本パッケージは MIT ライセンスで公開する OSS のため、`package.json` に `repository` を持ち、購入者向け文書からの
   リポジトリ言及も正当です（標準 §2.2 の「公開 OSS は例外」に該当。有料販売のみのパッケージでは `repository` を入れない）。
+- **UAS 適格性: 対象**（GOLD_STANDARD §7.1）。MIT ライセンスで技術的な抵触は無く、UAS へ出品可能です。無料/有料
+  いずれの出品形態にするかは未決定で、出品可否と形態は `publish.json` の `targets.unity-asset-store.enabled` で宣言します。
 
 ### 開発→リリース→商品化フローと使用スキル
 
