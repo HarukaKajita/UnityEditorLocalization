@@ -26,8 +26,10 @@ Unity Editor 上で開発・検証するための器に過ぎません。実装�
 
 - 本パッケージは MIT ライセンスで公開する OSS のため、`package.json` に `repository` を持ち、購入者向け文書からの
   リポジトリ言及も正当です（標準 §2.2 の「公開 OSS は例外」に該当。有料販売のみのパッケージでは `repository` を入れない）。
-- **UAS 適格性: 対象**（GOLD_STANDARD §7.1）。MIT ライセンスで技術的な抵触は無く、UAS へ出品可能です。無料/有料
-  いずれの出品形態にするかは未決定で、出品可否と形態は `publish.json` の `targets.unity-asset-store.enabled` で宣言します。
+- **UAS 適格性: 対象（ただし出品は暫定見送り）**（GOLD_STANDARD §7.1）。MIT ライセンスで技術的な抵触は無く、UAS へ
+  出品可能ですが、無料公開の本パッケージは UAS 出品のメリットが現時点では大きくないため暫定的に見送ります
+  （2026-07-22 開発者判断。`publish.json` の `targets.unity-asset-store.enabled: false` で宣言）。出品したほうが
+  よい状況になった時点で再判断します。
 
 ### 開発→リリース→商品化フローと使用スキル
 
