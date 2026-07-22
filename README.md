@@ -1,5 +1,7 @@
 # UnityEditorLocalization
 
+**Languages:** English | [日本語](docs/readme/README.ja.md) | [简体中文](docs/readme/README.zh-Hans.md) | [繁體中文](docs/readme/README.zh-Hant.md) | [한국어](docs/readme/README.ko.md) | [Français](docs/readme/README.fr.md) | [Deutsch](docs/readme/README.de.md) | [Italiano](docs/readme/README.it.md) | [Español (España)](docs/readme/README.es-ES.md) | [Español (Latinoamérica)](docs/readme/README.es-419.md) | [Português (Brasil)](docs/readme/README.pt-BR.md) | [Português (Portugal)](docs/readme/README.pt-PT.md) | [Русский](docs/readme/README.ru.md) | [Polski](docs/readme/README.pl.md) | [Türkçe](docs/readme/README.tr.md) | [ไทย](docs/readme/README.th.md) | [Tiếng Việt](docs/readme/README.vi.md) | [Українська](docs/readme/README.uk.md) | [Bahasa Indonesia](docs/readme/README.id.md)
+
 A lightweight, **Editor-only** localization foundation for Unity editor extensions.
 Pull UI text (Inspector labels, HelpBoxes, buttons, Console logs, progress bars) from
 per-scope translation catalogs keyed by **scope × locale × key**. Add a language by adding a
@@ -63,56 +65,3 @@ https://genera.booth.pm/items/8617787
 
 MIT License. See [`Packages/com.kajitaharuka.unity-editor-localization/LICENSE.md`](Packages/com.kajitaharuka.unity-editor-localization/LICENSE.md).
 Attribution is not required but always welcome.
-
----
-
-## 日本語
-
-Unity エディタ拡張向けの、**Editor 専用**の軽量な多言語化基盤です。Inspector・HelpBox・ボタン・
-Console ログ・進捗表示などの文言を、**scope × ロケール × key** で引く翻訳カタログから取得します。
-言語の追加は JSON ファイルを足すだけで、C# の変更は不要です。
-
-- **Editor 専用。** ランタイム、Addressables、Unity Localization package には依存しません。
-- **ロケールは文字列タグ**（manifest 宣言）で扱い、C# の `enum` にしません。言語追加で C# を触りません。
-- 設定 UI と同梱サンプルカタログが **19 言語**に対応します。
-- **UI Toolkit バインド**で `Label` / `Button` / `PropertyField` を key に結び付け、言語切替に自動追従します。コンパクト言語メニューと言語選択ドロップダウンを同梱します。
-- **任意依存（optional）として組み込めます。** 利用側パッケージは基盤が無くても既定言語の単一言語で動作し、本基盤を入れると多言語化と言語切替 UI が点灯します（ハード参照なし）。
-- **カタログ支援。** 作成ウィザードで manifest と空テーブルの雛形を生成し、検証で key 過不足・`string.Format` placeholder 整合・未翻訳疑いを確認できます（CI batchmode 対応）。
-- 翻訳品質と任意依存統合の雛形生成を助ける **AI エージェント向けスキル**を同梱します。
-
-> 本リポジトリは MIT ライセンスで公開しているソースです。開発対象は
-> [`Packages/com.kajitaharuka.unity-editor-localization/`](Packages/com.kajitaharuka.unity-editor-localization/)
-> 配下の単一 embedded UPM package で、リポジトリのその他（`Assets/`・`ProjectSettings/`）は
-> Unity Editor 上で開発・検証するための器です。
-
-### インストール
-
-**Unity 2022.3 以降**が必要です。
-
-- **Package Manager（Git URL）:** *Add package from git URL…* に次を入力します（バージョン固定はタグ `#1.2.1` を末尾に付与）。
-
-  ```text
-  https://github.com/HarukaKajita/UnityEditorLocalization.git?path=Packages/com.kajitaharuka.unity-editor-localization
-  ```
-
-- **VPM（VCC / ALCOM）:** 次の VPM リポジトリを追加してから UnityEditorLocalization を追加します。
-
-  ```text
-  https://harukakajita.github.io/vpm-repos/index.json
-  ```
-
-- **Booth:** パッケージ済みの `.zip` を配布しています（無料。お布施版あり）。
-
-  ```text
-  https://genera.booth.pm/items/8617787
-  ```
-
-### ドキュメント
-
-- **商品ページ（多言語）:** <https://kajitaharuka.com/products/unity-editor-localization/>
-- **パッケージ利用ガイド:** [`Packages/com.kajitaharuka.unity-editor-localization/README.md`](Packages/com.kajitaharuka.unity-editor-localization/README.md)
-- **詳細ガイド（`Documentation~/`）:** `DEVELOPER_GUIDE.md` / `UI_TOOLKIT_LOCALIZATION_TIPS.md` / `OPTIONAL_INTEGRATION.md`
-
-### ライセンス
-
-MIT License です。詳細は [`Packages/com.kajitaharuka.unity-editor-localization/LICENSE.md`](Packages/com.kajitaharuka.unity-editor-localization/LICENSE.md) を参照してください。クレジット表示の義務はありませんが、付けていただけると嬉しいです。
