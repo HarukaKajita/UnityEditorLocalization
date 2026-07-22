@@ -18,16 +18,24 @@
       "hash": "c14de1e6dc01ab42d2bb358730cff954bce0ce6b"
     },
     "com.kajitaharuka.export-package-extension": {
-      "version": "file:/Users/kajitaharuka/dev/unity/ExportPackageExtension/Packages/com.kajitaharuka.export-package-extension",
+      "version": "git@github.com:HarukaKajita/ExportPackageExtension.git?path=Packages/com.kajitaharuka.export-package-extension",
       "depth": 0,
-      "source": "local",
-      "dependencies": {}
+      "source": "git",
+      "dependencies": {},
+      "hash": "36f4bcd582c9310cc44baf7c58839b79be8d7a6e"
     },
     "com.kajitaharuka.unity-editor-localization": {
       "version": "file:com.kajitaharuka.unity-editor-localization",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}
+    },
+    "com.kajitaharuka.unity-editor-window-capture-extension": {
+      "version": "git@github.com:HarukaKajita/UnityEditorWindowCaptureExtension.git?path=Packages/com.kajitaharuka.unity-editor-window-capture-extension",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "c1d23486d8be2a7aa53eb4f24e7d3bcdbd596a73"
     },
     "com.unity.collab-proxy": {
       "version": "2.12.4",
