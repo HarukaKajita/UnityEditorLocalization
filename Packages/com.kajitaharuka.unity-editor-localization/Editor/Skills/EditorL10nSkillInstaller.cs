@@ -5,7 +5,6 @@ using System.IO;
 using System.Text;
 using UnityEditor;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 
 namespace Kajitaharuka.EditorLocalization
 {
@@ -40,25 +39,18 @@ namespace Kajitaharuka.EditorLocalization
         // リンク先の 2 系統。Claude Code は .claude/skills を、汎用エージェント系は .agents/skills を読む。
         private static readonly string[] LinkRoots = { ".claude/skills", ".agents/skills" };
 
-        // ===== メニュー =====
+        // ===== メニュー（間接方式のみ）=====
 
-        // 注意: MenuItem は '/' をサブメニュー区切りとして解釈するため、項目名にパス（~/.claude 等）を
-        // 入れると意図せず階層化される。項目名に '/' は使わない（パス詳細は Preferences の tooltip と README）。
-        [MenuItem("Tools/UnityEditorLocalization/AI Agent Skills/Install for current user", priority = 200)]
-        private static void MenuInstallUser() => Debug.Log(InstallToUser());
+        // GOLD_STANDARD §2.6 の間接方式: メニューは単一項目とし、押すとスキル導入の説明・登録状態・
+        // 実行ボタンを持つ Preferences ペインを「開くだけ」にする。メニュー項目から直接スキル登録・
+        // クリップボード書き込み等の副作用は一切行わない（意図しないスキル追加は開発者に敬遠されるため、
+        // 登録はユーザーがペイン内で内容を理解したうえで明示的にボタンを押した場合にのみ行う）。
+        // 実際の登録/CLI コピー処理は下記の公開ロジックとして残し、ペイン側のボタンから呼ぶ。
+        [MenuItem("Tools/UnityEditorLocalization/AI Agent Skills", priority = 200)]
+        private static void MenuOpenSkillsPane() =>
+            SettingsService.OpenUserPreferences(EditorL10nSettingsProvider.SettingsPath);
 
-        [MenuItem("Tools/UnityEditorLocalization/AI Agent Skills/Install for this project", priority = 201)]
-        private static void MenuInstallProject() => Debug.Log(InstallToProject());
-
-        [MenuItem("Tools/UnityEditorLocalization/AI Agent Skills/Copy CLI commands to clipboard", priority = 220)]
-        private static void MenuCopyCli()
-        {
-            var snippet = CliSnippetForUser() + "\n" + CliSnippetForProject();
-            EditorGUIUtility.systemCopyBuffer = snippet;
-            Debug.Log("[UnityEditorLocalization] AIエージェント連携スキル登録用の CLI コマンドをクリップボードにコピーしました:\n" + snippet);
-        }
-
-        // ===== Preferences / メニューから呼ぶ公開ロジック =====
+        // ===== Preferences / ペインから呼ぶ公開ロジック =====
 
         /// <summary>ユーザースコープ（ホーム配下）へスキルを登録する。結果サマリ文字列を返す。</summary>
         internal static string InstallToUser() => Install(GetUserBase(), "user");

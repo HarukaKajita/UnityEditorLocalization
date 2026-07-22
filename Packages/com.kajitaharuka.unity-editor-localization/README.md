@@ -232,12 +232,14 @@ Unity -batchmode -quit -projectPath . \
 
 スキルはエージェントの探索パス（`.claude/skills` / `.agents/skills`）に置かれて初めて有効になります。次のいずれかで登録できます。
 
-- **Unity から（おすすめ）**: `Tools > UnityEditorLocalization > AI Agent Skills` の
-  `Install for current user`（ホームの `~/.claude/skills` と `~/.agents/skills`）または
-  `Install for this project`（このプロジェクト直下の `.claude/skills` と `.agents/skills`）。
-  `Preferences > UnityEditorLocalization` の「AIエージェント連携スキル」からも、同じ登録操作と、表示された CLI コマンドのコピーができます。登録先ごとの現在の登録状態（登録済み / 未登録 / 要再登録）もこの画面で確認できます。
-  macOS / Linux / Windows いずれでも動作します（macOS/Linux は `ln`、Windows は `mklink /D`。権限が無い環境では junction にフォールバック）。
-- **CLI から**: 上記メニューの `Copy CLI commands to clipboard`（または Preferences に表示されるコマンドの「コピー」）で、実体パスを埋め込んだコマンドが得られます。表示・コピーされるコマンドは **OS に合わせて変わります**（macOS/Linux は下記の `ln`、Windows は `mklink /D`）。ユーザースコープの例（macOS / Linux）:
+- **Unity から（おすすめ）**: `Tools > UnityEditorLocalization > AI Agent Skills` を選ぶと
+  `Preferences > UnityEditorLocalization` の「AIエージェント連携スキル」節が開きます。この画面で、
+  ホーム（`~/.claude/skills` と `~/.agents/skills`）またはこのプロジェクト直下（`.claude/skills` と
+  `.agents/skills`）への登録ボタンを押して登録します。登録先ごとの現在の登録状態（登録済み / 未登録 /
+  要再登録）もこの画面で確認できます。メニュー項目はこの画面を開くだけで、選んだだけでスキルが登録される
+  ことはありません（登録は画面内のボタンを押したときのみ）。macOS / Linux / Windows いずれでも動作します
+  （macOS/Linux は `ln`、Windows は `mklink /D`。権限が無い環境では junction にフォールバック）。
+- **CLI から**: 上記の「AIエージェント連携スキル」節に表示されるコマンドの「コピー」で、実体パスを埋め込んだコマンドが得られます。表示・コピーされるコマンドは **OS に合わせて変わります**（macOS/Linux は下記の `ln`、Windows は `mklink /D`）。ユーザースコープの例（macOS / Linux）:
 
   ```bash
   PKG="<...>/Packages/com.kajitaharuka.unity-editor-localization/skills"
@@ -248,7 +250,7 @@ Unity -batchmode -quit -projectPath . \
   done
   ```
 
-  プロジェクトスコープにする場合は `~` をプロジェクトルートのパスに置き換えます。`$PKG` はパッケージの実体パス（埋め込みなら `Packages/...`、registry/VPM 経由なら `Library/PackageCache/...`）で、上記メニュー/ボタンが正確な値を埋めて出力します。
+  プロジェクトスコープにする場合は `~` をプロジェクトルートのパスに置き換えます。`$PKG` はパッケージの実体パス（埋め込みなら `Packages/...`、registry/VPM 経由なら `Library/PackageCache/...`）で、上記の画面のボタン/コマンド表示が正確な値を埋めて出力します。
 
 > 生成されるのは symlink です。registry/VPM 経由ではバージョン更新でパッケージの実体パスが変わるため、更新後に再実行してください。
 

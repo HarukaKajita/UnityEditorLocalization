@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Changed
+- AI エージェント連携スキルのメニューを間接方式へ変更した（GOLD_STANDARD §2.6）。従来 `Tools > UnityEditorLocalization > AI Agent Skills` 直下にあった 3 項目（Install for current user / Install for this project / Copy CLI commands to clipboard）を廃止し、単一項目 `Tools > UnityEditorLocalization > AI Agent Skills` に統合した。この項目はスキル導入の説明・登録状態・実行ボタンを持つ Preferences ペイン（Preferences > UnityEditorLocalization）を開くだけで、メニューから直接スキル登録やクリップボード書き込みは行わない。意図しないスキル追加は開発者に敬遠されるため、登録はユーザーがペイン内で内容を理解したうえで明示的にボタンを押した場合にのみ行う方針へ改めた。登録・CLI コピー機能そのものは Preferences ペインに従来どおり存在する。
 - 同梱の optional-integration スキルを更新: 連携 asmdef のファイル名を短縮形 `L10nIntegration.asmdef` に固定（assembly name は不変）。Unity Asset Store のファイルパス150字制約に適合するため。テンプレートフォルダ名も `templates/L10nIntegration/` へ短縮。
 
 ### Added

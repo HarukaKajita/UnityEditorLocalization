@@ -53,8 +53,9 @@ Unity Editor 上で開発・検証するための器に過ぎません。実装�
 - リポジトリ直下の `.claude/skills` / `.agents/skills` は `scripts/sync-agent-skills.mjs` が正本から生成する
   **実体コピーのミラー**で、Git 追跡します（標準 §2.6-4 / §2.9）。**ミラーを直接編集しないこと。**
   編集は必ず正本側で行い、`node scripts/sync-agent-skills.mjs` で再生成します（`--check` で drift 検査）。
-- エディタ拡張の**利用者**がスキルをローカル登録する導線は別途 `EditorL10nSkillInstaller`
-  （`Tools > UnityEditorLocalization > AI Agent Skills`）が symlink 方式で提供します（上記ミラーとは別機構）。
+- エディタ拡張の**利用者**がスキルをローカル登録する導線は別途 `EditorL10nSkillInstaller` が symlink 方式で
+  提供します（上記ミラーとは別機構）。メニュー `Tools > UnityEditorLocalization > AI Agent Skills` は間接方式
+  （標準 §2.6）で Preferences ペインを開くだけで、登録自体はペイン内のボタンから行います。
 
 ### 改善提案の義務
 
@@ -72,7 +73,7 @@ Unity Editor 上で開発・検証するための器に過ぎません。実装�
   - defaultLocale テーブルの存在、各ロケールでの key 過不足、`string.Format` placeholder 番号の一致と連番欠落、defaultLocale と同値の未翻訳疑いを検査します（manifest の `fixedTerms` で宣言した固定語キーは同値疑いから除外）。
   - CI からは batchmode で `EditorL10nValidator.ValidateForCI()`（`-executeMethod`）を使います。エラーで非 0 終了し CI を止める。既定はエラーのみ、`-l10nFailOnWarnings` で警告も失敗。対話モードでは終了しません。終了コード判定は純関数 `ComputeExitCode` に分離。
 - 表示言語の確認/変更（グローバルおよび scope ごと）: `Preferences > UnityEditorLocalization`（`Tools > UnityEditorLocalization > Settings` から開いて選択状態にできる。`SettingsService.OpenUserPreferences`）
-- 同梱スキル（翻訳ワークフロー / 既存拡張の多言語化連携）の登録: `Tools > UnityEditorLocalization > AI Agent Skills`（user / project スコープ、CLI コマンドの明示・コピー）。Preferences の「AIエージェント連携スキル」節からも実行可。`.claude/skills` と `.agents/skills` へ symlink を張る（[Editor/Skills/EditorL10nSkillInstaller.cs](Packages/com.kajitaharuka.unity-editor-localization/Editor/Skills/EditorL10nSkillInstaller.cs)）。mac/Linux=`ln`、Windows=`mklink /D`（不可なら junction）でクロスプラットフォーム動作し、表示する CLI コマンドも OS 別。この installer はエディタ拡張の**利用者**がローカルへスキルを登録するための機能。**このリポジトリ自身**が追跡する `.claude/skills`・`.agents/skills` は、それとは別に `scripts/sync-agent-skills.mjs` が package 同梱 `skills/` を正本として生成する実体コピーのミラー（symlink ではない）で、直接編集しない（後述「ゴールド標準と開発フロー」を参照）。
+- 同梱スキル（翻訳ワークフロー / 既存拡張の多言語化連携）の登録: メニュー `Tools > UnityEditorLocalization > AI Agent Skills` は間接方式（標準 §2.6）で Preferences の「AIエージェント連携スキル」節（`Preferences > UnityEditorLocalization`）を開くだけ。user / project スコープの登録・CLI コマンドの明示/コピーはこのペイン内のボタンから行う（メニューからは登録もクリップボード書き込みも実行しない。意図しないスキル追加を避けるため、登録はペインで内容を理解したうえで明示的に押した場合のみ）。`.claude/skills` と `.agents/skills` へ symlink を張る（[Editor/Skills/EditorL10nSkillInstaller.cs](Packages/com.kajitaharuka.unity-editor-localization/Editor/Skills/EditorL10nSkillInstaller.cs)）。mac/Linux=`ln`、Windows=`mklink /D`（不可なら junction）でクロスプラットフォーム動作し、表示する CLI コマンドも OS 別。この installer はエディタ拡張の**利用者**がローカルへスキルを登録するための機能。**このリポジトリ自身**が追跡する `.claude/skills`・`.agents/skills` は、それとは別に `scripts/sync-agent-skills.mjs` が package 同梱 `skills/` を正本として生成する実体コピーのミラー（symlink ではない）で、直接編集しない（後述「ゴールド標準と開発フロー」を参照）。
 - 翻訳テキスト品質の静的検証（Python、利用側の locale 群に対して実行）:
 
   ```bash
