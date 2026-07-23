@@ -865,8 +865,10 @@ namespace Kajitaharuka.EditorLocalization
                 var card = BuildSection("skills.title", "skills", true, out var content, out _);
                 content.Add(EditorL10nUiKit.Note(Tr("skills.note")).Also(label => BindLabel(label, "skills.note")));
 
-                content.Add(BuildSkillRow("skills.translation.name", "skills.translation.desc"));
-                content.Add(BuildSkillRow("skills.optional.name", "skills.optional.desc"));
+                content.Add(BuildSkillRow("editor-localization-translation-quality",
+                    "skills.translation.name", "skills.translation.desc", "skills.translation.samplePrompt"));
+                content.Add(BuildSkillRow("editor-localization-optional-integration",
+                    "skills.optional.name", "skills.optional.desc", "skills.optional.samplePrompt"));
 
                 // 操作結果のインライン表示（登録/コピーの両方からここへ出す）。列フローに直接置くため
                 // 行専用（flex-basis:100%）の class ではなく列用の class を使う（軸反転で他要素を潰さない）。
@@ -965,8 +967,8 @@ namespace Kajitaharuka.EditorLocalization
                 pill.tooltip = Tr("skills.status.tooltip");
             }
 
-            // 同梱スキル 1 件の表示（名前＋説明）。言語変更に追従させる。
-            private VisualElement BuildSkillRow(string nameKey, string descKey)
+            // 同梱スキル 1 件の表示（名前＋説明＋プロンプト例＋正本フォルダへの導線）。言語変更に追従させる。
+            private VisualElement BuildSkillRow(string skillFolder, string nameKey, string descKey, string promptKey)
             {
                 var box = new VisualElement();
                 box.AddToClassList("l10n-skill");
@@ -977,7 +979,32 @@ namespace Kajitaharuka.EditorLocalization
 
                 box.Add(name);
                 box.Add(EditorL10nUiKit.HintRow(Tr(descKey)).Also(label => BindLabel(label, descKey)));
+
+                // 導入者が「エージェントへ何を頼めるスキルか」を具体例 1 行で掴めるようにする（認識 > 想起）。
+                var prompt = EditorL10nUiKit.HintRow("");
+                void ApplyPrompt() => prompt.text = Tr("skills.samplePrompt.label") + " " + Tr(promptKey);
+                ApplyPrompt();
+                EditorL10nUi.RegisterLocaleCallback(prompt, ApplyPrompt);
+                box.Add(prompt);
+
+                // 登録されるスキルの正本フォルダへの導線。クリックで Project ビューに選択表示し、
+                // 導入者が登録前に SKILL.md を含む全文を確認できるようにする。
+                var folderPath = "Packages/" + EditorL10nPackage.Name + "/skills/" + skillFolder;
+                var folderRow = EditorL10nUiKit.AssetRow(folderPath, Tr("skills.folder.tooltip"),
+                    () => SelectSkillFolder(folderPath));
+                EditorL10nUi.RegisterLocaleCallback(folderRow, () => folderRow.tooltip = Tr("skills.folder.tooltip"));
+                box.Add(folderRow);
                 return box;
+            }
+
+            // スキルの正本フォルダを Project ビューで選択・強調表示する（解決できない場合は何もしない）。
+            private static void SelectSkillFolder(string assetPath)
+            {
+                var folder = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(assetPath);
+                if (folder == null)
+                    return;
+                Selection.activeObject = folder;
+                EditorGUIUtility.PingObject(folder);
             }
 
             // ===== 開発者向け =====

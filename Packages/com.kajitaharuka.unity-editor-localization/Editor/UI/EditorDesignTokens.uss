@@ -259,6 +259,9 @@
     color: var(--eui-accent);
     font-size: var(--eui-font-s);
     white-space: normal;
+    /* 長いパスでも狭いペインからはみ出さないよう、縮小と折り返しを許可する */
+    flex-shrink: 1;
+    min-width: 0;
 }
 
 .eui-asset-row:hover {
