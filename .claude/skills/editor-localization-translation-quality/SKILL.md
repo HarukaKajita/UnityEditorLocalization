@@ -18,6 +18,7 @@ Use this skill for EditorLocalization locale work, especially `*.l10n-manifest.j
 2. Establish terminology before translating.
    - Read `references/terminology-and-style.md` when adding or changing terms, product names, file format names, or UI wording policy.
    - Build a small project-specific glossary from the manifest, default locale, type/class names, menus, docs, and existing UI before editing locale files.
+   - Before translating new keys, dump the existing translations of related keys across all locales with `scripts/dump_catalog_terms.py` (see below) and match the catalog's established choices — the settled word for "asset", locales that keep `Editor` as a fixed term, full-width vs half-width colons, the apostrophe character — so new keys do not introduce a terminology split inside the same file.
    - Keep product/type names and file-format identifiers stable unless the current project explicitly has localized names.
 
 3. Translate for the UI, not word-for-word.
@@ -57,8 +58,38 @@ Validator, importer, and log messages are often hard-coded in one language. To m
 
 - Restructure each message into a translation key plus format arguments instead of a pre-built string. Hold the message in code as a *kind* (enum) + args, and format it at display time through the catalog (e.g. `Tr(scope, key, args)`), so both the Console and inline UI follow the current language.
 - Pass machine tokens as arguments, not as translated words: key names, locale tags, and placeholder lists go into `{0}`/`{1}`/`{2}`; keep `present=`/`missing=` style markers literal in the template.
-- Add the new message keys to every locale. A self-validating catalog will otherwise report them as missing, and the placeholder number set must be identical across locales.
+- Add the new message keys to every locale. A self-validating catalog will otherwise report them as missing, and the placeholder number set must be identical across locales. Insert them with `scripts/insert_catalog_keys.py` (see below), not a hand-written one-off script.
 - Choose the scope deliberately: a tool's own diagnostics belong in that tool's own catalog scope, not the scope being validated.
+
+## Bulk key insertion
+
+When adding new keys to every locale, use `scripts/insert_catalog_keys.py`. Do not write a throwaway insertion script per task: catalog JSON formatting differs between repositories (2-space multi-line entries vs single-line entries), and ad-hoc scripts have repeatedly broken or nearly broken the formatting.
+
+```bash
+python3 scripts/insert_catalog_keys.py \
+  --locales-dir path/to/Locales \
+  --anchor existing.key.to.insert.after \
+  --data new-keys.json \
+  --dry-run
+```
+
+- `--data` is a translation JSON file of the form `{"key": {"locale": "value", ...}, ...}`. Keys are inserted in file order, into every locale file, immediately after `--anchor`.
+- The script auto-detects each file's formatting and fails closed: a file matching neither supported format aborts the whole run with an example of that file's formatting. Follow the abort message (extend the script or normalize the file deliberately); do not hand-edit around it in a way that silently breaks the file's formatting.
+- Before writing it verifies that the anchor exists, the keys do not, and the data covers every locale; after inserting it re-verifies JSON validity, zero duplicate keys, identical key sets, and identical placeholder number sets across locales. Run with `--dry-run` first, then without.
+
+## Terminology dump
+
+`scripts/dump_catalog_terms.py` prints matching entries across all locales in one table, selected by key or by value substring:
+
+```bash
+python3 scripts/dump_catalog_terms.py --locales-dir path/to/Locales --keys skills.title,other.key
+python3 scripts/dump_catalog_terms.py --locales-dir path/to/Locales --grep Assets [--ignore-case]
+```
+
+Use it for:
+
+- Sampling established terminology before translating new keys (workflow step 2).
+- Verbatim UI names in documents: when a product page, README, or manual references an Inspector field or button name in bold, the bold text must match that locale's actual catalog label character-for-character — dump the label and compare. A paraphrase breaks findability: an es document saying "en Assets" while the real label reads "dentro de Assets" leaves the user unable to locate the field.
 
 ## Validation Script
 
@@ -98,4 +129,6 @@ When reporting a translation review, include:
 - Missing/extra key and placeholder status.
 - Whether English leftovers remain, and why any remaining duplicate is intentional.
 - Important terminology decisions.
+- Findings reviewed but deliberately not adopted, as a permanent record: locale, key, the finding, and the reason it was declined. Do not let declined findings disappear from the report.
+- For declined findings caused by the source text, the condition that reopens them (for example, re-apply after the source wording is fixed), so a later pass can re-verify them without re-deriving the context.
 - Any residual risk, especially for languages where native review is still recommended.
