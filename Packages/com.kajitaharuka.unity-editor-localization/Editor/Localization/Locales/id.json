@@ -94,7 +94,7 @@
         { "key": "skills.samplePrompt.label", "value": "Contoh prompt:" },
         { "key": "skills.folder.tooltip", "value": "Klik untuk memilih folder sumber skill ini di tampilan Project (Anda dapat memeriksa seluruh konten yang akan dipasang)" },
         { "key": "skills.translation.samplePrompt", "value": "Tinjau katalog terjemahan paket ini di semua bahasa dan perbaiki masalah yang ditemukan" },
-        { "key": "skills.optional.samplePrompt", "value": "Integrasikan UnityEditorLocalization sebagai dependensi opsional ke ekstensi editor ini" },
+        { "key": "skills.optional.samplePrompt", "value": "Integrasikan UnityEditorLocalization sebagai dependensi opsional ke extension Editor ini" },
         { "key": "skills.note", "value": "Mendaftarkan skill bawaan ke .claude/skills dan .agents/skills via symlink agar agen seperti Claude Code bisa memakainya." },
         { "key": "skills.translation.name", "value": "Skill alur kerja terjemahan" },
         { "key": "skills.translation.desc", "value": "Menjaga kualitas terjemahan dengan terminologi, gaya, catatan per bahasa, dan skrip validasi." },

@@ -94,7 +94,7 @@
         { "key": "skills.samplePrompt.label", "value": "ตัวอย่างพรอมป์ต์:" },
         { "key": "skills.folder.tooltip", "value": "คลิกเพื่อเลือกโฟลเดอร์ต้นฉบับของสกิลนี้ในมุมมอง Project (สามารถตรวจสอบเนื้อหาทั้งหมดที่จะถูกติดตั้งได้)" },
         { "key": "skills.translation.samplePrompt", "value": "ช่วยรีวิวแคตตาล็อกการแปลของแพ็กเกจนี้ในทุกภาษา และแก้ไขปัญหาที่พบ" },
-        { "key": "skills.optional.samplePrompt", "value": "ช่วยผสาน UnityEditorLocalization เข้ากับส่วนขยายเอดิเตอร์นี้แบบ dependency เสริม" },
+        { "key": "skills.optional.samplePrompt", "value": "ช่วยผสาน UnityEditorLocalization เข้ากับส่วนขยาย Editor นี้เป็น dependency แบบเลือกได้" },
         { "key": "skills.note", "value": "ลงทะเบียนสกิลที่มาพร้อมกันไปยัง .claude/skills และ .agents/skills ด้วย symlink เพื่อให้ agent อย่าง Claude Code ใช้งานได้" },
         { "key": "skills.translation.name", "value": "สกิลเวิร์กโฟลว์การแปล" },
         { "key": "skills.translation.desc", "value": "รักษาคุณภาพการแปลด้วยคำศัพท์ สไตล์ หมายเหตุแยกตามภาษา และสคริปต์ตรวจสอบ" },

@@ -94,7 +94,7 @@
         { "key": "skills.samplePrompt.label", "value": "Örnek prompt:" },
         { "key": "skills.folder.tooltip", "value": "Bu becerinin kaynak klasörünü Project görünümünde seçmek için tıklayın (kurulacak içeriğin tamamını inceleyebilirsiniz)" },
         { "key": "skills.translation.samplePrompt", "value": "Bu paketin çeviri kataloglarını tüm dillerde gözden geçir ve bulduğun sorunları düzelt" },
-        { "key": "skills.optional.samplePrompt", "value": "UnityEditorLocalization'ı bu editör uzantısına isteğe bağlı bağımlılık olarak entegre et" },
+        { "key": "skills.optional.samplePrompt", "value": "UnityEditorLocalization'ı bu Editor uzantısına isteğe bağlı bağımlılık olarak entegre et" },
         { "key": "skills.note", "value": "Birlikte gelen becerileri .claude/skills ve .agents/skills içine symlink ile kaydeder; böylece Claude Code gibi ajanlar bunları kullanabilir." },
         { "key": "skills.translation.name", "value": "Çeviri iş akışı becerisi" },
         { "key": "skills.translation.desc", "value": "Terminoloji, stil, dil notları ve bir doğrulama betiğiyle çeviri kalitesini korur." },

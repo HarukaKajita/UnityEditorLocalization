@@ -94,7 +94,7 @@
         { "key": "skills.samplePrompt.label", "value": "Przykładowy prompt:" },
         { "key": "skills.folder.tooltip", "value": "Kliknij, aby zaznaczyć folder źródłowy tej umiejętności w widoku Project (możesz przejrzeć pełną zawartość, która zostanie zainstalowana)" },
         { "key": "skills.translation.samplePrompt", "value": "Przejrzyj katalogi tłumaczeń tego pakietu we wszystkich językach i popraw znalezione problemy" },
-        { "key": "skills.optional.samplePrompt", "value": "Zintegruj UnityEditorLocalization jako opcjonalną zależność z tym rozszerzeniem edytora" },
+        { "key": "skills.optional.samplePrompt", "value": "Zintegruj UnityEditorLocalization jako opcjonalną zależność z tym rozszerzeniem Editora" },
         { "key": "skills.note", "value": "Rejestruje dołączone umiejętności w .claude/skills i .agents/skills przez symlinki, aby agenci tacy jak Claude Code mogli ich używać." },
         { "key": "skills.translation.name", "value": "Umiejętność procesu tłumaczenia" },
         { "key": "skills.translation.desc", "value": "Utrzymuje jakość tłumaczeń dzięki terminologii, stylowi, uwagom dla języków i skryptowi walidacji." },
