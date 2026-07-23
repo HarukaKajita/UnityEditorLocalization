@@ -34,17 +34,32 @@ def load_tables(locales_dir: Path) -> dict[str, dict[str, str]]:
     tables: dict[str, dict[str, str]] = {}
     for path in sorted(locales_dir.glob("*.json")):
         try:
-            document = json.loads(path.read_text(encoding="utf-8"))
+            text = path.read_text(encoding="utf-8")
+        except OSError as error:
+            raise SystemExit(f"NG: ファイルを読み取れません: {path}: {error}")
+        try:
+            document = json.loads(text)
         except ValueError as error:
             raise SystemExit(f"NG: JSON を解釈できません: {path}: {error}")
+        if not isinstance(document, dict):
+            raise SystemExit(f"NG: JSON のルートがオブジェクトではありません: {path}")
         entries = document.get("entries")
         if not isinstance(entries, list):
             raise SystemExit(f'NG: カタログに "entries" 配列がありません: {path}')
         tag = document.get("locale") or path.stem
-        tables[tag] = {
-            entry["key"]: entry.get("value") or ""
-            for entry in entries if isinstance(entry, dict) and isinstance(entry.get("key"), str)
-        }
+        # 重複タグ・重複キーは無言の上書きで壊れたカタログを正常な対訳表として提示してしまうため、
+        # 挿入スクリプトと同じく fail-closed で中断する
+        if tag in tables:
+            raise SystemExit(f"NG: ロケールタグ '{tag}' が重複しています: {path}")
+        table: dict[str, str] = {}
+        for entry in entries:
+            if not (isinstance(entry, dict) and isinstance(entry.get("key"), str)):
+                continue
+            key = entry["key"]
+            if key in table:
+                raise SystemExit(f"NG: キー '{key}' が重複しています: {path}")
+            table[key] = entry.get("value") or ""
+        tables[tag] = table
     if not tables:
         raise SystemExit(f"NG: ロケール JSON が見つかりません: {locales_dir}")
     return tables

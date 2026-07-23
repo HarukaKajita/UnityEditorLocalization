@@ -61,7 +61,14 @@ class FormatError(Exception):
 
 def load_data(path: Path) -> dict[str, dict[str, str]]:
     """対訳 JSON（{"キー": {"ロケール": "値"}}）を読み、構造を検証する。キー順は記載順を保持する。"""
-    document = json.loads(path.read_text(encoding="utf-8"))
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError as error:
+        raise SystemExit(f"NG: --data を読み取れません: {path}: {error}")
+    try:
+        document = json.loads(text)
+    except ValueError as error:
+        raise SystemExit(f"NG: --data の JSON を解釈できません: {path}: {error}")
     if not isinstance(document, dict) or not document:
         raise SystemExit(f"NG: --data は空でない JSON オブジェクトが必要です: {path}")
     for key, locales in document.items():
@@ -187,11 +194,18 @@ def main() -> int:
     errors: list[str] = []
     catalogs: dict[str, tuple[Path, str, dict]] = {}  # tag -> (path, content, document)
     for path in files:
-        content = path.read_text(encoding="utf-8")
+        try:
+            content = path.read_text(encoding="utf-8")
+        except OSError as error:
+            errors.append(f"{path.name}: ファイルを読み取れません: {error}")
+            continue
         try:
             document = json.loads(content)
         except ValueError as error:
             errors.append(f"{path.name}: JSON を解釈できません: {error}")
+            continue
+        if not isinstance(document, dict):
+            errors.append(f"{path.name}: JSON のルートがオブジェクトではありません")
             continue
         tag = document.get("locale") or path.stem
         if tag in catalogs:
