@@ -58,7 +58,7 @@ Place under `<package>/Editor/`:
 | `templates/Localization/ProductL10n.cs.txt` | `Localization/{{PREFIX}}L10n.cs` |
 | `templates/Localization/ProductL10nUi.cs.txt` | `Localization/{{PREFIX}}L10nUi.cs` |
 | `templates/Localization/ProductL10nAssemblyInfo.cs.txt` | `Localization/{{PREFIX}}L10nAssemblyInfo.cs` |
-| `templates/L10nIntegration/Asmdef.asmdef.txt` | `LocalizationIntegration/L10nIntegration.asmdef`（ファイル名は短縮固定。assembly `name` はテンプレ内で `{{INTEGRATION_ASMDEF}}` のまま） |
+| `templates/L10nIntegration/Integration.asmdef.txt` | `LocalizationIntegration/L10nIntegration.asmdef`（ファイル名は短縮固定。assembly `name` はテンプレ内で `{{INTEGRATION_ASMDEF}}` のまま） |
 | `templates/L10nIntegration/EditorL10nBridge.cs.txt` | `LocalizationIntegration/EditorL10nBridge.cs` |
 | `templates/L10nIntegration/BridgeInstaller.cs.txt` | `LocalizationIntegration/EditorL10nBridgeInstaller.cs` |
 
