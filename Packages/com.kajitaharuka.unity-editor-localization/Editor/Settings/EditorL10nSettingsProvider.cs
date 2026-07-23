@@ -981,11 +981,17 @@ namespace Kajitaharuka.EditorLocalization
                 box.Add(EditorL10nUiKit.HintRow(Tr(descKey)).Also(label => BindLabel(label, descKey)));
 
                 // 導入者が「エージェントへ何を頼めるスキルか」を具体例 1 行で掴めるようにする（認識 > 想起）。
-                var prompt = EditorL10nUiKit.HintRow("");
-                void ApplyPrompt() => prompt.text = Tr("skills.samplePrompt.label") + " " + Tr(promptKey);
-                ApplyPrompt();
-                EditorL10nUi.RegisterLocaleCallback(prompt, ApplyPrompt);
-                box.Add(prompt);
+                // プロンプト本文は「そのまま話しかけられる文」であることが伝わるよう、
+                // 説明のヒント行とは別の引用風ボックスで提示する（意味の違いを見た目で区別する）。
+                var promptRow = new VisualElement();
+                promptRow.AddToClassList("l10n-skill__prompt-row");
+                promptRow.Add(EditorL10nUiKit.HintRow(Tr("skills.samplePrompt.label"))
+                    .Also(label => BindLabel(label, "skills.samplePrompt.label")));
+                var promptText = new Label(Tr(promptKey));
+                promptText.AddToClassList("l10n-skill__prompt");
+                BindLabel(promptText, promptKey);
+                promptRow.Add(promptText);
+                box.Add(promptRow);
 
                 // 登録されるスキルの正本フォルダへの導線。クリックで Project ビューに選択表示し、
                 // 導入者が登録前に SKILL.md を含む全文を確認できるようにする。
