@@ -22,7 +22,7 @@
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "36f4bcd582c9310cc44baf7c58839b79be8d7a6e"
+      "hash": "82a76bc05ad113cb819b5331382df324736a1de1"
     },
     "com.kajitaharuka.unity-editor-localization": {
       "version": "file:com.kajitaharuka.unity-editor-localization",
@@ -35,7 +35,7 @@
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "c1d23486d8be2a7aa53eb4f24e7d3bcdbd596a73"
+      "hash": "305235c50e0146d00df3184b46b0a41639643b2a"
     },
     "com.unity.collab-proxy": {
       "version": "2.12.4",
