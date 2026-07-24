@@ -1,6 +1,6 @@
 {
   "name": "com.kajitaharuka.unity-editor-localization",
-  "version": "1.2.1",
+  "version": "1.3.0",
   "displayName": "UnityEditorLocalization",
   "description": "Lightweight localization foundation for Unity Editor extensions. Editor-only with no runtime or Unity Localization dependency: per-scope JSON translation catalogs, manifest-driven locale tags (add a locale by adding a JSON file), per-user language selection saved to EditorPrefs with OS-language auto-follow, UI Toolkit binding helpers (labels, buttons, PropertyFields, language menus), catalog hot-reload, and validation for missing keys and placeholder mismatches.\nUnity Editor拡張向けの軽量な多言語化基盤。Editor専用でランタイムやUnity Localizationに依存せず、scope単位のJSON翻訳カタログ、manifestの文字列タグによるロケール管理（JSON追加だけでロケールを増設）、EditorPrefs保存のユーザー別言語設定とOS言語への自動追従、UI Toolkit向けバインド補助（ラベル・ボタン・PropertyField・言語メニュー）、カタログの自動リロード、欠落キー・placeholder不一致の検証を提供。",
   "license": "MIT",
