@@ -109,6 +109,7 @@
         { "key": "skills.status.reinstall", "value": "Perlu pasang ulang" },
         { "key": "skills.status.tooltip", "value": "Status pendaftaran di tujuan ini (memeriksa symlink skill)." },
         { "key": "skills.cli.note", "value": "Untuk mendaftar via CLI, jalankan perintah di bawah." },
+        { "key": "skills.cli.foldout", "value": "Daftarkan via perintah CLI" },
         { "key": "skills.cli.copy", "value": "Salin" },
         { "key": "skills.cli.copy.tooltip", "value": "Salin perintah di atas ke clipboard." },
         { "key": "skills.result.installed", "value": "Terpasang. Lihat Console untuk detail." },

@@ -109,6 +109,7 @@
         { "key": "skills.status.reinstall", "value": "Neuinstallation nötig" },
         { "key": "skills.status.tooltip", "value": "Registrierungsstatus an diesem Ziel (prüft die Skill-Symlinks)." },
         { "key": "skills.cli.note", "value": "Zum Registrieren per CLI den folgenden Befehl ausführen." },
+        { "key": "skills.cli.foldout", "value": "Per CLI-Befehl registrieren" },
         { "key": "skills.cli.copy", "value": "Kopieren" },
         { "key": "skills.cli.copy.tooltip", "value": "Den obigen Befehl in die Zwischenablage kopieren." },
         { "key": "skills.result.installed", "value": "Installiert. Details siehe Console." },

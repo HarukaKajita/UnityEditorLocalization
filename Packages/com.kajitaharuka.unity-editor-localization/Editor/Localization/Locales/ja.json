@@ -109,6 +109,7 @@
         { "key": "skills.status.reinstall", "value": "要再登録" },
         { "key": "skills.status.tooltip", "value": "この登録先の登録状態です（スキルの symlink の有無を確認します）。" },
         { "key": "skills.cli.note", "value": "CLI で追加する場合は、下記のコマンドを実行してください。" },
+        { "key": "skills.cli.foldout", "value": "CLI コマンドで登録する" },
         { "key": "skills.cli.copy", "value": "コピー" },
         { "key": "skills.cli.copy.tooltip", "value": "上のコマンドをクリップボードにコピーします。" },
         { "key": "skills.result.installed", "value": "登録しました。詳細は Console を確認してください。" },

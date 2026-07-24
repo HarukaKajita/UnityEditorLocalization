@@ -109,6 +109,7 @@
         { "key": "skills.status.reinstall", "value": "Wymaga ponownej instalacji" },
         { "key": "skills.status.tooltip", "value": "Stan rejestracji w tym miejscu (sprawdza symlinki umiejętności)." },
         { "key": "skills.cli.note", "value": "Aby zarejestrować przez CLI, wykonaj poniższe polecenie." },
+        { "key": "skills.cli.foldout", "value": "Rejestracja poleceniem CLI" },
         { "key": "skills.cli.copy", "value": "Kopiuj" },
         { "key": "skills.cli.copy.tooltip", "value": "Skopiuj powyższe polecenie do schowka." },
         { "key": "skills.result.installed", "value": "Zainstalowano. Szczegóły w Console." },

@@ -109,6 +109,7 @@
         { "key": "skills.status.reinstall", "value": "Потрібне перевстановлення" },
         { "key": "skills.status.tooltip", "value": "Стан реєстрації в цьому розташуванні (перевіряються symlink навичок)." },
         { "key": "skills.cli.note", "value": "Щоб зареєструвати через CLI, виконайте команду нижче." },
+        { "key": "skills.cli.foldout", "value": "Реєстрація через команду CLI" },
         { "key": "skills.cli.copy", "value": "Копіювати" },
         { "key": "skills.cli.copy.tooltip", "value": "Скопіювати команду вище в буфер обміну." },
         { "key": "skills.result.installed", "value": "Встановлено. Подробиці див. у Console." },

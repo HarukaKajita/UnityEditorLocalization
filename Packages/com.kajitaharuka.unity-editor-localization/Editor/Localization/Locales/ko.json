@@ -109,6 +109,7 @@
         { "key": "skills.status.reinstall", "value": "재등록 필요" },
         { "key": "skills.status.tooltip", "value": "이 등록 대상의 등록 상태입니다(스킬 symlink 존재 여부를 확인합니다)." },
         { "key": "skills.cli.note", "value": "CLI로 등록하려면 아래 명령을 실행하세요." },
+        { "key": "skills.cli.foldout", "value": "CLI 명령으로 등록" },
         { "key": "skills.cli.copy", "value": "복사" },
         { "key": "skills.cli.copy.tooltip", "value": "위 명령을 클립보드에 복사합니다." },
         { "key": "skills.result.installed", "value": "등록했습니다. 자세한 내용은 Console을 확인하세요." },

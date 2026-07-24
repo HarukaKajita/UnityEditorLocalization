@@ -912,8 +912,12 @@ namespace Kajitaharuka.EditorLocalization
                 EditorL10nUi.RegisterLocaleCallback(_userSkillStatePill, UpdateSkillStatePills);
                 UpdateSkillStatePills();
 
-                // CLI で追加したい場合の案内＋コマンド明示＋横のコピーボタン。
-                content.Add(EditorL10nUiKit.Note(Tr("skills.cli.note")).Also(label => BindLabel(label, "skills.cli.note")));
+                // CLI で追加したい場合の案内＋コマンド全文＋コピーボタン。
+                // コマンドは長いので既定で畳み、開くと現在の OS 向けに生成された全文を
+                // その場で確認してからコピーできるようにする（開閉は他セクション同様 EditorPrefs に保持）。
+                var cliCard = BuildSection("skills.cli.foldout", "skillsCli", false, out var cliContent, out _);
+
+                cliContent.Add(EditorL10nUiKit.Note(Tr("skills.cli.note")).Also(label => BindLabel(label, "skills.cli.note")));
 
                 var cliRow = new VisualElement();
                 cliRow.AddToClassList("l10n-cli-row");
@@ -933,7 +937,8 @@ namespace Kajitaharuka.EditorLocalization
 
                 cliRow.Add(cliField);
                 cliRow.Add(copyCli);
-                content.Add(cliRow);
+                cliContent.Add(cliRow);
+                content.Add(cliCard);
 
                 content.Add(result);
                 return card;

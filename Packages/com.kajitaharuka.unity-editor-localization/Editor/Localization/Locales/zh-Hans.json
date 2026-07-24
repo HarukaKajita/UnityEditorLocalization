@@ -109,6 +109,7 @@
         { "key": "skills.status.reinstall", "value": "需重新注册" },
         { "key": "skills.status.tooltip", "value": "此注册位置的注册状态（检查技能 symlink）。" },
         { "key": "skills.cli.note", "value": "如需通过 CLI 注册，请执行下面的命令。" },
+        { "key": "skills.cli.foldout", "value": "通过 CLI 命令注册" },
         { "key": "skills.cli.copy", "value": "复制" },
         { "key": "skills.cli.copy.tooltip", "value": "将上面的命令复制到剪贴板。" },
         { "key": "skills.result.installed", "value": "已注册。详情请查看 Console。" },

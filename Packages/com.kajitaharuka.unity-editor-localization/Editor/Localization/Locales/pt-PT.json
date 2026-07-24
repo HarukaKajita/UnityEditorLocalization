@@ -109,6 +109,7 @@
         { "key": "skills.status.reinstall", "value": "Requer reinstalação" },
         { "key": "skills.status.tooltip", "value": "Estado do registo neste destino (verifica os symlinks dos skills)." },
         { "key": "skills.cli.note", "value": "Para registar via CLI, execute o comando abaixo." },
+        { "key": "skills.cli.foldout", "value": "Registar via comando de CLI" },
         { "key": "skills.cli.copy", "value": "Copiar" },
         { "key": "skills.cli.copy.tooltip", "value": "Copiar o comando acima para a área de transferência." },
         { "key": "skills.result.installed", "value": "Instalado. Veja a Console para detalhes." },

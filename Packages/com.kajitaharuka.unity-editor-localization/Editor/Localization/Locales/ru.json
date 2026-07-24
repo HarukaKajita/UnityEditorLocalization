@@ -109,6 +109,7 @@
         { "key": "skills.status.reinstall", "value": "Нужна переустановка" },
         { "key": "skills.status.tooltip", "value": "Состояние регистрации в этом расположении (проверяются symlink навыков)." },
         { "key": "skills.cli.note", "value": "Чтобы зарегистрировать через CLI, выполните команду ниже." },
+        { "key": "skills.cli.foldout", "value": "Регистрация через команду CLI" },
         { "key": "skills.cli.copy", "value": "Копировать" },
         { "key": "skills.cli.copy.tooltip", "value": "Скопировать команду выше в буфер обмена." },
         { "key": "skills.result.installed", "value": "Установлено. Подробности см. в Console." },

@@ -109,6 +109,7 @@
         { "key": "skills.status.reinstall", "value": "Cần cài lại" },
         { "key": "skills.status.tooltip", "value": "Trạng thái đăng ký tại đích này (kiểm tra symlink của kỹ năng)." },
         { "key": "skills.cli.note", "value": "Để đăng ký qua CLI, hãy chạy lệnh bên dưới." },
+        { "key": "skills.cli.foldout", "value": "Đăng ký qua lệnh CLI" },
         { "key": "skills.cli.copy", "value": "Sao chép" },
         { "key": "skills.cli.copy.tooltip", "value": "Sao chép lệnh ở trên vào clipboard." },
         { "key": "skills.result.installed", "value": "Đã cài. Xem Console để biết chi tiết." },

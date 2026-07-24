@@ -109,6 +109,7 @@
         { "key": "skills.status.reinstall", "value": "Yeniden kurulum gerekli" },
         { "key": "skills.status.tooltip", "value": "Bu hedefteki kayıt durumu (beceri symlink'lerini denetler)." },
         { "key": "skills.cli.note", "value": "CLI ile kaydetmek için aşağıdaki komutu çalıştırın." },
+        { "key": "skills.cli.foldout", "value": "CLI komutuyla kaydet" },
         { "key": "skills.cli.copy", "value": "Kopyala" },
         { "key": "skills.cli.copy.tooltip", "value": "Yukarıdaki komutu panoya kopyala." },
         { "key": "skills.result.installed", "value": "Kuruldu. Ayrıntılar için Console'a bakın." },
