@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7497f43d65d04c908b819a675989e426, type: 3}
   m_Name: UnityEditorLocalization
   m_EditorClassIdentifier: 
-  exportFileNameExpression: ./Publish/<Name>-1.2.1
+  exportFileNameExpression: ./Publish/<Name>-<Version>
   pathInputMode: 0
+  versionSourcePackageJson: {fileID: 8385607101436470782, guid: 88b92f01d00944c88bb7fbc258ec76ad, type: 3}
   entries:
   - exporter: {fileID: 11400000, guid: 725091923e11c4e01b5665133b38b28c, type: 2}
     format: 0
