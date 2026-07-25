@@ -1,7 +1,7 @@
 {
     "scope": "com.kajitaharuka.unity-editor-localization",
     "defaultLocale": "en",
-    "fixedTerms": ["summary.localeWithSource"],
+    "fixedTerms": ["summary.localeWithSource", "pill.fallback"],
     "locales": [
         {
             "tag": "en",

@@ -115,7 +115,10 @@ namespace Kajitaharuka.EditorLocalization
         private readonly HashSet<string> _tablePaths = new();
         // locale タグ -> その locale のテーブルアセットパス（検証結果から該当ファイルへジャンプする用途）。
         private readonly Dictionary<string, string> _tablePathByLocale = new();
-        // 全ロケールで defaultLocale と同値でも「未翻訳の疑い」警告を出さない固定語 key（manifest の fixedTerms）。
+        // defaultLocale と同値でも「未翻訳の疑い」警告を出さない固定語 key（manifest の fixedTerms）。
+        // 対象は2種類ある: ①ファイル名・型名など全ロケールで同値が正当なもの
+        // ②一部の言語だけ原語（ラテン表記）のまま使うことが用語方針として正当なもの
+        //   （例: pill.fallback は fr/ru などで訳語化しつつ es/pt/it/pl/th/id では "fallback" のまま使う）。
         private readonly HashSet<string> _fixedTerms;
 
         internal string Scope { get; }
