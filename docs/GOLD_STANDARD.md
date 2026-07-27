@@ -1,7 +1,7 @@
 <!-- 生成物: この内容はテンプレートリポジトリ UnityTemplate_2022_3_22f1 から配布されたコピーです。
      編集はテンプレート側で行い、scripts/distribute_standard.py で再配布してください。
      source: UnityTemplate_2022_3_22f1/docs/GOLD_STANDARD.md
-     source-sha256: 0e309862dec51903cef080c8675d9086b3e257920870058a4281c824d271823b -->
+     source-sha256: f15607be160cafce7ecffb7d0b510c6bd92a02fde370b3210ca47cd558bf3f74 -->
 
 # ゴールド標準 — Unityパッケージ開発・販売パイプライン標準 v1.0
 
@@ -179,7 +179,7 @@ python3 scripts/distribute_standard.py --check           # テンプレート側
 **配布物は編集しない。** 冒頭に生成物ヘッダ（`source-sha256`）が機械挿入されており、本文を書き換えると検査 3 が落ちる。標準を変えるときはテンプレート側を直して再配布する。
 
 - **保証範囲**: これは「うっかり配布物を直してしまった」を検出する仕組みであって改竄対策ではない（本文とヘッダを同時に書き換えれば通る）。**鮮度**は `pipeline/standard-manifest.json` の source commit と、テンプレート側での `--check` で確認する。テンプレートの変更は**先にコミットしてから配布する**（dirty のままだと台帳に source commit を記録できない）。
-- **リポジトリ側の宣言は `pipeline/repo.json`**（手書き・配布対象外）。`role` / `productSlug` / `saleUnit`（`packages` / `versionPolicy` / `distribution` / `exporterAssets`）/ `packagePolicies` / `skillRefs` / `waivers` を持つ。
+- **リポジトリ側の宣言は `pipeline/repo.json`**（手書き・配布対象外）。`role` / `productSlug` / `tagPolicy`（`bare` / `v-prefix`）/ `saleUnit`（`packages` / `versionPolicy` / `distribution` / `exporterAssets`）/ `packagePolicies` / `skillRefs` / `waivers` を持つ。**タグ名は推測しない** — `tagPolicy` が無い、または既存タグの命名が混在しているリリースは判定不能として停止する。
 - **判定の主役は構造化された宣言**で、自然言語のヒューリスティック（文書の言い回し）は補助の warn に留める。誤検出は検査を消すのではなく `waivers` へ `{checkId, target, reason, expiresAt}` の形で**理由を添えて**登録する。理由なし・期限切れ・未知の checkId は error になる。
 - **リポジトリ一覧の正本は MySite `pipeline/repositories.json`**。テンプレートには置かない（派生した新規リポジトリが古い一覧を持って生まれるため）。`docs/REPOSITORY_MAP.md` はそこから生成される地図で、**URL とローカルパスは含めない**（公開リポジトリ向けには非公開リポジトリの行も出さない）。
 - 日常の実行は任意、**リリース時は省略不可**（§3 のリリース工程・`release-unity-package` の検証ゲート 1.5）。
@@ -191,7 +191,8 @@ python3 scripts/distribute_standard.py --check           # テンプレート側
 2. **成果物をコミットする**（契約ファイルの `sourceCommit` は「成果物を最後に変更したコミット」なので、未コミットだと決まらず fail-closed になる）
 3. `emit_release_manifest.py` を実行し、開発リポジトリと external-content の 2 箇所へ契約ファイルを書く
 4. 契約ファイルをコミットする（契約ファイル自身のコミットは契約の対象外）
-5. タグを作る（`tag` は version から決まる期待名。実在する場合は `sourceCommit` を含むことが検証される）
+5. タグを作る（`tag` は `tagPolicy` と version から決まる期待名）
+6. **タグ作成後にもう一度 `emit_release_manifest.py --check` を実行**し、タグが `sourceCommit` を含むこと・契約ファイルに差分が無いことを確認する
 
 > **注意**: Unity の `Client.Pack` は tgz 内の `package.json` へ `_upm.revision`（その時点の git commit SHA）を書き込む。**同じ version でも書き出し直すと中身が変わる**ため、成果物は 1 回だけ書き出し、契約ファイルを作った後に再書き出ししない。
 

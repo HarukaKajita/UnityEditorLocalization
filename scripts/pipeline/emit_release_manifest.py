@@ -2,7 +2,7 @@
 # 生成物: この内容はテンプレートリポジトリ UnityTemplate_2022_3_22f1 から配布されたコピーです。
 # 編集はテンプレート側で行い、scripts/distribute_standard.py で再配布してください。
 # source: UnityTemplate_2022_3_22f1/scripts/pipeline/emit_release_manifest.py
-# source-sha256: fdc7dd74597be16585f0d290c2b0eec52af8c52d81d724d6dc49c70db9765eb5
+# source-sha256: 86c86561888ca49692e35be5e8e743a0928bdc284583dbd3787ff9deb1077a2b
 """リリース契約ファイル `release-<version>.json` を決定的に生成する（ゴールド標準 第3層）。
 
 `pipeline/repo.json` の宣言と `package.json` / `CHANGELOG.md` / `Publish/` / `git` だけを入力に
@@ -35,6 +35,8 @@ import json
 import re
 import subprocess
 import sys
+import tarfile
+import zipfile
 from pathlib import Path
 
 SCHEMA_VERSION = 1
@@ -91,15 +93,75 @@ def discover_packages(root: Path) -> list[tuple[str, Path, dict]]:
     return packages
 
 
-def pick_primary(packages: list[tuple[str, Path, dict]], config: dict) -> tuple[str, Path, dict]:
-    """販売単位の代表パッケージ（version と CHANGELOG の出所）を決める。"""
+def pick_primary(packages: list[tuple[str, Path, dict]], config: dict) -> tuple[str, Path, dict] | None:
+    """販売単位の代表パッケージ（version と CHANGELOG の出所）を決める。
+
+    宣言された `primaryPackage` が見つからないときに黙って別のパッケージで代替すると、
+    typo のまま「正常な」契約ファイルができてしまう。見つからなければ None を返す。
+    """
     declared = (config.get("saleUnit") or {}).get("primaryPackage")
     if declared:
         for package in packages:
             if package[0] == declared:
                 return package
+        return None
     # サブパッケージ（ドットが多い方）ではなく、名前が最も短いものを代表とする
     return min(packages, key=lambda p: (p[0].count("."), len(p[0])))
+
+
+# ---------------------------------------------------------------------------
+# 成果物の中身の検証（「旧内容を新しい名前でコピーしただけ」を検出する）
+# ---------------------------------------------------------------------------
+
+
+def _version_in_tgz(path: Path) -> str | None:
+    with tarfile.open(path, "r:gz") as archive:
+        member = archive.extractfile("package/package.json")
+        if member is None:
+            return None
+        return json.loads(member.read().decode("utf-8")).get("version")
+
+
+def _version_in_vpm_zip(path: Path) -> str | None:
+    with zipfile.ZipFile(path) as archive:
+        if "package.json" not in archive.namelist():
+            return None
+        return json.loads(archive.read("package.json").decode("utf-8")).get("version")
+
+
+def verify_artifact_contents(publish: Path, artifacts: list[dict], version: str) -> list[str]:
+    """アーカイブを開いて中身が宣言バージョンかを確かめる。
+
+    ファイル名と sha256 だけでは「旧内容を新しい名前でコピーした」事故を検出できない
+    （コピー後の hash はそのファイル自身と一致してしまう）。
+    """
+    problems: list[str] = []
+    names = {artifact["file"].rsplit("/", 1)[-1] for artifact in artifacts}
+    for artifact in artifacts:
+        path = publish / artifact["file"]
+        kind = artifact["kind"]
+        try:
+            if kind == "tgz":
+                actual = _version_in_tgz(path)
+                if actual != version:
+                    problems.append(f"{artifact['file']} の中の package.json が version {actual}（期待 {version}）")
+            elif kind == "vpm-zip":
+                actual = _version_in_vpm_zip(path)
+                if actual is None:
+                    problems.append(f"{artifact['file']} の直下に package.json がありません（VPM 構造ではない）")
+                elif actual != version:
+                    problems.append(f"{artifact['file']} の直下 package.json が version {actual}（期待 {version}）")
+            elif kind == "sale-zip":
+                with zipfile.ZipFile(path) as archive:
+                    entries = {name.rsplit("/", 1)[-1] for name in archive.namelist()}
+                bundled = {name for name in names if name != path.name}
+                if bundled and not (bundled & entries):
+                    problems.append(
+                        f"{artifact['file']} に今回の成果物が 1 つも入っていません（中身が旧版の疑い）"
+                    )
+        except (OSError, tarfile.TarError, zipfile.BadZipFile, json.JSONDecodeError, KeyError) as error:
+            problems.append(f"{artifact['file']} を検査できません: {error}")
+    return problems
 
 
 def derive_slug(config: dict, meta: dict) -> str | None:
@@ -225,20 +287,40 @@ def resolve_source_commit(root: Path, artifacts: list[dict]) -> tuple[str | None
             "成果物が git 追跡されていません。先に成果物をコミットしてから契約ファイルを生成してください: "
             + ", ".join(untracked)
         ]
+    # 追跡済みでも、コミット後に上書きされていれば sourceCommit と実体がずれる
+    dirty = subprocess.run(
+        ["git", "-C", str(root), "diff", "--quiet", "HEAD", "--", *paths], check=False
+    )
+    if dirty.returncode != 0:
+        return None, [
+            "成果物に未コミットの変更があります。コミットしてから契約ファイルを生成してください"
+            "（sourceCommit と実体がずれるため）"
+        ]
     commit = run_git(root, "log", "-1", "--format=%H", "--", *paths)
     if not commit:
         return None, ["成果物のコミットを特定できません"]
     return commit, []
 
 
-def resolve_tag(root: Path, version: str, source_commit: str) -> tuple[str | None, list[str]]:
+def resolve_tag(root: Path, version: str, source_commit: str, config: dict) -> tuple[str | None, list[str]]:
     """version から決まる期待タグ名を返し、実在する場合は sourceCommit を含むことを検証する。
 
-    タグは契約ファイルのコミットより後に作られるため、生成時点では未作成が普通。
-    期待名を先に決めておき、実在したときだけ整合を検査する。
+    タグ名の推測はしない（`1.0.0` 系と `v1.0.0` 系が混在するリポジトリで誤った名前を作るため）。
+    `pipeline/repo.json` の `tagPolicy`（`bare` / `v-prefix`）を正とし、既存タグと食い違えば止める。
     """
+    policy = config.get("tagPolicy")
+    if policy not in {"bare", "v-prefix"}:
+        return None, ["pipeline/repo.json に tagPolicy（bare / v-prefix）がありません。タグ名を推測しません"]
     existing = run_git(root, "tag", "--list").split()
-    prefix = "v" if any(tag.startswith("v") and tag[1:2].isdigit() for tag in existing) else ""
+    bare = [tag for tag in existing if tag[:1].isdigit()]
+    prefixed = [tag for tag in existing if tag.startswith("v") and tag[1:2].isdigit()]
+    if bare and prefixed:
+        return None, [f"タグ命名が混在しています（bare {len(bare)} 件 / v 付き {len(prefixed)} 件）。判定不能"]
+    if policy == "bare" and prefixed:
+        return None, ["tagPolicy=bare ですが既存タグは v 付きです"]
+    if policy == "v-prefix" and bare:
+        return None, ["tagPolicy=v-prefix ですが既存タグは v 無しです"]
+    prefix = "v" if policy == "v-prefix" else ""
     expected = f"{prefix}{version}"
     if expected not in existing:
         return expected, []
@@ -312,7 +394,11 @@ def build_manifest(root: Path, asserted_version: str | None, config: dict) -> tu
         return {}, [f"saleUnit.packages にあるパッケージが Packages/ にありません: {', '.join(missing)}"]
     packages = [found[name] for name in declared]
 
-    primary_name, primary_dir, primary_meta = pick_primary(packages, config)
+    primary = pick_primary(packages, config)
+    if primary is None:
+        declared = (sale_unit or {}).get("primaryPackage")
+        return {}, [f"saleUnit.primaryPackage `{declared}` が saleUnit.packages に含まれていません"]
+    primary_name, primary_dir, primary_meta = primary
     version = primary_meta.get("version")
     if not version:
         return {}, [f"{primary_name} の package.json に version がありません"]
@@ -337,12 +423,14 @@ def build_manifest(root: Path, asserted_version: str | None, config: dict) -> tu
 
     artifacts, artifact_problems = collect_artifacts(root, sale_unit, version)
     problems.extend(artifact_problems)
+    if artifacts:
+        problems.extend(verify_artifact_contents(root / "Publish", artifacts, version))
 
     source_commit, commit_problems = resolve_source_commit(root, artifacts)
     problems.extend(commit_problems)
     tag = None
     if source_commit:
-        tag, tag_problems = resolve_tag(root, version, source_commit)
+        tag, tag_problems = resolve_tag(root, version, source_commit, config)
         problems.extend(tag_problems)
 
     manifest = {

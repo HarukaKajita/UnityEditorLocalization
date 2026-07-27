@@ -3,6 +3,7 @@
   "repository": "UnityEditorLocalization",
   "role": "product",
   "productSlug": "unity-editor-localization",
+  "tagPolicy": "bare",
   "saleUnit": {
     "displayName": "UnityEditorLocalization",
     "primaryPackage": "com.kajitaharuka.unity-editor-localization",
