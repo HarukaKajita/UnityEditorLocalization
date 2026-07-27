@@ -11,6 +11,6 @@
     "docs/GOLD_STANDARD.md": "c72b14f4d26ec6545972b77a59a8ff37ceea23e9435d126043de293e2d8f6e22",
     "docs/REPOSITORY_MAP.md": "f841bd27be81c6efabc5ee24080f4c4a56a294acc2c2907e8a30f3648f57ea24",
     "scripts/pipeline/emit_release_manifest.py": "c254b64c1b8aa1bdd28ed5b865f45d6e1e06ccca2471a97b0e6f24b24412bb29",
-    "scripts/pipeline/verify_repo_guide.py": "c957755f4ebb4acd27e1d963e1b40580038ff29fe17d8bf2aff6c688e961d65f"
+    "scripts/pipeline/verify_repo_guide.py": "26931490626637330fce2b3531fa617ede5bbdedef830dbc48407da5b22ac040"
   }
 }
