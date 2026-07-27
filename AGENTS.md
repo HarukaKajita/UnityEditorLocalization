@@ -63,6 +63,27 @@ Unity Editor 上で開発・検証するための器に過ぎません。実装�
 発見したら、作業完了報告に「提案」としてまとめて積極的に共有してください。標準の変更はテンプレートリポジトリの
 `docs/GOLD_STANDARD.md` に反映してから各リポジトリへ展開します。
 
+## パイプライン整合性の 3 層（配布物・検査・契約）
+
+このリポジトリには、テンプレートリポジトリ `UnityTemplate_2022_3_22f1` から**配布された生成物**があります（GOLD_STANDARD §2.10）。**配布物は編集しないでください。** 変更が必要なときはテンプレートリポジトリ側の正本を直して再配布します（配布物の先頭には `source-sha256` の生成物ヘッダがあり、書き換えると検査 3 が落ちます）。
+
+| ファイル | 位置づけ |
+|---|---|
+| `docs/GOLD_STANDARD.md` | 標準の配布コピー（正本はテンプレートリポジトリ） |
+| `docs/REPOSITORY_MAP.md` | パイプラインのリポジトリ地図（正本は MySite の `pipeline/repositories.json`） |
+| `scripts/pipeline/verify_repo_guide.py` | 標準準拠検査（第 2 層） |
+| `scripts/pipeline/emit_release_manifest.py` | リリース契約ファイルの生成（第 3 層） |
+| `pipeline/repo.json` | **このリポジトリの手書き宣言**（配布物ではない） |
+
+```bash
+python3 scripts/pipeline/verify_repo_guide.py       # 標準準拠検査。error があれば非ゼロ終了
+python3 scripts/pipeline/emit_release_manifest.py   # リリース後に契約ファイルを 2 箇所へ書く
+```
+
+- 検査はリリース工程で**省略不可**（`release-unity-package` の検証ゲート 1.5）。日常の実行は任意です。
+- ヒューリスティックな検査（文書内のパス参照・テスト整備の記述・スキル名）の誤検出は、`pipeline/repo.json` の `waivers` へ**理由を添えて**登録します。検査そのものを消さないでください。
+- `pipeline/repo.json` の `saleUnit.exporterAssets` は販売単位の成果物を作る Exporter 設定アセットの宣言です。Exporter を増減したら合わせて更新します。
+
 ## よく使う操作
 
 このリポジトリには CLI ベースのビルド/テスト基盤はなく、検証は Unity Editor のメニューから行います。

@@ -1,0 +1,45 @@
+{
+  "$schemaVersion": 1,
+  "slug": "unity-editor-localization",
+  "repository": "UnityEditorLocalization",
+  "displayName": "UnityEditorLocalization",
+  "version": "1.3.1",
+  "releasedAt": "2026-07-25",
+  "tag": "1.3.1",
+  "commit": "5001e5cfcc1a411b3d81772c6a6f9da765615946",
+  "packages": [
+    {
+      "name": "com.kajitaharuka.unity-editor-localization",
+      "version": "1.3.1"
+    }
+  ],
+  "artifacts": [
+    {
+      "kind": "sale-zip",
+      "file": "UnityEditorLocalization-1.3.1.zip",
+      "bytes": 374306,
+      "sha256": "a2622264f149cc024e6509a627991c0c97b980c6c06c6d030515d6024ead892a"
+    },
+    {
+      "kind": "tgz",
+      "file": "com.kajitaharuka.unity-editor-localization-1.3.1.tgz",
+      "bytes": 174689,
+      "sha256": "a4917e146a2e2b468ea4a66bdb6601ed93aef85e84a8edfe923212723bf5a110"
+    },
+    {
+      "kind": "unitypackage",
+      "file": "com.kajitaharuka.unity-editor-localization-1.3.1.unitypackage",
+      "bytes": 199914,
+      "sha256": "915056827e6217e04ae636640a1559540395bdde8e49e7cfb0be561e2ab49b63"
+    },
+    {
+      "kind": "vpm-zip",
+      "file": "vpm/com.kajitaharuka.unity-editor-localization-1.3.1.zip",
+      "bytes": 254996,
+      "sha256": "7be609ee6172f499ba424307bdb28a26b9d2fa8969f3a88e5420d86e3deff062"
+    }
+  ],
+  "changelogSections": [
+    "Fixed"
+  ]
+}

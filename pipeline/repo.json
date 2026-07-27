@@ -1,0 +1,24 @@
+{
+  "$schemaVersion": 1,
+  "repository": "UnityEditorLocalization",
+  "role": "product",
+  "productSlug": "unity-editor-localization",
+  "standardProfile": "full",
+  "saleUnit": {
+    "displayName": "UnityEditorLocalization",
+    "primaryPackage": "com.kajitaharuka.unity-editor-localization",
+    "exporterAssets": [
+      "Assets/UnityEditorLocalization.asset",
+      "Assets/UnityEditorLocalization_Tarball.asset",
+      "Assets/UnityEditorLocalization_VPM.asset"
+    ],
+    "distribution": ["sale-zip", "tgz", "unitypackage", "vpm-zip"]
+  },
+  "waivers": {
+    "docFiles": [],
+    "docPaths": [],
+    "skills": [],
+    "claims": [],
+    "publishFiles": []
+  }
+}
