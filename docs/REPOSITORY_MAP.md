@@ -1,13 +1,13 @@
 <!-- 生成物: この内容はテンプレートリポジトリ UnityTemplate_2022_3_22f1 から配布されたコピーです。
      編集はテンプレート側で行い、scripts/distribute_standard.py で再配布してください。
-     source: UnityTemplate_2022_3_22f1/pipeline/REPOSITORY_MAP.md（MySite のレジストリから生成）
-     source-sha256: d90338e51311c378136d454866488c37383960e338a3cd883dc1c2176df8c466 -->
+     source: UnityTemplate_2022_3_22f1/（MySite の pipeline/repositories.json から生成）
+     source-sha256: 7032157e3a2f965b73f64234b383ea640fafd15990c09cec07cee3850ff09780 -->
 
 # パイプラインのリポジトリ地図
 
 kajitaharuka 名義の Unity パッケージ／アセットの開発〜販売パイプラインに乗っているリポジトリの一覧。**正本は MySite の `pipeline/repositories.json`** で、この文書はそこから生成される。
 
-役割の分担は次のとおり（詳細は `docs/GOLD_STANDARD.md` と MySite `docs/pipeline-consistency-design.md`）。
+> この地図は公開リポジトリ向けに縮約されている（非公開リポジトリの行と、すべての URL・ローカルパスは含まれない）。
 
 | 場所 | 何の正本か |
 |---|---|
@@ -16,46 +16,17 @@ kajitaharuka 名義の Unity パッケージ／アセットの開発〜販売パ
 | `MySite` | 運用（実在リポジトリ一覧・出品資料・商品ページの site 実装） |
 | `external-content` | 商品情報とリリース契約 |
 
-## 標準の正本
-
-| リポジトリ | 商品 slug | 既定ブランチ / 作業ブランチ | remote |
-|---|---|---|---|
-| **UnityTemplate_2022_3_22f1** | — | main / main | `HarukaKajita/UnityTemplate_2022_3_22f1`（private） |
-
 ## 販売リポジトリ
 
-| リポジトリ | 商品 slug | 既定ブランチ / 作業ブランチ | remote |
+| リポジトリ | 商品 slug | 既定 / 作業ブランチ | 公開範囲 |
 |---|---|---|---|
-| **ExportPackageExtension** | export-package-extension | main / develop | `HarukaKajita/ExportPackageExtension`（private） |
-| **UnityEditorLocalization** | unity-editor-localization | main / develop | `HarukaKajita/UnityEditorLocalization`（public） |
-| **UnityEditorWindowCaptureExtension** | unity-editor-window-capture-extension | main / develop | `HarukaKajita/UnityEditorWindowCaptureExtension`（private） |
-| **TextureAssetExtension** | texture-asset-extension | main / develop | `HarukaKajita/TextureAssetExtension`（private） |
-| **UberMaterialPropertyDrawer** | uber-material-property-drawer | main / develop | `HarukaKajita/UberMaterialPropertyDrawer`（private） |
-| **TechBook_GenerativeProgramming1** | generative-programming-1 | master / master | `HarukaKajita/TechBook_GenerativeProgramming1`（private） |
-
-## サイト
-
-| リポジトリ | 商品 slug | 既定ブランチ / 作業ブランチ | remote |
-|---|---|---|---|
-| **MySite** | — | main / develop | `HarukaKajita/MySite`（private） |
-
-## 商品情報
-
-| リポジトリ | 商品 slug | 既定ブランチ / 作業ブランチ | remote |
-|---|---|---|---|
-| **external-content** | — | main / main | `HarukaKajita/external-content`（private） |
+| **UnityEditorLocalization** | unity-editor-localization | main / develop | public |
 
 ## 配信基盤
 
-| リポジトリ | 商品 slug | 既定ブランチ / 作業ブランチ | remote |
+| リポジトリ | 商品 slug | 既定 / 作業ブランチ | 公開範囲 |
 |---|---|---|---|
-| **vpm-repos** | — | main / main | `HarukaKajita/vpm-repos`（public） |
-
-## 検証サンドボックス
-
-| リポジトリ | 商品 slug | 既定ブランチ / 作業ブランチ | remote |
-|---|---|---|---|
-| **My project** | — | None / None | `?/?` |
+| **vpm-repos** | — | main / main | public |
 
 ## ローカルパスの解決手順
 

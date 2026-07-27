@@ -3,22 +3,37 @@
   "repository": "UnityEditorLocalization",
   "role": "product",
   "productSlug": "unity-editor-localization",
-  "standardProfile": "full",
   "saleUnit": {
     "displayName": "UnityEditorLocalization",
     "primaryPackage": "com.kajitaharuka.unity-editor-localization",
+    "versionPolicy": "lockstep",
+    "packages": [
+      "com.kajitaharuka.unity-editor-localization"
+    ],
+    "distribution": [
+      "sale-zip",
+      "tgz",
+      "unitypackage",
+      "vpm-zip"
+    ],
     "exporterAssets": [
       "Assets/UnityEditorLocalization.asset",
       "Assets/UnityEditorLocalization_Tarball.asset",
       "Assets/UnityEditorLocalization_VPM.asset"
-    ],
-    "distribution": ["sale-zip", "tgz", "unitypackage", "vpm-zip"]
+    ]
   },
-  "waivers": {
-    "docFiles": [],
-    "docPaths": [],
-    "skills": [],
-    "claims": [],
-    "publishFiles": []
-  }
+  "skillRefs": [
+    "release-unity-package",
+    "editor-window-capture",
+    "unity-editor-ui-design",
+    "editor-localization-optional-integration",
+    "editor-localization-translation-quality",
+    "new-product-onboarding",
+    "write-my-product-page",
+    "write-my-promo-images",
+    "publish-to-platform",
+    "unity-mcp-skill",
+    "unity-cli"
+  ],
+  "waivers": []
 }

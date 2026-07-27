@@ -1,7 +1,7 @@
 <!-- 生成物: この内容はテンプレートリポジトリ UnityTemplate_2022_3_22f1 から配布されたコピーです。
      編集はテンプレート側で行い、scripts/distribute_standard.py で再配布してください。
      source: UnityTemplate_2022_3_22f1/docs/GOLD_STANDARD.md
-     source-sha256: aee065adbe9fc74d4290bfb6e108434671a7226bfbd8881233e26548405c84d5 -->
+     source-sha256: 0e309862dec51903cef080c8675d9086b3e257920870058a4281c824d271823b -->
 
 # ゴールド標準 — Unityパッケージ開発・販売パイプライン標準 v1.0
 
@@ -161,16 +161,39 @@ package 直下に置く（すべて購入者向け。§2.2 の情報分離を守
 | 第 2 層: 検証 | 陳腐化を検出可能にする | 各リポジトリの `scripts/pipeline/verify_repo_guide.py`（10 検査） |
 | 第 3 層: 契約 | 開発リポジトリと商品情報のずれを潰す | `scripts/pipeline/emit_release_manifest.py` が `release-<version>.json` を**2 箇所**へ書く |
 
-- **配布物は編集しない。** 冒頭に生成物ヘッダ（`source-sha256`）が機械挿入されており、本文を書き換えると検査 3 が落ちる。標準を変えるときはテンプレート側を直して再配布する。
-- **リポジトリ側の宣言は `pipeline/repo.json`**（手書き・配布対象外）。`role` / `productSlug` / `saleUnit.exporterAssets` / `waivers` を持つ。ヒューリスティック検査の誤検出は `waivers` に**理由を添えて**逃がす（黙って検査を消さない）。
-- **リポジトリ一覧の正本は MySite `pipeline/repositories.json`**。テンプレートには置かない（派生した新規リポジトリが古い一覧を持って生まれるため）。`docs/REPOSITORY_MAP.md` はそこから生成される地図。
-- 日常の実行は任意、**リリース時は省略不可**（§3 のリリース工程・`release-unity-package` の検証ゲート 1.5）。
-
 ```bash
 python3 scripts/pipeline/verify_repo_guide.py            # 標準準拠検査（error があれば非ゼロ終了）
-python3 scripts/pipeline/emit_release_manifest.py        # リリース契約ファイルの生成（リリース後）
+python3 scripts/pipeline/emit_release_manifest.py        # リリース契約ファイルの生成（成果物コミット後）
 python3 scripts/distribute_standard.py --check           # テンプレート側: 配布の drift 検査
 ```
+
+**配布プロファイル**（正本は MySite `pipeline/repositories.json` の `standardProfile`。リポジトリ側には持たせない）:
+
+| プロファイル | 配る部品 | 対象 |
+|---|---|---|
+| `full` | 標準 ＋ 検査 ＋ 契約生成 ＋ CI ＋ 地図 | Unity パッケージの販売リポジトリ |
+| `guide` | 検査 ＋ CI ＋ 地図 | サイト・商品情報・技術書・配信基盤（Unity 検査は対象が無いので自動的に空振りする） |
+| `source` | CI ＋ 地図 | テンプレート自身（標準と検査の正本を持つため配布は受けない） |
+| `none` | なし | git 管理外のサンドボックス |
+
+**配布物は編集しない。** 冒頭に生成物ヘッダ（`source-sha256`）が機械挿入されており、本文を書き換えると検査 3 が落ちる。標準を変えるときはテンプレート側を直して再配布する。
+
+- **保証範囲**: これは「うっかり配布物を直してしまった」を検出する仕組みであって改竄対策ではない（本文とヘッダを同時に書き換えれば通る）。**鮮度**は `pipeline/standard-manifest.json` の source commit と、テンプレート側での `--check` で確認する。テンプレートの変更は**先にコミットしてから配布する**（dirty のままだと台帳に source commit を記録できない）。
+- **リポジトリ側の宣言は `pipeline/repo.json`**（手書き・配布対象外）。`role` / `productSlug` / `saleUnit`（`packages` / `versionPolicy` / `distribution` / `exporterAssets`）/ `packagePolicies` / `skillRefs` / `waivers` を持つ。
+- **判定の主役は構造化された宣言**で、自然言語のヒューリスティック（文書の言い回し）は補助の warn に留める。誤検出は検査を消すのではなく `waivers` へ `{checkId, target, reason, expiresAt}` の形で**理由を添えて**登録する。理由なし・期限切れ・未知の checkId は error になる。
+- **リポジトリ一覧の正本は MySite `pipeline/repositories.json`**。テンプレートには置かない（派生した新規リポジトリが古い一覧を持って生まれるため）。`docs/REPOSITORY_MAP.md` はそこから生成される地図で、**URL とローカルパスは含めない**（公開リポジトリ向けには非公開リポジトリの行も出さない）。
+- 日常の実行は任意、**リリース時は省略不可**（§3 のリリース工程・`release-unity-package` の検証ゲート 1.5）。
+- **Python 3 が無い環境**: 日常の実行では警告してスキップしてよい。**リリース工程では「判定不能」として停止する**（報告しただけで先へ進まない）。
+
+**リリース時の実行順序（この順でないと契約ファイルが決まらない）**:
+
+1. 成果物を書き出す → 内容を検証する
+2. **成果物をコミットする**（契約ファイルの `sourceCommit` は「成果物を最後に変更したコミット」なので、未コミットだと決まらず fail-closed になる）
+3. `emit_release_manifest.py` を実行し、開発リポジトリと external-content の 2 箇所へ契約ファイルを書く
+4. 契約ファイルをコミットする（契約ファイル自身のコミットは契約の対象外）
+5. タグを作る（`tag` は version から決まる期待名。実在する場合は `sourceCommit` を含むことが検証される）
+
+> **注意**: Unity の `Client.Pack` は tgz 内の `package.json` へ `_upm.revision`（その時点の git commit SHA）を書き込む。**同じ version でも書き出し直すと中身が変わる**ため、成果物は 1 回だけ書き出し、契約ファイルを作った後に再書き出ししない。
 
 ## 3. 開発→リリース→商品化フロー
 

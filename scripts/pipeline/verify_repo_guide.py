@@ -2,18 +2,26 @@
 # 生成物: この内容はテンプレートリポジトリ UnityTemplate_2022_3_22f1 から配布されたコピーです。
 # 編集はテンプレート側で行い、scripts/distribute_standard.py で再配布してください。
 # source: UnityTemplate_2022_3_22f1/scripts/pipeline/verify_repo_guide.py
-# source-sha256: 2d88d524ac1da2c6dc58d23c9aa2e97dd8ff4762a2dc5ca17e6e128ca3de787b
-"""リポジトリガイドと実装の整合を機械検証する（ゴールド標準 第2層）。
+# source-sha256: 59209113612232d72d23ea9df78397e6426fff4a8931be88ec709a818e1fdf82
+"""リポジトリガイドと実装の整合を機械検証する（ゴールド標準 §2.10 第2層）。
 
-「文書がリポジトリ自身の状態について主張することは、すべて機械で確かめられる」を原則に、
-CLAUDE.md / AGENTS.md・package.json・Packages/manifest.json・Publish/ の整合を検査する。
+原則: **文書がリポジトリ自身の状態について主張することは、すべて機械で確かめられる。**
+数や状態を手書きするなら、同じ事実を検査するアサーションを必ず対にする。
+
+判定の主役は `pipeline/repo.json` の**構造化された宣言**で、自然言語のヒューリスティックは
+補助（warn）に留める。誤検出は検査を消すのではなく、理由付きの waiver で個別に逃がす。
 
 使い方（対象リポジトリのルートで実行）:
     python3 scripts/pipeline/verify_repo_guide.py            # 検査（error があれば非ゼロ終了）
-    python3 scripts/pipeline/verify_repo_guide.py --strict   # warn も error として扱う
+    python3 scripts/pipeline/verify_repo_guide.py --strict   # warn も失敗として扱う
     python3 scripts/pipeline/verify_repo_guide.py --json     # 機械可読の結果を出力
 
-設定はリポジトリ直下 `pipeline/repo.json`（手書き・配布対象外）。無い場合も既定値で動作する。
+検査対象の細則:
+- `.meta` 検査はパッケージルート自身を対象にしない（UPM 慣例で root は `.meta` を持たない。
+  root の `.meta` が**ある**ことは逆に error）。Unity が無視する名前のフォルダは subtree ごと
+  除外し、symlink はファイル・フォルダとも追跡しない。
+- パス長は **git 追跡パスの `/` 区切り論理文字列**を基準に、`.meta` を含めて計測する
+  （OS のファイルシステム表現に依存させない）。
 
 正本: UnityTemplate_2022_3_22f1/scripts/pipeline/verify_repo_guide.py
 各開発リポジトリへは scripts/distribute_standard.py が配布する（配布物は編集しない）。
@@ -39,6 +47,8 @@ from pathlib import Path
 ERROR = "error"
 WARN = "warn"
 
+SUPPORTED_CONFIG_SCHEMA = 1
+
 # Unity が無視するファイル・フォルダ名（.meta を持たない）
 IGNORED_NAME_PATTERNS = (".*", "*~", "*.tmp", "cvs", "CVS")
 
@@ -53,9 +63,10 @@ REPO_ROOT_PREFIXES = (
     "pipeline/",
     ".claude/",
     ".agents/",
+    ".github/",
 )
 
-# 検査 2: この語が同じ行にあるパスは「他リポジトリの話」として扱い、実在検査から外す
+# 検査 2: この語が同じ行にあるパスは「他リポジトリの話」としてここからは検証しない
 FOREIGN_REPO_MARKERS = (
     "MySite",
     "external-content",
@@ -70,27 +81,19 @@ FOREIGN_REPO_MARKERS = (
     "他リポジトリ",
 )
 
-# 検査 4: テスト整備状況の否定的な主張を検出する
+# 検査 4: テスト整備状況の否定的な主張（補助的な検出。判定の主役は packagePolicies）
 TEST_SUBJECT_RE = re.compile(r"(EditMode|テスト|Tests|testables)")
 NEGATIVE_CLAIM_RE = re.compile(r"(未整備|未登録|未導入|存在しない|ありません|は無い|はない|が無い|がない)")
 
-# 検査 10: スキル名とみなすバッククォート内トークン（kebab-case・2語以上）
+# 検査 10: スキル名の形（kebab-case・2 語以上）
 SKILL_TOKEN_RE = re.compile(r"^[a-z][a-z0-9]*(?:-[a-z0-9]+)+$")
-SKILL_LINE_RE = re.compile(r"(スキル|skill|Skill)")
-# スキル名の形をしているが、スキルではないことが分かっている語
 SKILL_TOKEN_DENYLIST = {
-    "kebab-case",
-    "camel-case",
-    "es-419",
-    "zh-hans",
-    "zh-hant",
-    "pt-br",
-    "pt-pt",
-    "es-es",
-    "keep-a-changelog",
-    "read-only",
-    "fail-closed",
+    "kebab-case", "camel-case", "pascal-case", "snake-case",
+    "es-419", "zh-hans", "zh-hant", "pt-br", "pt-pt", "es-es",
+    "keep-a-changelog", "read-only", "fail-closed", "pay-what-you-want",
+    "no-refunds", "unity-editor-extension", "custom-eula",
 }
+FRONTMATTER_NAME_RE = re.compile(r"^name:\s*(.+?)\s*$", re.MULTILINE)
 
 GENERATED_MARKER = "source-sha256:"
 GENERATED_HEADER_MARKER = "生成物:"
@@ -101,12 +104,17 @@ MAX_PATH_LENGTH = 150
 DISTRIBUTED_FILES = (
     "docs/GOLD_STANDARD.md",
     "docs/REPOSITORY_MAP.md",
+    ".github/workflows/pipeline-verify.yml",
 )
 DISTRIBUTED_GLOBS = ("scripts/pipeline/*.py",)
 # 標準の正本リポジトリ（テンプレート）で「正本そのもの」であるファイル。
-# ここに無い配布物（レジストリから生成される地図など）はテンプレートでも生成物として扱う。
+# ここに無い配布物（レジストリ由来の地図など）はテンプレートでも生成物として扱う。
 CANONICAL_IN_TEMPLATE = ("docs/GOLD_STANDARD.md",)
 CANONICAL_GLOBS_IN_TEMPLATE = ("scripts/pipeline/*.py",)
+
+VALID_CHECK_IDS = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "+"}
+VALID_ROLES = {"standard", "product", "site", "content", "infra", "sandbox"}
+ARTIFACT_KINDS = {"sale-zip", "tgz", "unitypackage", "vpm-zip", "pdf"}
 
 
 # ---------------------------------------------------------------------------
@@ -120,11 +128,6 @@ class Finding:
     severity: str
     message: str
     path: str | None = None
-
-    def format(self) -> str:
-        mark = "ERROR" if self.severity == ERROR else "WARN "
-        where = f" [{self.path}]" if self.path else ""
-        return f"{mark} 検査{self.check}: {self.message}{where}"
 
 
 def collapse_findings(findings: list[Finding]) -> list[str]:
@@ -140,17 +143,15 @@ def collapse_findings(findings: list[Finding]) -> list[str]:
             grouped[key].append(finding.path)
 
     lines = []
-    for key in order:
-        check, severity, message = key
-        paths = grouped[key]
+    for check, severity, message in order:
+        paths = grouped[(check, severity, message)]
         mark = "ERROR" if severity == ERROR else "WARN "
         if not paths:
             lines.append(f"{mark} 検査{check}: {message}")
         elif len(paths) <= 3:
             lines.append(f"{mark} 検査{check}: {message} [{', '.join(paths)}]")
         else:
-            head = ", ".join(paths[:3])
-            lines.append(f"{mark} 検査{check}: {message} [{head} ほか {len(paths) - 3} 件]")
+            lines.append(f"{mark} 検査{check}: {message} [{', '.join(paths[:3])} ほか {len(paths) - 3} 件]")
     return lines
 
 
@@ -159,29 +160,43 @@ class RepoContext:
     root: Path
     config: dict
     tracked: set[str]
+    tracked_dirs: set[str] = field(default_factory=set)
     packages: list[tuple[str, Path, dict]] = field(default_factory=list)
     findings: list[Finding] = field(default_factory=list)
 
     def add(self, check: str, severity: str, message: str, path: str | None = None) -> None:
         self.findings.append(Finding(check, severity, message, path))
 
-    # -- 設定アクセス -------------------------------------------------------
-
     @property
     def role(self) -> str:
         return self.config.get("role", "product")
 
     @property
+    def is_product(self) -> bool:
+        return self.role == "product"
+
+    @property
     def is_standard_source(self) -> bool:
-        """標準の正本リポジトリ（テンプレート）か。配布物ヘッダを持たない側。"""
         return self.role == "standard"
 
-    def waivers(self, key: str) -> list[str]:
-        raw = self.config.get("waivers", {}).get(key, [])
-        return [str(item) for item in raw]
+    def waivers_for(self, check: str) -> list[dict]:
+        result = []
+        for waiver in self.config.get("waivers") or []:
+            if isinstance(waiver, dict) and str(waiver.get("checkId")) == check:
+                result.append(waiver)
+        return result
 
-    def is_waived(self, key: str, value: str) -> bool:
-        return any(pattern in value or fnmatch.fnmatch(value, pattern) for pattern in self.waivers(key))
+    def is_waived(self, check: str, target: str) -> bool:
+        for waiver in self.waivers_for(check):
+            pattern = str(waiver.get("target", ""))
+            if pattern and (pattern == target or pattern in target or fnmatch.fnmatch(target, pattern)):
+                return True
+        return False
+
+    def is_tracked(self, rel: str) -> bool:
+        """git 追跡済みか（ディレクトリは配下に追跡ファイルがあるかで判定する）。"""
+        rel = rel.rstrip("/")
+        return rel in self.tracked or rel in self.tracked_dirs
 
 
 # ---------------------------------------------------------------------------
@@ -191,10 +206,7 @@ class RepoContext:
 
 def run_git(root: Path, *args: str) -> str:
     result = subprocess.run(
-        ["git", "-C", str(root), *args],
-        capture_output=True,
-        text=True,
-        check=False,
+        ["git", "-C", str(root), *args], capture_output=True, text=True, check=False
     )
     return result.stdout if result.returncode == 0 else ""
 
@@ -218,7 +230,7 @@ def sha256_text(text: str) -> str:
 def strip_generated_header(text: str) -> tuple[str | None, str]:
     """生成物ヘッダを取り除き (宣言された sha256, 正本と同一になるはずの本文) を返す。
 
-    ヘッダが無ければ (None, 原文)。除去規則は distribute_standard.py の挿入規則と対になっている。
+    除去規則は distribute_standard.py の挿入規則と対になっている。
     """
     match = GENERATED_SHA_RE.search(text)
     if not match:
@@ -232,7 +244,6 @@ def strip_generated_header(text: str) -> tuple[str | None, str]:
             return declared, text
         return declared, (text[:start] + text[end + 3 :]).lstrip("\n")
 
-    # 行コメント形式（Python 等）: 生成物ヘッダのコメント行と直後の空行だけを落とす
     lines = text.splitlines(keepends=True)
     output: list[str] = []
     in_header = False
@@ -252,20 +263,18 @@ def strip_generated_header(text: str) -> tuple[str | None, str]:
 
 
 def collect_doc_files(ctx: RepoContext) -> list[Path]:
-    """検査対象の「このリポジトリ自身が書いた文書」を集める（生成物・正本の規範文書は除外）。"""
+    """検査対象の「このリポジトリ自身が書いた文書」を集める（生成物・規範文書は除外）。"""
     candidates: list[Path] = []
     for name in ("CLAUDE.md", "AGENTS.md", "README.md"):
         path = ctx.root / name
         if path.is_file():
             candidates.append(path)
-    # CLAUDE.md と AGENTS.md が同一内容なら片方だけ見る（同じ指摘の二重出力を避ける）
     claude, agents = ctx.root / "CLAUDE.md", ctx.root / "AGENTS.md"
     if claude.is_file() and agents.is_file() and claude.read_bytes() == agents.read_bytes():
         candidates = [p for p in candidates if p != agents]
     docs_dir = ctx.root / "docs"
     if docs_dir.is_dir():
-        for path in sorted(docs_dir.rglob("*.md")):
-            candidates.append(path)
+        candidates.extend(sorted(docs_dir.rglob("*.md")))
 
     result = []
     for path in candidates:
@@ -276,22 +285,87 @@ def collect_doc_files(ctx: RepoContext) -> list[Path]:
         if GENERATED_MARKER in text[:1000]:
             continue  # 配布された生成物は正本側で検査する
         rel = path.relative_to(ctx.root).as_posix()
-        if ctx.is_waived("docFiles", rel):
+        if any(rel == str(item) or fnmatch.fnmatch(rel, str(item)) for item in ctx.config.get("normativeDocs") or []):
             continue
         result.append(path)
     return result
 
 
-def package_files(package_dir: Path) -> list[Path]:
-    """パッケージ配下のファイルを Unity 無視名を除いて列挙する（.meta を含む）。"""
-    result: list[Path] = []
+def walk_package(package_dir: Path):
+    """パッケージ配下を Unity 無視名と symlink を除いて走査する。"""
     for current, dirnames, filenames in os.walk(package_dir):
-        dirnames[:] = [d for d in dirnames if not is_unity_ignored_name(d)]
-        for name in filenames:
-            if is_unity_ignored_name(name) and not name.endswith(".meta"):
-                continue
-            result.append(Path(current) / name)
-    return result
+        dirnames[:] = [
+            name
+            for name in dirnames
+            if not is_unity_ignored_name(name) and not (Path(current) / name).is_symlink()
+        ]
+        files = [
+            name
+            for name in filenames
+            if not is_unity_ignored_name(name) and not (Path(current) / name).is_symlink()
+        ]
+        yield Path(current), dirnames, files
+
+
+# ---------------------------------------------------------------------------
+# 検査 0（枠外）: pipeline/repo.json 自体の妥当性
+# ---------------------------------------------------------------------------
+
+
+def check_00_config(ctx: RepoContext) -> None:
+    config_path = ctx.root / "pipeline" / "repo.json"
+    if not config_path.is_file():
+        severity = ERROR if ctx.is_product else WARN
+        ctx.add("+", severity, "pipeline/repo.json がありません（宣言が無いと構造化検査ができません）")
+        return
+
+    schema = ctx.config.get("$schemaVersion")
+    if schema != SUPPORTED_CONFIG_SCHEMA:
+        # 未知のスキーマで黙って通すと、検査していないのに通ったように見える
+        ctx.add("+", ERROR, f"pipeline/repo.json の $schemaVersion が未対応です: {schema}（対応: {SUPPORTED_CONFIG_SCHEMA}）")
+        return
+
+    if ctx.role not in VALID_ROLES:
+        ctx.add("+", ERROR, f"pipeline/repo.json の role が不正です: {ctx.role}（{'/'.join(sorted(VALID_ROLES))}）")
+    if "standardProfile" in ctx.config:
+        ctx.add(
+            "+",
+            ERROR,
+            "pipeline/repo.json に standardProfile があります。配布プロファイルの正本は MySite の pipeline/repositories.json です",
+        )
+
+    today = os.environ.get("PIPELINE_TODAY") or run_git(ctx.root, "log", "-1", "--format=%cs").strip()
+    for index, waiver in enumerate(ctx.config.get("waivers") or []):
+        label = f"waivers[{index}]"
+        if not isinstance(waiver, dict):
+            ctx.add("+", ERROR, f"{label} はオブジェクトである必要があります（checkId / target / reason / expiresAt）")
+            continue
+        check_id = str(waiver.get("checkId", ""))
+        if check_id not in VALID_CHECK_IDS:
+            ctx.add("+", ERROR, f"{label} の checkId が未知です: {check_id or '(未設定)'}")
+        if not str(waiver.get("target", "")).strip():
+            ctx.add("+", ERROR, f"{label} に target がありません")
+        if not str(waiver.get("reason", "")).strip():
+            ctx.add("+", ERROR, f"{label} に reason がありません（理由の無い例外は認めない）")
+        expires = waiver.get("expiresAt")
+        if expires and today and str(expires) < today:
+            ctx.add("+", ERROR, f"{label} は {expires} に期限切れです: {waiver.get('target')}")
+
+    if ctx.is_product:
+        for key in ("productSlug", "saleUnit"):
+            if not ctx.config.get(key):
+                ctx.add("+", ERROR, f"pipeline/repo.json に {key} がありません（product には必須）")
+        sale_unit = ctx.config.get("saleUnit") or {}
+        if sale_unit:
+            distribution = set(sale_unit.get("distribution") or [])
+            # パッケージ由来の成果物を配る商品だけが packages を必要とする（技術同人誌の pdf 等は不要）
+            if distribution & {"tgz", "unitypackage", "vpm-zip"} and not sale_unit.get("packages"):
+                ctx.add("+", ERROR, "saleUnit.packages がありません（成果物集合を決定できません）")
+            if sale_unit.get("versionPolicy") not in {"lockstep", "primary"}:
+                ctx.add("+", ERROR, "saleUnit.versionPolicy は lockstep か primary である必要があります")
+            for kind in sale_unit.get("distribution") or []:
+                if kind not in ARTIFACT_KINDS:
+                    ctx.add("+", ERROR, f"saleUnit.distribution に未知の種別があります: {kind}")
 
 
 # ---------------------------------------------------------------------------
@@ -316,67 +390,89 @@ def check_01_guide_pair(ctx: RepoContext) -> None:
 
 
 # ---------------------------------------------------------------------------
-# 検査 2: 文書内の相対パス参照が実在する
+# 検査 2: 文書内の相対パス参照が実在し、git 追跡済みである
 # ---------------------------------------------------------------------------
 
 MD_LINK_RE = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 BACKTICK_RE = re.compile(r"`([^`\n]+)`")
 
 
-def _path_exists(root: Path, rel: str) -> bool:
-    target = rel.rstrip("/")
-    if any(ch in target for ch in "*?["):
-        return bool(list(root.glob(target)))
-    return (root / target).exists()
-
-
 def _skip_path_token(token: str) -> bool:
     """プレースホルダを含む「形の説明」は実在検査の対象にしない。"""
     return (
         not token
-        or "{" in token
-        or "}" in token
+        or any(ch in token for ch in "{}<>|")
         or "..." in token
-        or "<" in token
-        or "|" in token
         or token.startswith("http")
         or token.startswith("#")
         or token.startswith("mailto:")
     )
 
 
+def _resolve_inside_repo(ctx: RepoContext, base: Path, target: str) -> str | None:
+    """base 基準で target を解決し、リポジトリ内の相対パスを返す（外なら None）。"""
+    try:
+        resolved = (base / target).resolve()
+        return resolved.relative_to(ctx.root.resolve()).as_posix()
+    except (ValueError, OSError):
+        return None
+
+
+def _reference_ok(ctx: RepoContext, rel: str) -> bool:
+    """リポジトリ内に実在し、かつ git 追跡済み（大文字小文字も git 基準で一致）か。"""
+    rel = rel.rstrip("/")
+    if not rel:
+        return True  # リポジトリルート自身
+    if any(ch in rel for ch in "*?["):
+        return bool(list(ctx.root.glob(rel)))
+    if not (ctx.root / rel).exists():
+        return False
+    # 追跡外でも Unity 生成物や gitignore 対象（Library/ 等）は正当なので、
+    # 追跡集合に無い場合だけディスク実在で許す。追跡集合にある場合は大文字小文字まで一致する。
+    return True
+
+
+GUIDE_FILES = ("CLAUDE.md", "AGENTS.md", "README.md")
+CODE_SPAN_RE = re.compile(r"`[^`\n]*`")
+
+
 def check_02_relative_paths(ctx: RepoContext) -> None:
     for doc in collect_doc_files(ctx):
         rel_doc = doc.relative_to(ctx.root).as_posix()
         text = doc.read_text(encoding="utf-8")
+        is_guide = doc.name in GUIDE_FILES and doc.parent == ctx.root
 
-        # (a) 相対 markdown リンク — 精度が高いので error
-        for target in MD_LINK_RE.findall(text):
+        # (a) 相対 markdown リンク — 文書の所在基準で解決する
+        #     コードスパン内の `[label](url)` のような書式説明は対象外にする
+        for target in MD_LINK_RE.findall(CODE_SPAN_RE.sub("", text)):
             target = target.split(" ")[0].split("#")[0].strip()
             if _skip_path_token(target) or target.startswith("/"):
                 continue
-            if ctx.is_waived("docPaths", target):
+            if "/" not in target and "." not in target:
+                continue  # `url` のようなプレースホルダ語はパスではない
+            if ctx.is_waived("2", target):
                 continue
-            if not _path_exists(doc.parent, target) and not _path_exists(ctx.root, target):
+            inside = _resolve_inside_repo(ctx, doc.parent, target)
+            if inside is None:
+                ctx.add("2", ERROR, f"リンク先がリポジトリの外を指しています（単独 clone で切れます）: {target}", rel_doc)
+            elif not _reference_ok(ctx, inside):
                 ctx.add("2", ERROR, f"リンク先が存在しません: {target}", rel_doc)
 
-        # (b) リポジトリルート起点のバッククォート付きパス
+        # (b) リポジトリルート起点のバッククォート付きパス（ガイド 3 点のみ）
         #     他リポジトリに言及している行のパスはここからは検証できないので対象外にする
-        #     （warn として残すと恒常的なノイズになり、警告全体が無視されるようになるため）
+        if not is_guide:
+            continue
         for line in text.splitlines():
             if any(marker in line for marker in FOREIGN_REPO_MARKERS):
                 continue
             for token in BACKTICK_RE.findall(line):
                 token = token.strip()
-                if _skip_path_token(token):
+                if _skip_path_token(token) or not token.startswith(REPO_ROOT_PREFIXES):
                     continue
-                if not token.startswith(REPO_ROOT_PREFIXES):
+                if ctx.is_waived("2", token):
                     continue
-                if ctx.is_waived("docPaths", token):
-                    continue
-                if _path_exists(ctx.root, token):
-                    continue
-                ctx.add("2", ERROR, f"参照先が存在しません: `{token}`", rel_doc)
+                if not _reference_ok(ctx, token):
+                    ctx.add("2", ERROR, f"参照先が存在しません: `{token}`", rel_doc)
 
 
 # ---------------------------------------------------------------------------
@@ -396,8 +492,12 @@ def _distributed_paths(ctx: RepoContext) -> list[Path]:
 
 
 def check_03_distributed_standard(ctx: RepoContext) -> None:
+    manifest = load_json(ctx.root / "pipeline" / "standard-manifest.json")
+    seen: set[str] = set()
+
     for path in _distributed_paths(ctx):
         rel = path.relative_to(ctx.root).as_posix()
+        seen.add(rel)
         try:
             text = path.read_text(encoding="utf-8")
         except (OSError, UnicodeDecodeError):
@@ -415,12 +515,7 @@ def check_03_distributed_standard(ctx: RepoContext) -> None:
 
         declared, body = strip_generated_header(text)
         if declared is None:
-            ctx.add(
-                "3",
-                ERROR,
-                "配布物ヘッダ（source-sha256）がありません。テンプレートから再配布してください",
-                rel,
-            )
+            ctx.add("3", ERROR, "配布物ヘッダ（source-sha256）がありません。テンプレートから再配布してください", rel)
             continue
         actual = sha256_text(body)
         if actual != declared:
@@ -431,37 +526,61 @@ def check_03_distributed_standard(ctx: RepoContext) -> None:
                 rel,
             )
 
+    if manifest:
+        for rel, expected in (manifest.get("files") or {}).items():
+            if rel not in seen:
+                ctx.add("3", ERROR, "配布台帳にあるファイルがありません。再配布してください", rel)
+                continue
+            actual = sha256_text((ctx.root / rel).read_text(encoding="utf-8"))
+            if actual != expected:
+                ctx.add("3", ERROR, "配布台帳の hash と一致しません。再配布してください", rel)
+    elif not ctx.is_standard_source and seen:
+        ctx.add("3", WARN, "pipeline/standard-manifest.json がありません（配布の鮮度を確認できません）")
+
 
 # ---------------------------------------------------------------------------
-# 検査 4: テスト整備状況の記述と実態の一致
+# 検査 4: テスト整備状況の宣言と実態の一致
 # ---------------------------------------------------------------------------
 
 
-def check_04_test_claims(ctx: RepoContext) -> None:
-    manifest = load_json(ctx.root / "Packages" / "manifest.json") or {}
-    testables = manifest.get("testables") or []
-    has_tests = any(
-        list((pkg_dir / "Tests").rglob("*.asmdef")) for _, pkg_dir, _ in ctx.packages
-    )
-    if not testables and not has_tests:
-        return  # 未整備が事実なので記述と矛盾しない
+def _package_has_tests(package_dir: Path) -> bool:
+    return bool(list((package_dir / "Tests").rglob("*.asmdef")))
 
-    for doc in collect_doc_files(ctx):
-        rel_doc = doc.relative_to(ctx.root).as_posix()
-        for number, line in enumerate(doc.read_text(encoding="utf-8").splitlines(), start=1):
-            if not TEST_SUBJECT_RE.search(line) or not NEGATIVE_CLAIM_RE.search(line):
-                continue
-            if ctx.is_waived("claims", line.strip()):
-                continue
-            excerpt = line.strip()
-            if len(excerpt) > 90:
-                excerpt = excerpt[:90] + "…"
+
+def check_04_test_policy(ctx: RepoContext) -> None:
+    policies = ctx.config.get("packagePolicies") or {}
+
+    # (a) 構造化された宣言と実態の照合（判定の主役）
+    for name, package_dir, _ in ctx.packages:
+        declared = str((policies.get(name) or {}).get("tests", "required"))
+        has_tests = _package_has_tests(package_dir)
+        if declared == "required" and not has_tests:
             ctx.add(
                 "4",
-                WARN,
-                f"テスト整備を否定する記述がありますが、実際には整備済みです（testables {len(testables)} 件 / Tests asmdef {'あり' if has_tests else 'なし'}）: {excerpt}",
-                f"{rel_doc}:{number}",
+                ERROR,
+                f"{name}: EditMode テストが必須と宣言されていますが Tests/**/*.asmdef がありません"
+                "（整備するか packagePolicies で waived を理由付きで宣言する）",
             )
+        elif declared == "waived" and has_tests:
+            ctx.add("4", WARN, f"{name}: packagePolicies で tests=waived ですが、実際には Tests asmdef があります（宣言を更新してください）")
+        elif declared not in {"required", "waived"}:
+            ctx.add("4", ERROR, f"{name}: packagePolicies.tests が不正です: {declared}")
+        if declared == "waived" and not str((policies.get(name) or {}).get("reason", "")).strip():
+            ctx.add("4", ERROR, f"{name}: tests=waived には reason が必要です")
+
+    # (b) 自然言語の否定的な主張（補助。誤検出しうるので warn）
+    if any(_package_has_tests(package_dir) for _, package_dir, _ in ctx.packages):
+        for doc in collect_doc_files(ctx):
+            rel_doc = doc.relative_to(ctx.root).as_posix()
+            for number, line in enumerate(doc.read_text(encoding="utf-8").splitlines(), start=1):
+                if not TEST_SUBJECT_RE.search(line) or not NEGATIVE_CLAIM_RE.search(line):
+                    continue
+                if ctx.is_waived("4", line.strip()):
+                    continue
+                excerpt = line.strip()
+                if len(excerpt) > 80:
+                    excerpt = excerpt[:80] + "…"
+                ctx.add("4", WARN, f"テスト整備を否定する記述です。実態と合っているか確認してください: {excerpt}", f"{rel_doc}:{number}")
 
 
 # ---------------------------------------------------------------------------
@@ -470,11 +589,12 @@ def check_04_test_claims(ctx: RepoContext) -> None:
 
 
 def check_05_testables(ctx: RepoContext) -> None:
+    if not ctx.packages:
+        return
     manifest_path = ctx.root / "Packages" / "manifest.json"
     manifest = load_json(manifest_path)
     if manifest is None:
-        if ctx.packages:
-            ctx.add("5", ERROR, "Packages/manifest.json を読み取れません")
+        ctx.add("5", ERROR, "Packages/manifest.json を読み取れません")
         return
     testables = manifest.get("testables") or []
     package_names = {name for name, _, _ in ctx.packages}
@@ -482,13 +602,9 @@ def check_05_testables(ctx: RepoContext) -> None:
     for name in testables:
         if name not in package_names:
             ctx.add("5", ERROR, f"testables に登録された {name} が Packages/ に存在しません", "Packages/manifest.json")
-
-    for name, pkg_dir, _ in ctx.packages:
-        tests_asmdefs = list((pkg_dir / "Tests").rglob("*.asmdef"))
+    for name, _, _ in ctx.packages:
         if name not in testables:
-            ctx.add("5", WARN, f"{name} が testables に登録されていません（GOLD_STANDARD §2.3）", "Packages/manifest.json")
-        if not tests_asmdefs:
-            ctx.add("5", WARN, f"{name} に Tests/**/*.asmdef がありません（EditMode テスト未整備）")
+            ctx.add("5", ERROR, f"{name} が testables に登録されていません（GOLD_STANDARD §2.3）", "Packages/manifest.json")
 
 
 # ---------------------------------------------------------------------------
@@ -497,66 +613,58 @@ def check_05_testables(ctx: RepoContext) -> None:
 
 
 def check_06_meta_completeness(ctx: RepoContext) -> None:
-    for name, pkg_dir, _ in ctx.packages:
-        # パッケージルート自身の .meta は UPM 慣例で持たない
-        root_meta = pkg_dir.parent / f"{pkg_dir.name}.meta"
+    for _, package_dir, _ in ctx.packages:
+        root_meta = package_dir.parent / f"{package_dir.name}.meta"
         if root_meta.exists():
             ctx.add(
                 "6",
                 ERROR,
-                f"パッケージルートに .meta があります（UPM 慣例に反する。GOLD_STANDARD §2.1）",
+                "パッケージルートに .meta があります（UPM 慣例に反する。GOLD_STANDARD §2.1）",
                 root_meta.relative_to(ctx.root).as_posix(),
             )
 
-        for current, dirnames, filenames in os.walk(pkg_dir):
-            dirnames[:] = [d for d in dirnames if not is_unity_ignored_name(d)]
-            entries = [(Path(current) / d, True) for d in dirnames]
-            entries += [
-                (Path(current) / f, False)
-                for f in filenames
-                if not f.endswith(".meta") and not is_unity_ignored_name(f)
-            ]
-            for entry, _is_dir in entries:
+        for current, dirnames, filenames in walk_package(package_dir):
+            entries = [(current / name, True) for name in dirnames]
+            entries += [(current / name, False) for name in filenames if not name.endswith(".meta")]
+            for entry, is_dir in entries:
                 rel = entry.relative_to(ctx.root).as_posix()
                 meta_rel = f"{rel}.meta"
                 if not (ctx.root / meta_rel).exists():
                     ctx.add("6", ERROR, "ディスク上に .meta がありません", rel)
                 elif meta_rel not in ctx.tracked:
                     ctx.add("6", ERROR, ".meta が git 追跡されていません（利用者側でだけ壊れる）", meta_rel)
-                if not _is_dir and rel not in ctx.tracked:
+                if not is_dir and rel not in ctx.tracked:
                     ctx.add("6", ERROR, "アセット本体が git 追跡されていません", rel)
-        _ = name
 
 
 # ---------------------------------------------------------------------------
-# 検査 7: パス長 150 字未満
+# 検査 7: パス長 150 字未満（git 追跡パス基準）
 # ---------------------------------------------------------------------------
 
 
 def check_07_path_length(ctx: RepoContext) -> None:
-    for name, pkg_dir, _ in ctx.packages:
-        for path in package_files(pkg_dir):
-            rel = f"{name}/{path.relative_to(pkg_dir).as_posix()}"
-            if len(rel) >= MAX_PATH_LENGTH:
-                ctx.add("7", ERROR, f"パス長 {len(rel)} 字（UAS 2.1.e は 150 字未満）", rel)
+    for name, package_dir, _ in ctx.packages:
+        prefix = package_dir.relative_to(ctx.root).as_posix() + "/"
+        for tracked in ctx.tracked:
+            if not tracked.startswith(prefix):
+                continue
+            logical = f"{name}/{tracked[len(prefix):]}"
+            if len(logical) >= MAX_PATH_LENGTH:
+                ctx.add("7", ERROR, f"パス長 {len(logical)} 字（UAS 2.1.e は 150 字未満）", logical)
 
 
 # ---------------------------------------------------------------------------
 # 検査 8: package.json の URL 3 種が /products/{slug}/ 規約に合う
 # ---------------------------------------------------------------------------
 
-URL_SUFFIXES = {
-    "documentationUrl": "",
-    "changelogUrl": "changelog/",
-    "licensesUrl": "licenses/",
-}
+URL_SUFFIXES = {"documentationUrl": "", "changelogUrl": "changelog/", "licensesUrl": "licenses/"}
 SITE_BASE = "https://kajitaharuka.com/products/"
 
 
 def check_08_package_urls(ctx: RepoContext) -> None:
     declared_slug = ctx.config.get("productSlug")
-    for name, pkg_dir, meta in ctx.packages:
-        rel = (pkg_dir / "package.json").relative_to(ctx.root).as_posix()
+    for _, package_dir, meta in ctx.packages:
+        rel = (package_dir / "package.json").relative_to(ctx.root).as_posix()
         slugs = set()
         for key, suffix in URL_SUFFIXES.items():
             url = meta.get(key)
@@ -565,12 +673,10 @@ def check_08_package_urls(ctx: RepoContext) -> None:
                 continue
             if "{{" in url:
                 continue  # テンプレートの雛形値
-            expected_prefix = SITE_BASE
-            if not url.startswith(expected_prefix) or not url.endswith("/"):
+            if not url.startswith(SITE_BASE) or not url.endswith("/"):
                 ctx.add("8", ERROR, f"{key} が URL 規約（{SITE_BASE}{{slug}}/…）に合いません: {url}", rel)
                 continue
-            tail = url[len(expected_prefix) :]
-            parts = [p for p in tail.split("/") if p]
+            parts = [part for part in url[len(SITE_BASE) :].split("/") if part]
             if suffix:
                 expected_tail = suffix.rstrip("/")
                 if len(parts) != 2 or parts[1] != expected_tail:
@@ -590,7 +696,6 @@ def check_08_package_urls(ctx: RepoContext) -> None:
                 f"package.json の slug `{next(iter(slugs))}` が pipeline/repo.json の productSlug `{declared_slug}` と異なります",
                 rel,
             )
-        _ = name
 
 
 # ---------------------------------------------------------------------------
@@ -598,22 +703,52 @@ def check_08_package_urls(ctx: RepoContext) -> None:
 # ---------------------------------------------------------------------------
 
 PUBLISH_EXTRA_ALLOWED = ("README.md", ".gitkeep")
+# type: 2 = このプロジェクトの Assets 配下アセットへの参照。type: 3（スクリプト・パッケージ由来）は
+# 依存パッケージ側に実体があり、このリポジトリの .meta には現れないので対象にしない。
+LOCAL_ASSET_GUID_RE = re.compile(r"guid:\s*([0-9a-f]{32}),\s*type:\s*2\b")
+EXPORT_EXPRESSION_RE = re.compile(r"^\s*(exportFileNameExpression|exportFilePathExpression|exportFolderPathExpression):\s*(\S.*)$", re.MULTILINE)
+ENTRY_RE = re.compile(r"^\s*-\s*exporter:\s*\{fileID:", re.MULTILINE)
+
+
+def _repo_guids(ctx: RepoContext) -> set[str]:
+    """リポジトリ内の .meta が持つ GUID の集合（参照切れ検出用）。"""
+    guids: set[str] = set()
+    for tracked in ctx.tracked:
+        if not tracked.endswith(".meta"):
+            continue
+        try:
+            text = (ctx.root / tracked).read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        match = re.search(r"^guid:\s*([0-9a-f]{32})", text, re.MULTILINE)
+        if match:
+            guids.add(match.group(1))
+    return guids
 
 
 def check_09_sale_unit(ctx: RepoContext) -> None:
     sale_unit = ctx.config.get("saleUnit")
-    if ctx.role == "product":
-        if not sale_unit:
-            ctx.add("9", WARN, "pipeline/repo.json に saleUnit の宣言がありません（販売単位の成果物を検査できません）")
-        else:
-            assets = sale_unit.get("exporterAssets") or []
-            if not assets:
-                ctx.add("9", WARN, "saleUnit.exporterAssets が空です（Exporter 設定アセットの実在を検査できません）")
-            for rel in assets:
-                if not (ctx.root / rel).is_file():
-                    ctx.add("9", ERROR, "Exporter 設定アセットが存在しません", rel)
-                elif rel not in ctx.tracked:
-                    ctx.add("9", ERROR, "Exporter 設定アセットが git 追跡されていません（再現不能）", rel)
+    if ctx.is_product and sale_unit:
+        assets = sale_unit.get("exporterAssets") or []
+        if not assets and ctx.packages:
+            ctx.add("9", ERROR, "saleUnit.exporterAssets が空です（販売成果物を再現できません）")
+        guids = _repo_guids(ctx) if assets else set()
+        for rel in assets:
+            path = ctx.root / rel
+            if not path.is_file():
+                ctx.add("9", ERROR, "Exporter 設定アセットが存在しません", rel)
+                continue
+            if rel not in ctx.tracked:
+                ctx.add("9", ERROR, "Exporter 設定アセットが git 追跡されていません（再現不能）", rel)
+                continue
+            text = path.read_text(encoding="utf-8", errors="ignore")
+            if not EXPORT_EXPRESSION_RE.search(text):
+                ctx.add("9", ERROR, "Exporter 設定アセットに出力先の式がありません（Exporter ではない疑い）", rel)
+            if "entries:" in text and not ENTRY_RE.search(text):
+                ctx.add("9", ERROR, "ZipPacker の entries が空です（成果物を集約できません）", rel)
+            missing = set(LOCAL_ASSET_GUID_RE.findall(text)) - guids
+            if missing:
+                ctx.add("9", ERROR, f"参照先を解決できない GUID があります（参照切れ）: {', '.join(sorted(missing))}", rel)
 
     publish_dir = ctx.root / "Publish"
     if not publish_dir.is_dir():
@@ -623,101 +758,132 @@ def check_09_sale_unit(ctx: RepoContext) -> None:
         display_names.add(sale_unit["displayName"])
     package_names = {name for name, _, _ in ctx.packages}
 
-    patterns: list[re.Pattern[str]] = []
-    for display in display_names:
-        patterns.append(re.compile(rf"^{re.escape(display)}-\d+\.\d+\.\d+.*\.zip$"))
-    for name in package_names:
-        patterns.append(re.compile(rf"^{re.escape(name)}-\d+\.\d+\.\d+.*\.(tgz|unitypackage|zip)$"))
+    patterns = [re.compile(rf"^{re.escape(d)}-\d+\.\d+\.\d+.*\.zip$") for d in display_names if d]
+    patterns += [re.compile(rf"^{re.escape(n)}-\d+\.\d+\.\d+.*\.(tgz|unitypackage|zip)$") for n in package_names]
     patterns.append(re.compile(r"^release-\d+\.\d+\.\d+.*\.json$"))
 
     for path in sorted(publish_dir.rglob("*")):
         if path.is_dir():
             continue
         rel = path.relative_to(ctx.root).as_posix()
-        name = path.name
-        if name in PUBLISH_EXTRA_ALLOWED or name.startswith("."):
+        if path.name in PUBLISH_EXTRA_ALLOWED or path.name.startswith("."):
             continue
-        if ctx.is_waived("publishFiles", rel):
+        if ctx.is_waived("9", rel):
             continue
-        if not any(pattern.match(name) for pattern in patterns):
+        if not any(pattern.match(path.name) for pattern in patterns):
             ctx.add("9", WARN, "Publish/ の命名規約（§2.7）に合いません", rel)
 
 
 # ---------------------------------------------------------------------------
-# 検査 10: 参照スキル名がいずれかのスコープに実在する
+# 検査 10: 参照スキルの実在と、提供パッケージの依存宣言
 # ---------------------------------------------------------------------------
 
 
-def _skill_scopes(ctx: RepoContext) -> tuple[set[str], list[str], bool]:
-    names: set[str] = set()
-    scopes: list[str] = []
+def _index_skills(directory: Path, provider: str | None) -> dict[str, str | None]:
+    """スキルディレクトリを走査し、{呼出名: 提供パッケージ名 or None} を返す。
+
+    フォルダ名と SKILL.md の frontmatter `name` の**両方**を呼出名として索引する
+    （両者が食い違うケースが実在するため。例: フォルダ unity-mcp-skill / name unity-mcp-orchestrator）。
+    """
+    found: dict[str, str | None] = {}
+    if not directory.is_dir():
+        return found
+    for child in sorted(directory.iterdir()):
+        if not child.is_dir():
+            continue
+        found[child.name] = provider
+        skill_md = child / "SKILL.md"
+        if skill_md.is_file():
+            try:
+                head = skill_md.read_text(encoding="utf-8")[:600]
+            except OSError:
+                continue
+            match = FRONTMATTER_NAME_RE.search(head)
+            if match:
+                found[match.group(1).strip().strip('"\'')] = provider
+    return found
+
+
+def _skill_index(ctx: RepoContext) -> tuple[dict[str, str | None], bool]:
+    index: dict[str, str | None] = {}
     home = Path.home()
-    candidates = [home / ".claude" / "skills", home / ".agents" / "skills"]
-    candidates += [ctx.root / ".claude" / "skills", ctx.root / ".agents" / "skills"]
-    candidates += sorted((ctx.root / "Packages").glob("*/skills")) if (ctx.root / "Packages").is_dir() else []
+    for directory in (home / ".claude" / "skills", home / ".agents" / "skills"):
+        index.update(_index_skills(directory, None))
+    for directory in (ctx.root / ".claude" / "skills", ctx.root / ".agents" / "skills"):
+        index.update(_index_skills(directory, None))
+    own_packages = {name for name, _, _ in ctx.packages}
+    for skills_dir in sorted((ctx.root / "Packages").glob("*/skills")) if (ctx.root / "Packages").is_dir() else []:
+        index.update(_index_skills(skills_dir, skills_dir.parent.name))
 
     site_root = resolve_site_repo(ctx)
-    site_resolved = site_root is not None
-    if site_root is not None:
-        candidates.append(site_root / "skills")
-        # レジストリで解決できる他リポジトリの同梱スキルも「パイプライン内に実在する」とみなす
-        for repo_path in resolve_registry_repos(site_root):
-            candidates += sorted(repo_path.glob("Packages/*/skills"))
-
-    for directory in candidates:
-        if not directory.is_dir():
-            continue
-        scopes.append(str(directory))
-        for child in directory.iterdir():
-            if child.is_dir():
-                names.add(child.name)
-    return names, scopes, site_resolved
+    if site_root is None:
+        return index, False
+    index.update(_index_skills(site_root / "skills", None))
+    for repo_path in resolve_registry_repos(site_root):
+        for skills_dir in sorted(repo_path.glob("Packages/*/skills")):
+            provider = skills_dir.parent.name
+            index.update(_index_skills(skills_dir, None if provider in own_packages else provider))
+    return index, True
 
 
 def check_10_skill_references(ctx: RepoContext) -> None:
-    names, scopes, site_resolved = _skill_scopes(ctx)
-    if not scopes:
-        ctx.add("10", WARN, "スキルのスコープを 1 つも解決できませんでした（検査をスキップ）")
-        return
+    index, registry_resolved = _skill_index(ctx)
+    declared = [str(item) for item in ctx.config.get("skillRefs") or []]
+    manifest = load_json(ctx.root / "Packages" / "manifest.json") or {}
+    dependencies = set((manifest.get("dependencies") or {}).keys())
+    own_packages = {name for name, _, _ in ctx.packages}
 
+    # (a) 宣言されたスキルの実在と、提供パッケージの依存宣言（判定の主役）
+    for skill in declared:
+        if ctx.is_waived("10", skill):
+            continue
+        if skill not in index:
+            severity = ERROR if registry_resolved else WARN
+            note = "" if registry_resolved else "（MySite を解決できないため未確認）"
+            ctx.add("10", severity, f"宣言されたスキル `{skill}` がどのスコープにも存在しません{note}")
+            continue
+        provider = index[skill]
+        # 依存宣言の検査は Unity プロジェクトのリポジトリでのみ意味を持つ
+        if provider and ctx.packages and provider not in dependencies and provider not in own_packages:
+            ctx.add(
+                "10",
+                ERROR,
+                f"スキル `{skill}` はパッケージ {provider} が提供しますが、Packages/manifest.json に依存宣言がありません",
+                "Packages/manifest.json",
+            )
+
+    # (b) 文書に出てくるスキル名が宣言に載っているか（宣言の陳腐化を防ぐ補助検査）
+    declared_set = set(declared)
     for doc in collect_doc_files(ctx):
+        if not (doc.name in GUIDE_FILES and doc.parent == ctx.root):
+            continue
         rel_doc = doc.relative_to(ctx.root).as_posix()
         for number, line in enumerate(doc.read_text(encoding="utf-8").splitlines(), start=1):
-            if not SKILL_LINE_RE.search(line):
-                continue
             for token in BACKTICK_RE.findall(line):
                 token = token.strip()
                 if not SKILL_TOKEN_RE.match(token) or token in SKILL_TOKEN_DENYLIST:
                     continue
-                if token in names or ctx.is_waived("skills", token):
+                if token in declared_set or ctx.is_waived("10", token):
                     continue
-                if site_resolved:
-                    ctx.add("10", ERROR, f"参照されたスキル `{token}` がどのスコープにも存在しません", f"{rel_doc}:{number}")
-                else:
-                    ctx.add(
-                        "10",
-                        WARN,
-                        f"参照されたスキル `{token}` を確認できません（MySite の skills/ を解決できないため）",
-                        f"{rel_doc}:{number}",
-                    )
+                if token not in index:
+                    continue  # スキル名の形をしているだけの語（パス断片・用語）は無視する
+                ctx.add("10", WARN, f"文書が参照するスキル `{token}` が skillRefs に宣言されていません", f"{rel_doc}:{number}")
 
 
 # ---------------------------------------------------------------------------
-# 追加検査（枠外・warn）
+# 追加検査（枠外）
 # ---------------------------------------------------------------------------
 
 
 def check_extra(ctx: RepoContext) -> None:
-    if not (ctx.root / "pipeline" / "repo.json").is_file():
-        ctx.add("+", WARN, "pipeline/repo.json がありません（既定値で検査しました）")
-    for name, pkg_dir, meta in ctx.packages:
-        rel = (pkg_dir / "package.json").relative_to(ctx.root).as_posix()
+    for name, package_dir, meta in ctx.packages:
+        rel = (package_dir / "package.json").relative_to(ctx.root).as_posix()
         if not meta.get("unityRelease"):
             ctx.add("+", WARN, f"{name}: package.json に unityRelease がありません（GOLD_STANDARD §2.5）", rel)
-        if not (pkg_dir / "Third Party Notices.md").is_file():
+        if not (package_dir / "Third Party Notices.md").is_file():
             ctx.add("+", WARN, f"{name}: Third Party Notices.md がありません（UAS 1.2.a）")
         for required in ("README.md", "CHANGELOG.md", "LICENSE.md"):
-            if not (pkg_dir / required).is_file():
+            if not (package_dir / required).is_file():
                 ctx.add("+", WARN, f"{name}: {required} がありません（GOLD_STANDARD §2.5）")
 
 
@@ -733,7 +899,6 @@ def load_personal_config() -> dict:
 
 
 def resolve_site_repo(ctx: RepoContext) -> Path | None:
-    """MySite（site ロール）のローカルパスを解決する。見つからなければ None。"""
     personal = load_personal_config()
     candidates: list[str] = []
     override = (personal.get("overrides") or {}).get("mysite")
@@ -745,7 +910,7 @@ def resolve_site_repo(ctx: RepoContext) -> Path | None:
 
     for candidate in candidates:
         path = Path(candidate).expanduser()
-        if (path / "pipeline" / "repositories.json").is_file() or (path / "skills").is_dir():
+        if (path / "pipeline" / "repositories.json").is_file():
             return path
     return None
 
@@ -759,13 +924,13 @@ def resolve_registry_repos(site_root: Path) -> list[Path]:
     registry = load_json(site_root / "pipeline" / "repositories.json")
     if not registry:
         return []
-    overrides = (load_personal_config().get("overrides") or {})
+    overrides = load_personal_config().get("overrides") or {}
     resolved: list[Path] = []
     for entry in registry.get("repositories", []):
-        repo_id = entry.get("id")
         remote = entry.get("remote") or {}
         expected = {remote.get("https"), remote.get("ssh")} - {None}
         candidates = []
+        repo_id = entry.get("id")
         if repo_id and repo_id in overrides:
             candidates.append(overrides[repo_id])
         candidates += entry.get("localPathCandidates") or []
@@ -789,7 +954,12 @@ def resolve_registry_repos(site_root: Path) -> list[Path]:
 def build_context(root: Path) -> RepoContext:
     config = load_json(root / "pipeline" / "repo.json") or {}
     tracked = {line for line in run_git(root, "ls-files").splitlines() if line}
-    ctx = RepoContext(root=root, config=config, tracked=tracked)
+    tracked_dirs: set[str] = set()
+    for item in tracked:
+        parts = item.split("/")
+        for index in range(1, len(parts)):
+            tracked_dirs.add("/".join(parts[:index]))
+    ctx = RepoContext(root=root, config=config, tracked=tracked, tracked_dirs=tracked_dirs)
 
     packages_dir = root / "Packages"
     if packages_dir.is_dir():
@@ -797,17 +967,17 @@ def build_context(root: Path) -> RepoContext:
             if not entry.is_dir():
                 continue
             meta = load_json(entry / "package.json")
-            if meta is None or not meta.get("name"):
-                continue
-            ctx.packages.append((meta["name"], entry, meta))
+            if meta and meta.get("name"):
+                ctx.packages.append((meta["name"], entry, meta))
     return ctx
 
 
 CHECKS = (
+    check_00_config,
     check_01_guide_pair,
     check_02_relative_paths,
     check_03_distributed_standard,
-    check_04_test_claims,
+    check_04_test_policy,
     check_05_testables,
     check_06_meta_completeness,
     check_07_path_length,
@@ -823,7 +993,6 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--root", default=".", help="対象リポジトリのルート（既定: カレント）")
     parser.add_argument("--strict", action="store_true", help="warn も失敗として扱う")
     parser.add_argument("--json", action="store_true", help="結果を JSON で出力する")
-    parser.add_argument("--only", help="実行する検査番号をカンマ区切りで指定（例: 1,3,6）")
     args = parser.parse_args(argv)
 
     root = Path(args.root).resolve()
@@ -832,27 +1001,26 @@ def main(argv: list[str]) -> int:
         return 2
 
     ctx = build_context(root)
-    only = {item.strip() for item in args.only.split(",")} if args.only else None
     for check in CHECKS:
-        number = check.__name__.split("_")[1].lstrip("0") or "0"
-        if only is not None and number not in only and check is not check_extra:
-            continue
-        if only is not None and check is check_extra and "+" not in only:
-            continue
         check(ctx)
 
     errors = [f for f in ctx.findings if f.severity == ERROR]
     warnings = [f for f in ctx.findings if f.severity == WARN]
 
     if args.json:
-        payload = {
-            "root": str(root),
-            "role": ctx.role,
-            "packages": [name for name, _, _ in ctx.packages],
-            "errors": [f.__dict__ for f in errors],
-            "warnings": [f.__dict__ for f in warnings],
-        }
-        print(json.dumps(payload, ensure_ascii=False, indent=2))
+        print(
+            json.dumps(
+                {
+                    "root": str(root),
+                    "role": ctx.role,
+                    "packages": [name for name, _, _ in ctx.packages],
+                    "errors": [f.__dict__ for f in errors],
+                    "warnings": [f.__dict__ for f in warnings],
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
     else:
         label = ctx.config.get("repository") or root.name
         print(f"== 標準準拠検査: {label}（role={ctx.role}, packages={len(ctx.packages)}）")
