@@ -6,7 +6,7 @@ Unity Editor拡張向けの軽量な多言語化基盤です。Editor上のInspe
 
 - Editor専用です。ランタイム、Addressables、Unity Localization packageには依存しません。
 - ロケールはC#のenumではなくmanifestの文字列タグで扱います。
-- 新しいロケールはJSONファイルを追加するだけで増やせます。
+- 新しいロケールは翻訳JSONを追加し、manifestの`locales`へ登録するだけで増やせます（C#の変更は不要です）。
 - 表示言語はユーザーごとの`EditorPrefs`に保存し、全 scope 共通のグローバル設定と scope 個別設定を使い分けられます。グローバル未設定時は OS の言語へ自動追従します（Preferences のトグルで無効化可）。
 - UI Toolkit用のラベル、ボタン、PropertyField、言語選択Dropdown、コンパクトな言語選択メニューの補助APIを含みます。
 - manifestや翻訳テーブルJSONの変更を検知し、カタログを自動リロードします。
@@ -239,8 +239,9 @@ Unity -batchmode -quit -projectPath . \
   要再登録）もこの画面で確認できます。各スキルの名前・要約・プロンプト例が一覧表示され、スキル名の下の
   パスをクリックすると正本フォルダが Project ビューで選択されるため、SKILL.md を含む登録内容の全文を
   登録前に確認できます。メニュー項目はこの画面を開くだけで、選んだだけでスキルが登録される
-  ことはありません（登録は画面内のボタンを押したときのみ）。macOS / Linux / Windows いずれでも動作します
-  （macOS/Linux は `ln`、Windows は `mklink /D`。権限が無い環境では junction にフォールバック）。
+  ことはありません（登録は画面内のボタンを押したときのみ）。登録処理は macOS / Linux 向けに `ln`、
+  Windows 向けに `mklink /D`（権限が無い環境では junction にフォールバック）を実装しています。
+  権限やファイルシステムの設定によっては登録に失敗することがあります。
 - **CLI から**: 上記の「AIエージェント連携スキル」節に表示されるコマンドの「コピー」で、実体パスを埋め込んだコマンドが得られます。表示・コピーされるコマンドは **OS に合わせて変わります**（macOS/Linux は下記の `ln`、Windows は `mklink /D`）。ユーザースコープの例（macOS / Linux）:
 
   ```bash

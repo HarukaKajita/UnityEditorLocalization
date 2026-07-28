@@ -8,7 +8,7 @@ tooltip、placeholder、Validator、翻訳品質workflowの導線を1つのEdito
 
 ## scope
 
-scopeは翻訳カタログの名前空間です。Unity package nameと同じ文字列を推奨します。
+scopeは翻訳カタログを拡張ごとに分ける一意な識別子です（C#のnamespaceとは無関係です）。Unity package nameと同じ文字列を推奨します。
 
 ```text
 com.example.my-editor-extension
