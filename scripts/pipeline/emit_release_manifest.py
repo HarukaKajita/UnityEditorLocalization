@@ -2,7 +2,7 @@
 # 生成物: この内容はテンプレートリポジトリ UnityTemplate_2022_3_22f1 から配布されたコピーです。
 # 編集はテンプレート側で行い、scripts/distribute_standard.py で再配布してください。
 # source: UnityTemplate_2022_3_22f1/scripts/pipeline/emit_release_manifest.py
-# source-sha256: 7de2bd510ed0e8a6e4c639b76392031183fa77038c7e21476b23266665da4e76
+# source-sha256: 070fb2ff18698b1f5751a48adc50bfd4ff8d50694ba3e2d2a6d909b9ba64848a
 """リリース契約ファイル `release-<version>.json` を決定的に生成する（ゴールド標準 第3層）。
 
 `pipeline/repo.json` の宣言と `package.json` / `CHANGELOG.md` / `Publish/` / `git` だけを入力に
@@ -169,6 +169,53 @@ def verify_artifact_contents(publish: Path, artifacts: list[dict], version: str)
                     )
         except (OSError, tarfile.TarError, zipfile.BadZipFile, json.JSONDecodeError, KeyError) as error:
             problems.append(f"{artifact['file']} を検査できません: {error}")
+    return problems
+
+
+def verify_sample_assets_in_tgz(publish: Path, artifacts: list[dict]) -> list[str]:
+    """配布 tgz の Samples~ に壊れたアセットが入っていないかを見る。
+
+    リポジトリ側は `verify_repo_guide.py` の検査 11 が同じことを見ているが、
+    書き出し経路の不具合で成果物だけが壊れる可能性は残る。出荷物そのものを開いて確かめる。
+    """
+    problems: list[str] = []
+    doc_split = re.compile(r"^(--- !u!\d+ &-?\d+.*)$", re.M)
+    doc_head = re.compile(r"^--- !u!(\d+) &(-?\d+)")
+    name_re = re.compile(r"^  m_Name: (.*)$", re.M)
+    null_script = re.compile(r"^  m_Script: \{fileID: 0\}$", re.M)
+
+    for artifact in artifacts:
+        if artifact["kind"] != "tgz":
+            continue
+        path = publish / artifact["file"]
+        try:
+            with tarfile.open(path, "r:gz") as archive:
+                targets = [m for m in archive.getmembers()
+                           if m.isfile() and "Samples~" in m.name and m.name.endswith((".mat", ".asset"))]
+                for member in targets:
+                    handle = archive.extractfile(member)
+                    if handle is None:
+                        continue
+                    text = handle.read().decode("utf-8", errors="replace")
+                    parts = doc_split.split(text)
+                    if len(parts) < 3:
+                        continue
+                    names: list[str] = []
+                    for i in range(1, len(parts), 2):
+                        head = doc_head.match(parts[i])
+                        body = parts[i + 1]
+                        name_match = name_re.search(body)
+                        name = name_match.group(1).strip() if name_match else ""
+                        if name:
+                            names.append(name)
+                        if head and head.group(1) == "114" and null_script.search(body):
+                            problems.append(
+                                f"{artifact['file']} の {member.name} に script 参照を失ったサブアセットがあります（{name}）"
+                            )
+                    for duplicate in sorted({n for n in names if names.count(n) > 1}):
+                        problems.append(f"{artifact['file']} の {member.name} で m_Name が重複しています: {duplicate}")
+        except (OSError, tarfile.TarError) as error:
+            problems.append(f"{artifact['file']} の Samples~ を検査できません: {error}")
     return problems
 
 
@@ -467,6 +514,7 @@ def build_manifest(root: Path, asserted_version: str | None, config: dict) -> tu
     problems.extend(artifact_problems)
     if artifacts:
         problems.extend(verify_artifact_contents(root / "Publish", artifacts, version))
+        problems.extend(verify_sample_assets_in_tgz(root / "Publish", artifacts))
         for warning in warn_leaked_repository(root / "Publish", artifacts, config):
             print(f"警告: {warning}", file=sys.stderr)
 
