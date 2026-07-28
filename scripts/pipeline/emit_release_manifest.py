@@ -2,7 +2,7 @@
 # 生成物: この内容はテンプレートリポジトリ UnityTemplate_2022_3_22f1 から配布されたコピーです。
 # 編集はテンプレート側で行い、scripts/distribute_standard.py で再配布してください。
 # source: UnityTemplate_2022_3_22f1/scripts/pipeline/emit_release_manifest.py
-# source-sha256: 1763a0609d692e38af203841d56134ecd0704c8697f8bb22f13cdddf74bd9b0b
+# source-sha256: 7de2bd510ed0e8a6e4c639b76392031183fa77038c7e21476b23266665da4e76
 """リリース契約ファイル `release-<version>.json` を決定的に生成する（ゴールド標準 第3層）。
 
 `pipeline/repo.json` の宣言と `package.json` / `CHANGELOG.md` / `Publish/` / `git` だけを入力に
@@ -173,12 +173,15 @@ def verify_artifact_contents(publish: Path, artifacts: list[dict], version: str)
 
 
 def warn_leaked_repository(publish: Path, artifacts: list[dict], repo: dict) -> list[str]:
-    """有償パッケージの tgz に開発リポジトリ情報が混入していないかを見る。
+    """配布 tgz の `repository.url` に資格情報が埋まっていないかだけを見る。
 
-    `Client.Pack` は pack 時に `repository`（remote URL と commit SHA）を package.json へ
-    注入する。ソース側で規約どおり `repository` を書いていなくても配布物には入るため、
-    リポジトリ内の package.json を見るだけの検査では捕まらない（GOLD_STANDARD §2.2）。
-    公開リポジトリの製品は `repository` を持つのが正しいので、ここでは警告に留める。
+    `Client.Pack` は pack 時に `repository`（remote URL と commit SHA）を注入する。
+    非公開リポジトリの URL と SHA が入ること自体は許容と決めた（GOLD_STANDARD §2.2。
+    実害がほぼ無く、除去のコストのほうが高いため）ので、常時警告は出さない
+    ——毎回出る警告は読まれなくなり、本当に危ないものを埋もれさせる。
+
+    ただし remote が `https://user:token@github.com/...` の形だと、**トークンが
+    そのまま購入者へ配られる**。これは実害があるので、この形だけを警告する。
     """
     warnings: list[str] = []
     for artifact in artifacts:
@@ -191,13 +194,15 @@ def warn_leaked_repository(publish: Path, artifacts: list[dict], repo: dict) -> 
         if not package_json:
             continue
         repository = package_json.get("repository")
-        if not repository:
-            continue
         url = repository.get("url") if isinstance(repository, dict) else repository
-        warnings.append(
-            f"{artifact['file']} の package.json に repository が入っています（{url}）。"
-            "非公開リポジトリの製品では GOLD_STANDARD §2.2 の情報分離に反します"
-        )
+        if not isinstance(url, str):
+            continue
+        # scheme://user:secret@host の形だけを拾う（scheme://host や git@host: は対象外）
+        if re.match(r"^[a-zA-Z][a-zA-Z0-9+.-]*://[^/@\s]+:[^/@\s]+@", url):
+            warnings.append(
+                f"{artifact['file']} の package.json の repository.url に資格情報が埋まっています。"
+                "そのまま購入者へ配られるため、remote を資格情報なしの形へ変えて作り直してください"
+            )
     return warnings
 
 
