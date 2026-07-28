@@ -121,6 +121,42 @@ python3 scripts/check_tr_placeholder_parity.py \
 
 The per-locale line reports `placeholder=` (placeholder set mismatch vs the default locale) and `gap=` (placeholder numbers that are not consecutive from `0`) as separate counts, mirroring the C# `EditorL10nValidator` so the two gates can cross-check. Add `--report-variant-duplicates` to print (non-failing) the keys whose value is identical across the locales of a regional-variant group (`es-ES`/`es-419`, `pt-BR`/`pt-PT`, `zh-Hans`/`zh-Hant`, grouped by primary subtag), to review for copy-paste left-overs — remembering that identical values are legitimate for terse technical strings.
 
+## UI ラベルを文中で参照するときは、そのラベルの訳を渡す（2026-07-28 制定）
+
+文言の中で**画面上のボタン名・タブ名・メニュー名に言及する**とき、その名前を**文字列で書き込んではいけない。**
+そのラベル自体が別のキーで翻訳されているなら、**en 以外の全ロケールで、文言が指す名前と画面の表示が食い違う。**
+
+実例（UMPD・2026-07-28）: 警告文が掃除先を `Open Material Inspector` と英語で固定していたが、そのボタンは
+`matInspector.button.openMaterialInspector` で全ロケール翻訳済みだった（ja は「マテリアルインスペクターを開く」）。
+**ja を含む 18 ロケールで、文言が存在しないボタン名を指していた。**
+
+正しい形は、**ラベルをプレースホルダで受け取り、呼び出し側でそのキーの訳を渡す**:
+
+```csharp
+var inspectorButton = UmpdL10n.Tr(UmpdTextKey.MatInspectorButtonOpenMaterialInspector);
+message = UmpdL10n.Tr(UmpdTextKey.GenTexWarningUnreadableSubAsset, dataAssetName, inspectorButton);
+```
+
+カタログ側は `「{1}」から …` のようにプレースホルダで書く。こうすると**ボタン名を後から訳し直しても文言が自動で追従**する。
+
+**機械検査**: 既存の値に、他のキーの `defaultLocale` の値が**文字列として埋まっていないか**を探す。
+埋まっていれば、その参照はプレースホルダへ移すべき候補である。
+
+```bash
+python3 - <<'CHECK'
+import json, pathlib, sys
+base = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else "Locales")
+default = json.loads((base / "en.json").read_text(encoding="utf-8"))
+values = {e["key"]: e["value"] for e in default["entries"]}
+# UI ラベルらしいキー（短く、プレースホルダを持たない）を参照候補にする
+labels = {k: v for k, v in values.items() if len(v) <= 40 and "{" not in v}
+for key, value in values.items():
+    for label_key, label in labels.items():
+        if label_key != key and len(label) >= 8 and label in value:
+            print(f"{key} が {label_key} の値『{label}』を文字列で含んでいる")
+CHECK
+```
+
 ## Review Output
 
 When reporting a translation review, include:
