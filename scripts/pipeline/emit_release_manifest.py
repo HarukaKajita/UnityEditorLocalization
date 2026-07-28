@@ -2,7 +2,7 @@
 # 生成物: この内容はテンプレートリポジトリ UnityTemplate_2022_3_22f1 から配布されたコピーです。
 # 編集はテンプレート側で行い、scripts/distribute_standard.py で再配布してください。
 # source: UnityTemplate_2022_3_22f1/scripts/pipeline/emit_release_manifest.py
-# source-sha256: 86c86561888ca49692e35be5e8e743a0928bdc284583dbd3787ff9deb1077a2b
+# source-sha256: 1763a0609d692e38af203841d56134ecd0704c8697f8bb22f13cdddf74bd9b0b
 """リリース契約ファイル `release-<version>.json` を決定的に生成する（ゴールド標準 第3層）。
 
 `pipeline/repo.json` の宣言と `package.json` / `CHANGELOG.md` / `Publish/` / `git` だけを入力に
@@ -114,6 +114,14 @@ def pick_primary(packages: list[tuple[str, Path, dict]], config: dict) -> tuple[
 # ---------------------------------------------------------------------------
 
 
+def _package_json_in_tgz(path: Path) -> dict | None:
+    with tarfile.open(path, "r:gz") as archive:
+        member = archive.extractfile("package/package.json")
+        if member is None:
+            return None
+        return json.loads(member.read().decode("utf-8"))
+
+
 def _version_in_tgz(path: Path) -> str | None:
     with tarfile.open(path, "r:gz") as archive:
         member = archive.extractfile("package/package.json")
@@ -162,6 +170,35 @@ def verify_artifact_contents(publish: Path, artifacts: list[dict], version: str)
         except (OSError, tarfile.TarError, zipfile.BadZipFile, json.JSONDecodeError, KeyError) as error:
             problems.append(f"{artifact['file']} を検査できません: {error}")
     return problems
+
+
+def warn_leaked_repository(publish: Path, artifacts: list[dict], repo: dict) -> list[str]:
+    """有償パッケージの tgz に開発リポジトリ情報が混入していないかを見る。
+
+    `Client.Pack` は pack 時に `repository`（remote URL と commit SHA）を package.json へ
+    注入する。ソース側で規約どおり `repository` を書いていなくても配布物には入るため、
+    リポジトリ内の package.json を見るだけの検査では捕まらない（GOLD_STANDARD §2.2）。
+    公開リポジトリの製品は `repository` を持つのが正しいので、ここでは警告に留める。
+    """
+    warnings: list[str] = []
+    for artifact in artifacts:
+        if artifact["kind"] != "tgz":
+            continue
+        try:
+            package_json = _package_json_in_tgz(publish / artifact["file"])
+        except (OSError, tarfile.TarError, json.JSONDecodeError, KeyError):
+            continue
+        if not package_json:
+            continue
+        repository = package_json.get("repository")
+        if not repository:
+            continue
+        url = repository.get("url") if isinstance(repository, dict) else repository
+        warnings.append(
+            f"{artifact['file']} の package.json に repository が入っています（{url}）。"
+            "非公開リポジトリの製品では GOLD_STANDARD §2.2 の情報分離に反します"
+        )
+    return warnings
 
 
 def derive_slug(config: dict, meta: dict) -> str | None:
@@ -425,6 +462,8 @@ def build_manifest(root: Path, asserted_version: str | None, config: dict) -> tu
     problems.extend(artifact_problems)
     if artifacts:
         problems.extend(verify_artifact_contents(root / "Publish", artifacts, version))
+        for warning in warn_leaked_repository(root / "Publish", artifacts, config):
+            print(f"警告: {warning}", file=sys.stderr)
 
     source_commit, commit_problems = resolve_source_commit(root, artifacts)
     problems.extend(commit_problems)
