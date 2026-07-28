@@ -2,7 +2,7 @@
 # 生成物: この内容はテンプレートリポジトリ UnityTemplate_2022_3_22f1 から配布されたコピーです。
 # 編集はテンプレート側で行い、scripts/distribute_standard.py で再配布してください。
 # source: UnityTemplate_2022_3_22f1/scripts/pipeline/emit_release_manifest.py
-# source-sha256: 070fb2ff18698b1f5751a48adc50bfd4ff8d50694ba3e2d2a6d909b9ba64848a
+# source-sha256: 1e87a8a184919ff8269c0e0d8127d2e2290d355c5a3572cb4c1bdf5e820fd125
 """リリース契約ファイル `release-<version>.json` を決定的に生成する（ゴールド標準 第3層）。
 
 `pipeline/repo.json` の宣言と `package.json` / `CHANGELOG.md` / `Publish/` / `git` だけを入力に
@@ -183,6 +183,9 @@ def verify_sample_assets_in_tgz(publish: Path, artifacts: list[dict]) -> list[st
     doc_head = re.compile(r"^--- !u!(\d+) &(-?\d+)")
     name_re = re.compile(r"^  m_Name: (.*)$", re.M)
     null_script = re.compile(r"^  m_Script: \{fileID: 0\}$", re.M)
+    tex_data = re.compile(r"^  _typelessdata: ([0-9a-fA-F]+)$", re.M)
+    # 未初期化メモリの充填バイト。実データがこの 1 種類だけで埋まることはまず無い
+    debug_fill = {0xCD, 0xCC, 0xDD, 0xFD, 0xAB, 0xBA, 0xFE}
 
     for artifact in artifacts:
         if artifact["kind"] != "tgz":
@@ -197,6 +200,21 @@ def verify_sample_assets_in_tgz(publish: Path, artifacts: list[dict]) -> list[st
                     if handle is None:
                         continue
                     text = handle.read().decode("utf-8", errors="replace")
+
+                    # 入れ物だけ作って焼き忘れると、寸法も形式も正しいまま中身が未初期化で出荷される
+                    for index, payload in enumerate(tex_data.findall(text)):
+                        try:
+                            data = bytes.fromhex(payload)
+                        except ValueError:
+                            continue
+                        values = set(data)
+                        if len(data) >= 16 and len(values) == 1 and next(iter(values)) in debug_fill:
+                            problems.append(
+                                f"{artifact['file']} の {member.name} で埋め込みテクスチャの中身が"
+                                f"未初期化のままです（{index + 1} 個目・{len(data)} バイトすべて"
+                                f" 0x{next(iter(values)):02X}）"
+                            )
+
                     parts = doc_split.split(text)
                     if len(parts) < 3:
                         continue
