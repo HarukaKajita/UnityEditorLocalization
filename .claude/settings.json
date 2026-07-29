@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "p=$(jq -r \".tool_input.file_path // empty\"); case \"$p\" in */.claude/skills/*|*/.agents/skills/*) exit 0 ;; */skills/*) cd \"${CLAUDE_PROJECT_DIR:-.}\" && node scripts/sync-agent-skills.mjs >/dev/null 2>&1 ;; esac; exit 0"
+          }
+        ]
+      }
+    ]
+  }
+}

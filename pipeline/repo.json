@@ -36,5 +36,15 @@
     "unity-mcp-skill",
     "unity-cli"
   ],
+  "skillSync": {
+    "sourceRoots": [
+      "Packages/*/skills"
+    ],
+    "mirrors": [
+      ".claude/skills",
+      ".agents/skills"
+    ],
+    "syncCommand": "node scripts/sync-agent-skills.mjs"
+  },
   "waivers": []
 }
