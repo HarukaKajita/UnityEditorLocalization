@@ -4,11 +4,11 @@
 
 > 這是翻譯版本，正式版本以英文 README（[English](../../README.md)）為準。
 
-一個面向 Unity 編輯器擴充功能的**僅編輯器（Editor-only）**輕量本地化基礎庫。它依 **scope × locale × key** 從各 scope 的翻譯目錄中讀取 UI 文字（Inspector 標籤、HelpBox、按鈕、Console 記錄、進度條）。新增一種語言只需新增一個 JSON 檔案，無需改動 C#。
+一個面向 Unity 編輯器擴充功能的**僅編輯器（Editor-only）**輕量本地化基礎庫。它依 **scope × locale × key** 從各 scope 的翻譯目錄中讀取 UI 文字（Inspector 標籤、HelpBox、按鈕、Console 記錄、進度條）。新增一種語言只需新增一個翻譯 JSON 並在 manifest 中註冊，無需改動 C#。
 
 - **僅編輯器。** 不依賴執行時程式碼、Addressables，也不依賴 Unity Localization package。
 - **locale 是字串標籤**，在 manifest 中宣告，而非 C# 的 `enum`。新增 locale 永遠不需要改動 C#。
-- 設定 UI 與隨附範例目錄內建 **19 種語言**。
+- 設定 UI 內建 **19 種語言**（隨附範例目錄為 `ja` 與 `en`）。
 - **UI Toolkit 輔助方法**可將 `Label` / `Button` / `PropertyField` 綁定到 key，並自動跟隨語言切換。同時提供一個精簡的 locale 選單與一個 locale 下拉選單。
 - **對可選依賴友善。** 使用方 package 可將其作為*可選*依賴整合：在未安裝本 package 時，以單一預設語言獨立編譯並執行；安裝本 package 後，即可點亮多語言 UI 與 locale 切換器——無需硬性的組件參照。
 - **目錄工具。** 建立精靈可產生 manifest 與空白資料表的骨架。驗證會檢查缺少的 key、`string.Format` 佔位符一致性，以及疑似未翻譯的項目（可在 CI 的 batchmode 中執行）。
@@ -30,7 +30,7 @@
 https://github.com/HarukaKajita/UnityEditorLocalization.git?path=Packages/com.kajitaharuka.unity-editor-localization
 ```
 
-在結尾附加發行標籤即可鎖定版本，例如 `#1.2.1`。你也可以將同一 URL 直接加入 `Packages/manifest.json` 的 `dependencies` 中。
+在結尾附加發行標籤即可鎖定版本，例如 `#<tag>`（把 `<tag>` 換成儲存庫 Releases 中的標籤名）。你也可以將同一 URL 直接加入 `Packages/manifest.json` 的 `dependencies` 中。
 
 ### VPM (VCC / ALCOM)
 
@@ -47,6 +47,8 @@ Booth 上提供打包好的 `.zip`（內含 `.unitypackage` / `.tgz`）——免
 ```text
 https://genera.booth.pm/items/8617787
 ```
+
+`.unitypackage` 不包含 `Samples~/` 與 `Documentation~/`，因為 Unity 的 AssetDatabase 不處理帶 `~` 的資料夾。若也需要範例與詳細指南，請改用 `.tgz`、git URL 或 VPM。
 
 ## 文件
 

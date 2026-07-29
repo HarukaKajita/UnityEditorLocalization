@@ -4,11 +4,11 @@
 
 > 이 문서는 번역본이며, 정본은 영어 README([English](../../README.md))입니다.
 
-Unity 에디터 확장을 위한 **에디터 전용(Editor-only)** 경량 현지화 기반입니다. UI 텍스트(Inspector 레이블, HelpBox, 버튼, Console 로그, 진행 표시줄)를 **scope × locale × key**로 조회하는 scope별 번역 카탈로그에서 가져옵니다. 언어 추가는 JSON 파일 하나를 더하는 것으로 끝나며 C# 변경은 필요 없습니다.
+Unity 에디터 확장을 위한 **에디터 전용(Editor-only)** 경량 현지화 기반입니다. UI 텍스트(Inspector 레이블, HelpBox, 버튼, Console 로그, 진행 표시줄)를 **scope × locale × key**로 조회하는 scope별 번역 카탈로그에서 가져옵니다. 언어 추가는 번역 JSON을 더하고 manifest에 등록하는 것으로 끝나며 C# 변경은 필요 없습니다.
 
 - **에디터 전용.** 런타임 코드, Addressables, Unity Localization package 어디에도 의존하지 않습니다.
 - **locale은 문자열 태그**로 manifest에서 선언하며 C#의 `enum`이 아닙니다. locale을 추가해도 C#은 건드리지 않습니다.
-- 설정 UI와 동봉 샘플 카탈로그가 **19개 언어**를 지원합니다.
+- 설정 UI가 **19개 언어**를 지원합니다(동봉 샘플 카탈로그는 `ja`와 `en`입니다).
 - **UI Toolkit 헬퍼**가 `Label` / `Button` / `PropertyField`를 key에 바인딩하고 언어 변경에 자동으로 따라갑니다. 컴팩트한 locale 메뉴와 locale 드롭다운이 포함됩니다.
 - **선택적 의존성(optional)에 친화적.** 사용하는 package는 이를 *선택적* 의존성으로 통합할 수 있습니다. 본 package가 없어도 단일 기본 언어로 독립적으로 컴파일·동작하며, 설치하면 다국어 UI와 locale 전환기가 켜집니다 — 하드한 어셈블리 참조 없이.
 - **카탈로그 도구.** 생성 마법사가 manifest와 빈 테이블의 스캐폴드를 만듭니다. 검증은 누락된 key, `string.Format` placeholder 일관성, 미번역 의심 항목을 확인합니다(CI batchmode에서 실행 가능).
@@ -30,7 +30,7 @@ Unity 에디터 확장을 위한 **에디터 전용(Editor-only)** 경량 현지
 https://github.com/HarukaKajita/UnityEditorLocalization.git?path=Packages/com.kajitaharuka.unity-editor-localization
 ```
 
-끝에 릴리스 태그를 붙이면 버전을 고정할 수 있습니다(예: `#1.2.1`). 같은 URL을 `Packages/manifest.json`의 `dependencies`에 직접 추가할 수도 있습니다.
+끝에 릴리스 태그를 붙이면 버전을 고정할 수 있습니다(예: `#<tag>`. `<tag>`에는 리포지토리 Releases에 있는 태그 이름을 넣습니다). 같은 URL을 `Packages/manifest.json`의 `dependencies`에 직접 추가할 수도 있습니다.
 
 ### VPM (VCC / ALCOM)
 
@@ -47,6 +47,8 @@ https://harukakajita.github.io/vpm-repos/index.json
 ```text
 https://genera.booth.pm/items/8617787
 ```
+
+`.unitypackage`에는 `Samples~/`와 `Documentation~/`가 들어 있지 않습니다(Unity의 AssetDatabase가 `~` 폴더를 다루지 않기 때문입니다). 샘플과 상세 가이드도 사용하려면 `.tgz`·git URL·VPM 중 하나로 설치하세요.
 
 ## 문서
 

@@ -4,11 +4,11 @@
 
 > これは翻訳版です。正本は英語版 README（[English](../../README.md)）です。
 
-Unity エディタ拡張向けの、**Editor 専用**の軽量な多言語化基盤です。Inspector ラベル・HelpBox・ボタン・Console ログ・進捗バーなどの UI 文言を、**scope × locale × key** で引く scope ごとの翻訳カタログから取得します。言語の追加は JSON ファイルを足すだけで、C# の変更は不要です。
+Unity エディタ拡張向けの、**Editor 専用**の軽量な多言語化基盤です。Inspector ラベル・HelpBox・ボタン・Console ログ・進捗バーなどの UI 文言を、**scope × locale × key** で引く scope ごとの翻訳カタログから取得します。言語の追加は翻訳 JSON を足して manifest へ登録するだけで、C# の変更は不要です。
 
 - **Editor 専用。** ランタイムコード、Addressables、Unity Localization package のいずれにも依存しません。
 - **ロケールは文字列タグ**で、manifest で宣言します（C# の `enum` ではありません）。ロケール追加で C# を触ることはありません。
-- 設定 UI と同梱サンプルカタログが **19 言語**に対応します。
+- 設定 UI が **19 言語**に対応します（同梱サンプルのカタログは `ja` と `en` です）。
 - **UI Toolkit ヘルパー**が `Label` / `Button` / `PropertyField` を key に結び付け、言語切替に自動追従します。コンパクトなロケールメニューとロケールのドロップダウンを同梱します。
 - **任意依存（optional）にやさしい設計。** 利用側パッケージは本パッケージを*任意*依存として組み込めます。基盤が無くても既定言語の単一言語でコンパイル・動作し、本パッケージを入れると多言語 UI とロケール切替が点灯します（ハードなアセンブリ参照は不要）。
 - **カタログ支援ツール。** 作成ウィザードが manifest と空テーブルの雛形を生成します。検証では key の欠落、`string.Format` の placeholder 整合、未翻訳が疑われるエントリを確認できます（CI の batchmode でも実行可）。
@@ -30,7 +30,7 @@ Unity エディタ拡張向けの、**Editor 専用**の軽量な多言語化基
 https://github.com/HarukaKajita/UnityEditorLocalization.git?path=Packages/com.kajitaharuka.unity-editor-localization
 ```
 
-リリースタグを末尾に付けるとバージョンを固定できます（例 `#1.2.1`）。同じ URL を `Packages/manifest.json` の `dependencies` に直接追記することもできます。
+リリースタグを末尾に付けるとバージョンを固定できます（例 `#<tag>`。`<tag>` はリポジトリの Releases に並ぶタグ名です）。同じ URL を `Packages/manifest.json` の `dependencies` に直接追記することもできます。
 
 ### VPM (VCC / ALCOM)
 
@@ -47,6 +47,8 @@ https://harukakajita.github.io/vpm-repos/index.json
 ```text
 https://genera.booth.pm/items/8617787
 ```
+
+`.unitypackage` には `Samples~/` と `Documentation~/` が入りません（Unity の AssetDatabase が `~` 付きフォルダを扱わないためです）。サンプルと詳細ガイドも使う場合は、`.tgz`・git URL・VPM のいずれかで導入してください。
 
 ## ドキュメント
 

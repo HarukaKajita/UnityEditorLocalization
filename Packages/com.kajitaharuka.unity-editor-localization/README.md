@@ -32,13 +32,21 @@ https://github.com/HarukaKajita/UnityEditorLocalization.git?path=Packages/com.ka
 }
 ```
 
-バージョンを固定する場合は、末尾にリリースタグを付けます。
+バージョンを固定する場合は、末尾にリリースタグを付けます。`<tag>`にはリリースタグ名を入れます
+（タグ名は`CHANGELOG.md`に並ぶバージョン番号と同じで、一覧はリポジトリのReleasesで確認できます）。
 
 ```text
-https://github.com/HarukaKajita/UnityEditorLocalization.git?path=Packages/com.kajitaharuka.unity-editor-localization#1.2.1
+https://github.com/HarukaKajita/UnityEditorLocalization.git?path=Packages/com.kajitaharuka.unity-editor-localization#<tag>
 ```
 
 このリポジトリ自体をUnityプロジェクトとして開く場合は、Embedded UPM packageとして`Packages/`配下にすでに配置されているため、追加のインストールは不要です。
+
+### `.unitypackage`で導入した場合の注意
+
+`.unitypackage`には`Samples~/`（サンプル`Localized Editor Window`）と`Documentation~/`（開発者向けガイド3本）が
+入りません。UnityのAssetDatabaseが`~`付きの隠しフォルダを扱わないためで、基盤の動作に必要なファイルはすべて
+含まれます。サンプルと開発者向けガイドも使う場合は、`.tgz`（Package Managerの`Add package from tarball...`）・
+git URL・VPMのいずれかで導入してください。
 
 ## パッケージ構成
 
@@ -68,6 +76,9 @@ Package Managerから`Localized Editor Window`サンプルをimportすると、U
 
 サンプルの翻訳テーブルは`ja`と`en`を含みます。新しいロケールを試す場合は、import後の
 `Editor/Localization/Locales/`へJSONを追加し、manifestの`locales`へ登録してください。
+
+`.unitypackage`で導入した場合は`Samples~/`が含まれないため、このサンプルはimportできません
+（上記「`.unitypackage`で導入した場合の注意」を参照）。
 
 ## 最小構成
 
@@ -263,6 +274,9 @@ Unity -batchmode -quit -projectPath . \
 - `Documentation~/UI_TOOLKIT_LOCALIZATION_TIPS.md`: UI Toolkitで言語変更に追従するための実装Tips
 - `Documentation~/OPTIONAL_INTEGRATION.md`: UnityEditorLocalizationを任意依存（optional）として組み込む2アセンブリ方式（基盤が無くても単一言語で動作し、導入時に多言語化が点灯）。雛形生成は`editor-localization-optional-integration`スキル
 - `skills/editor-localization-translation-quality/`: 翻訳ワークフロー
+
+`Documentation~/`の3本は`.unitypackage`で導入した場合には含まれません（上記「`.unitypackage`で導入した場合の注意」を参照）。
+その場合は[GitHubリポジトリの`Documentation~/`](https://github.com/HarukaKajita/UnityEditorLocalization/tree/main/Packages/com.kajitaharuka.unity-editor-localization/Documentation~)で読めます。
 
 ## クレジット（任意・歓迎）
 

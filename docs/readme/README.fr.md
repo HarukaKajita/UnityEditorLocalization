@@ -4,11 +4,11 @@
 
 > Ceci est une version traduite ; la version de référence est le README en anglais ([English](../../README.md)).
 
-Une base de localisation légère et **réservée à l'Éditeur (Editor-only)** pour les extensions d'éditeur Unity. Le texte de l'interface (libellés de l'Inspector, HelpBox, boutons, journaux de la Console, barres de progression) est puisé dans des catalogues de traduction par scope, indexés par **scope × locale × key**. Ajouter une langue se fait en ajoutant un fichier JSON — sans modifier le C#.
+Une base de localisation légère et **réservée à l'Éditeur (Editor-only)** pour les extensions d'éditeur Unity. Le texte de l'interface (libellés de l'Inspector, HelpBox, boutons, journaux de la Console, barres de progression) est puisé dans des catalogues de traduction par scope, indexés par **scope × locale × key**. Ajouter une langue se fait en ajoutant un JSON de traduction et en l'enregistrant dans le manifest — sans modifier le C#.
 
 - **Réservé à l'Éditeur.** Aucune dépendance au code d'exécution, à Addressables ni au package Unity Localization.
 - **Les locales sont des balises de chaîne**, déclarées dans un manifest — pas un `enum` C#. Ajouter une locale ne touche jamais au C#.
-- **19 langues** sont fournies dans l'UI de configuration et dans le catalogue d'exemple inclus.
+- **19 langues** sont fournies dans l'UI de configuration (le catalogue d'exemple inclus contient `ja` et `en`).
 - **Les aides UI Toolkit** lient `Label` / `Button` / `PropertyField` à des keys et suivent automatiquement les changements de langue. Un menu de locale compact et une liste déroulante de locale sont inclus.
 - **Compatible avec les dépendances optionnelles.** Les packages consommateurs l'intègrent comme dépendance *optionnelle* : ils compilent et s'exécutent de façon autonome dans une seule langue par défaut, puis activent une UI multilingue et un sélecteur de locale une fois ce package installé — sans référence d'assembly stricte.
 - **Outillage de catalogue.** Un assistant de création génère un manifest et des tables vides. La validation vérifie les keys manquantes, la cohérence des espaces réservés `string.Format` et les entrées suspectées non traduites (exécutable en batchmode CI).
@@ -31,7 +31,7 @@ Dans *Package Manager → Add package from git URL…*, saisissez :
 https://github.com/HarukaKajita/UnityEditorLocalization.git?path=Packages/com.kajitaharuka.unity-editor-localization
 ```
 
-Fixez une version en ajoutant un tag de release, p. ex. `#1.2.1`. Vous pouvez aussi ajouter la même URL directement dans `Packages/manifest.json`, sous `dependencies`.
+Fixez une version en ajoutant un tag de release, p. ex. `#<tag>` ; remplacez `<tag>` par un nom de tag figurant dans les Releases du dépôt. Vous pouvez aussi ajouter la même URL directement dans `Packages/manifest.json`, sous `dependencies`.
 
 ### VPM (VCC / ALCOM)
 
@@ -48,6 +48,8 @@ Un `.zip` empaqueté (contenant `.unitypackage` / `.tgz`) est disponible sur Boo
 ```text
 https://genera.booth.pm/items/8617787
 ```
+
+Le `.unitypackage` ne contient ni `Samples~/` ni `Documentation~/`, car l'AssetDatabase de Unity ne traite pas les dossiers en `~`. Utilisez le `.tgz`, la git URL ou VPM si vous voulez l'exemple et les guides détaillés.
 
 ## Documentation
 

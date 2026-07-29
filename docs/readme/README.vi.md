@@ -4,11 +4,11 @@
 
 > Đây là bản dịch; bản gốc chính thức là README tiếng Anh ([English](../../README.md)).
 
-Một nền tảng bản địa hóa nhẹ, **chỉ dành cho Editor (Editor-only)** cho các tiện ích mở rộng của Unity editor. Nó lấy văn bản UI (nhãn Inspector, HelpBox, nút, log Console, thanh tiến trình) từ các catalog dịch theo scope, được lập chỉ mục theo **scope × locale × key**. Thêm một ngôn ngữ chỉ cần thêm một tệp JSON — không cần thay đổi C#.
+Một nền tảng bản địa hóa nhẹ, **chỉ dành cho Editor (Editor-only)** cho các tiện ích mở rộng của Unity editor. Nó lấy văn bản UI (nhãn Inspector, HelpBox, nút, log Console, thanh tiến trình) từ các catalog dịch theo scope, được lập chỉ mục theo **scope × locale × key**. Thêm một ngôn ngữ chỉ cần thêm một tệp JSON dịch và đăng ký vào manifest — không cần thay đổi C#.
 
 - **Chỉ Editor.** Không phụ thuộc vào mã runtime, Addressables hay package Unity Localization.
 - **Locale là các thẻ chuỗi**, được khai báo trong manifest — không phải `enum` C#. Thêm locale không bao giờ động đến C#.
-- **19 ngôn ngữ** được cung cấp sẵn trong UI cài đặt và trong catalog mẫu đi kèm.
+- **19 ngôn ngữ** được cung cấp sẵn trong UI cài đặt (catalog mẫu đi kèm có `ja` và `en`).
 - **Các helper UI Toolkit** liên kết `Label` / `Button` / `PropertyField` với key và tự động theo dõi thay đổi ngôn ngữ. Đã bao gồm một menu locale gọn và một dropdown locale.
 - **Thân thiện với phụ thuộc tùy chọn.** Các package sử dụng tích hợp nó như một phụ thuộc *tùy chọn*: chúng biên dịch và chạy độc lập với một ngôn ngữ mặc định duy nhất, rồi bật UI đa ngôn ngữ và bộ chuyển locale khi package này được cài đặt — mà không cần tham chiếu assembly cứng.
 - **Bộ công cụ catalog.** Một trình hướng dẫn tạo sẽ dựng khung manifest và các bảng trống. Việc xác thực kiểm tra các key bị thiếu, tính nhất quán của placeholder `string.Format` và các mục nghi ngờ chưa dịch (có thể chạy trong batchmode của CI).
@@ -31,7 +31,7 @@ Trong *Package Manager → Add package from git URL…*, nhập:
 https://github.com/HarukaKajita/UnityEditorLocalization.git?path=Packages/com.kajitaharuka.unity-editor-localization
 ```
 
-Ghim một phiên bản bằng cách thêm thẻ release, ví dụ `#1.2.1`. Bạn cũng có thể thêm chính URL đó trực tiếp vào `Packages/manifest.json`, trong mục `dependencies`.
+Ghim một phiên bản bằng cách thêm thẻ release, ví dụ `#<tag>`; thay `<tag>` bằng tên thẻ trong Releases của repository. Bạn cũng có thể thêm chính URL đó trực tiếp vào `Packages/manifest.json`, trong mục `dependencies`.
 
 ### VPM (VCC / ALCOM)
 
@@ -48,6 +48,8 @@ Một tệp `.zip` đã đóng gói (bên trong có `.unitypackage` / `.tgz`) c�
 ```text
 https://genera.booth.pm/items/8617787
 ```
+
+`.unitypackage` không chứa `Samples~/` lẫn `Documentation~/`, vì AssetDatabase của Unity không xử lý thư mục có `~`. Hãy dùng `.tgz`, git URL hoặc VPM nếu bạn cần ví dụ và các hướng dẫn chi tiết.
 
 ## Tài liệu
 

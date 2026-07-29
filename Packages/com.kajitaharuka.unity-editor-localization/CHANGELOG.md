@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+### Added
+- `.unitypackage` で導入した場合に `Samples~/`（サンプル `Localized Editor Window`）と `Documentation~/`（開発者向けガイド 3 本）が含まれないことを `README.md` へ明記した。Unity の AssetDatabase が `~` 付きの隠しフォルダを扱わないことによる構造的な差で、基盤の動作に必要なファイルはどちらの形式にも含まれる。1.3.1 の実物（`.tgz` / `.unitypackage`）を突き合わせて確認した差は `Samples~/` 6 ファイルと `Documentation~/` 3 ファイルの計 9 ファイルのみで、残る 66 ファイルは両方に入っている。README は「インストール」に注意節を設け、サンプル節と関連資料節の 2 箇所からも参照するようにした（この 2 つが `.unitypackage` 利用者にとって行き止まりになるため）。
+- 同梱の translation-quality スキルに、文言が名乗っている型名・属性名が実装に存在するかを突き合わせる検査スクリプト（`check_message_identifiers.py`）を追加した。翻訳の質でも placeholder でもないため、`Validate Catalogs` も `validate_locale_quality.py` もこの層を 1 件も見ていない。あわせて SKILL.md へ 3 節を追加した: 文中で UI ラベルを参照するときはそのラベルの訳をプレースホルダで渡すこと、識別子の実在確認、分担して展開するときは変更を「意味変更」と「正本言語だけの文法修正」へ先に分類すること。
+
+### Changed
+- `README.md` のバージョン固定例から具体的なバージョン番号を外し、プレースホルダ `#<tag>` と、タグ名の在り処（`CHANGELOG.md` に並ぶバージョン番号と同じ。一覧はリポジトリの Releases）を示す形へ改めた。固定例に具体的な番号を書くと、リリースのたびに書き換えない限り古い版を指し続け、コピーした利用者が意図せず旧版を掴む（実際に 1.2.1 の例が 1.3.1 の時点まで残っていた）。プレースホルダなら陳腐化せず、そのまま貼った場合も解決に失敗して誤りに気づける。
+
+### Fixed
+- 同梱ドキュメントの記述を実装と一致させた。`README.md` の「新しいロケールはJSONファイルを追加するだけで増やせます」は manifest の `locales` への登録が必要な点が抜けていたため「翻訳JSONを追加し、manifestの`locales`へ登録するだけ（C#の変更は不要）」へ訂正し、`package.json` の `description` にも同じ訂正を反映した。`Documentation~/DEVELOPER_GUIDE.md` の scope の説明は「翻訳カタログの名前空間」という表現が C# の namespace と混同されうるため、「翻訳カタログを拡張ごとに分ける一意な識別子（C#のnamespaceとは無関係）」へ改めた。
+- AI エージェント連携スキルの登録について、`README.md` の「macOS / Linux / Windows いずれでも動作します」という断定を、実装している範囲（macOS/Linux は `ln`、Windows は `mklink /D`。権限が無い環境では junction へフォールバック）と「権限やファイルシステムの設定によっては登録に失敗することがある」旨の記述へ改めた。
+
 ## [1.3.1] - 2026-07-25
 
 ### Fixed

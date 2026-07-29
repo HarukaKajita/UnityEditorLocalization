@@ -4,11 +4,11 @@
 
 > นี่คือฉบับแปล เอกสารต้นฉบับคือ README ภาษาอังกฤษ ([English](../../README.md))
 
-ฐานการทำโลคัลไลเซชันแบบเบาที่ทำงาน**เฉพาะใน Editor (Editor-only)** สำหรับส่วนขยายของ Unity editor ดึงข้อความ UI (ป้ายกำกับใน Inspector, HelpBox, ปุ่ม, ล็อกใน Console, แถบความคืบหน้า) จากแคตาล็อกการแปลแยกตาม scope ซึ่งจัดทำดัชนีด้วย **scope × locale × key** การเพิ่มภาษาทำได้โดยเพิ่มไฟล์ JSON โดยไม่ต้องแก้ C#
+ฐานการทำโลคัลไลเซชันแบบเบาที่ทำงาน**เฉพาะใน Editor (Editor-only)** สำหรับส่วนขยายของ Unity editor ดึงข้อความ UI (ป้ายกำกับใน Inspector, HelpBox, ปุ่ม, ล็อกใน Console, แถบความคืบหน้า) จากแคตาล็อกการแปลแยกตาม scope ซึ่งจัดทำดัชนีด้วย **scope × locale × key** การเพิ่มภาษาทำได้โดยเพิ่มไฟล์ JSON การแปลแล้วลงทะเบียนใน manifest โดยไม่ต้องแก้ C#
 
 - **เฉพาะ Editor** ไม่ขึ้นกับโค้ดรันไทม์ Addressables หรือ Unity Localization package
 - **locale เป็นแท็กสตริง** ที่ประกาศไว้ใน manifest ไม่ใช่ `enum` ของ C# การเพิ่ม locale จะไม่แตะต้อง C# เลย
-- มาพร้อม **19 ภาษา** ทั้งใน UI ตั้งค่าและในแคตาล็อกตัวอย่างที่แนบมา
+- มาพร้อม **19 ภาษา** ใน UI ตั้งค่า (แคตาล็อกตัวอย่างที่แนบมามี `ja` และ `en`)
 - **ตัวช่วย UI Toolkit** ผูก `Label` / `Button` / `PropertyField` เข้ากับ key และติดตามการเปลี่ยนภาษาโดยอัตโนมัติ มีเมนู locale แบบกะทัดรัดและดรอปดาวน์ locale ให้ด้วย
 - **เป็นมิตรกับ dependency แบบ optional** package ที่นำไปใช้สามารถผสานเป็น dependency แบบ *optional* ได้ กล่าวคือคอมไพล์และทำงานได้เองด้วยภาษาเริ่มต้นเพียงภาษาเดียว แล้วเมื่อติดตั้ง package นี้ UI หลายภาษาและตัวสลับ locale ก็จะเปิดใช้งาน โดยไม่ต้องมีการอ้างอิง assembly แบบตายตัว
 - **เครื่องมือจัดการแคตาล็อก** ตัวช่วยสร้างจะวางโครง manifest และตารางว่าง การตรวจสอบจะเช็ก key ที่ขาดหาย ความสอดคล้องของ placeholder ใน `string.Format` และรายการที่น่าสงสัยว่ายังไม่ได้แปล (รันใน batchmode ของ CI ได้)
@@ -30,7 +30,7 @@
 https://github.com/HarukaKajita/UnityEditorLocalization.git?path=Packages/com.kajitaharuka.unity-editor-localization
 ```
 
-ตรึงเวอร์ชันได้โดยต่อท้ายด้วยแท็กรีลีส เช่น `#1.2.1` และสามารถเพิ่ม URL เดียวกันนี้ลงใน `Packages/manifest.json` ภายใต้ `dependencies` ได้โดยตรง
+ตรึงเวอร์ชันได้โดยต่อท้ายด้วยแท็กรีลีส เช่น `#<tag>` โดยแทน `<tag>` ด้วยชื่อแท็กจาก Releases ของรีโพซิทอรี และสามารถเพิ่ม URL เดียวกันนี้ลงใน `Packages/manifest.json` ภายใต้ `dependencies` ได้โดยตรง
 
 ### VPM (VCC / ALCOM)
 
@@ -47,6 +47,8 @@ https://harukakajita.github.io/vpm-repos/index.json
 ```text
 https://genera.booth.pm/items/8617787
 ```
+
+`.unitypackage` จะไม่มีทั้ง `Samples~/` และ `Documentation~/` เพราะ AssetDatabase ของ Unity ไม่รองรับโฟลเดอร์ที่มี `~` หากต้องการตัวอย่างและคู่มือเชิงลึกด้วย ให้ติดตั้งด้วย `.tgz`, git URL หรือ VPM
 
 ## เอกสาร
 

@@ -5,11 +5,11 @@
 A lightweight, **Editor-only** localization foundation for Unity editor extensions.
 Pull UI text (Inspector labels, HelpBoxes, buttons, Console logs, progress bars) from
 per-scope translation catalogs keyed by **scope × locale × key**. Add a language by adding a
-JSON file — no C# changes.
+translation JSON and registering it in the manifest — no C# changes.
 
 - **Editor-only.** No dependency on runtime code, Addressables, or the Unity Localization package.
 - **Locales are string tags**, declared in a manifest — not a C# `enum`. New locales never touch C#.
-- **19 languages** ship in the settings UI and the bundled sample catalog.
+- **19 languages** ship in the settings UI (the bundled sample catalog ships `ja` and `en`).
 - **UI Toolkit helpers** bind `Label` / `Button` / `PropertyField` to keys and follow language changes automatically. A compact locale menu and a locale dropdown are included.
 - **Optional-dependency friendly.** Consuming packages integrate it as an *optional* dependency: they compile and run standalone in a single default language, then light up multi-language UI and a locale switcher when this package is installed — with no hard assembly reference.
 - **Catalog tooling.** A creation wizard scaffolds a manifest + empty tables. Validation checks missing keys, `string.Format` placeholder consistency, and untranslated-suspect entries (runnable in CI batchmode).
@@ -32,8 +32,9 @@ In *Package Manager → Add package from git URL…*, enter:
 https://github.com/HarukaKajita/UnityEditorLocalization.git?path=Packages/com.kajitaharuka.unity-editor-localization
 ```
 
-Pin a version by appending a release tag, e.g. `#1.2.1`. You can also add the same URL directly
-to `Packages/manifest.json` under `dependencies`.
+Pin a version by appending a release tag, e.g. `#<tag>` — replace `<tag>` with a tag name from the
+repository's Releases. You can also add the same URL directly to `Packages/manifest.json` under
+`dependencies`.
 
 ### VPM (VCC / ALCOM)
 
@@ -51,6 +52,9 @@ supporter tier:
 ```text
 https://genera.booth.pm/items/8617787
 ```
+
+The `.unitypackage` carries neither `Samples~/` nor `Documentation~/` — Unity's AssetDatabase does not
+handle `~` folders. Use the `.tgz`, the git URL, or VPM if you want the sample and the in-depth guides.
 
 ## Documentation
 

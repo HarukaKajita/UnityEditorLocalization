@@ -4,11 +4,11 @@
 
 > Bu çevrilmiş bir sürümdür; asıl kaynak İngilizce README’dir ([English](../../README.md)).
 
-Unity editör uzantıları için hafif, **yalnızca Editör’de çalışan (Editor-only)** bir yerelleştirme altyapısı. Arayüz metnini (Inspector etiketleri, HelpBox’lar, düğmeler, Console günlükleri, ilerleme çubukları) **scope × locale × key** ile anahtarlanan, scope başına çeviri kataloglarından çeker. Bir dil eklemek, bir JSON dosyası eklemekle olur — C# değişikliği gerekmez.
+Unity editör uzantıları için hafif, **yalnızca Editör’de çalışan (Editor-only)** bir yerelleştirme altyapısı. Arayüz metnini (Inspector etiketleri, HelpBox’lar, düğmeler, Console günlükleri, ilerleme çubukları) **scope × locale × key** ile anahtarlanan, scope başına çeviri kataloglarından çeker. Bir dil eklemek, bir çeviri JSON'u ekleyip manifest'e kaydetmekle olur — C# değişikliği gerekmez.
 
 - **Yalnızca Editör.** Çalışma zamanı koduna, Addressables’a veya Unity Localization package’ına bağımlılık yoktur.
 - **Locale’ler dize etiketleridir**, bir manifest’te bildirilir — C# `enum`’u değildir. Locale eklemek C#’a asla dokunmaz.
-- Ayarlar arayüzünde ve birlikte gelen örnek katalogda **19 dil** sunulur.
+- Ayarlar arayüzünde **19 dil** sunulur (birlikte gelen örnek katalogda `ja` ve `en` bulunur).
 - **UI Toolkit yardımcıları** `Label` / `Button` / `PropertyField` öğelerini key’lere bağlar ve dil değişikliklerini otomatik olarak izler. Kompakt bir locale menüsü ve bir locale açılır listesi dahildir.
 - **İsteğe bağlı bağımlılığa dostane.** Kullanan packages onu *isteğe bağlı* bir bağımlılık olarak entegre eder: tek bir varsayılan dilde bağımsız derlenip çalışır, ardından bu package kurulduğunda çok dilli arayüz ve bir locale değiştirici devreye girer — katı bir assembly referansı olmadan.
 - **Katalog araçları.** Bir oluşturma sihirbazı, bir manifest ve boş tablolar iskeleti üretir. Doğrulama; eksik key’leri, `string.Format` yer tutucu tutarlılığını ve çevrilmemiş olabilecek girdileri denetler (CI batchmode’da çalıştırılabilir).
@@ -30,7 +30,7 @@ Unity editör uzantıları için hafif, **yalnızca Editör’de çalışan (Edi
 https://github.com/HarukaKajita/UnityEditorLocalization.git?path=Packages/com.kajitaharuka.unity-editor-localization
 ```
 
-Sona bir sürüm etiketi ekleyerek bir sürümü sabitleyin, örn. `#1.2.1`. Aynı URL’yi doğrudan `Packages/manifest.json` içindeki `dependencies` altına da ekleyebilirsiniz.
+Sona bir sürüm etiketi ekleyerek bir sürümü sabitleyin, örn. `#<tag>`; `<tag>` yerine deponun Releases bölümündeki bir etiket adını yazın. Aynı URL’yi doğrudan `Packages/manifest.json` içindeki `dependencies` altına da ekleyebilirsiniz.
 
 ### VPM (VCC / ALCOM)
 
@@ -47,6 +47,8 @@ Booth’ta paketlenmiş bir `.zip` (içinde `.unitypackage` / `.tgz`) mevcuttur 
 ```text
 https://genera.booth.pm/items/8617787
 ```
+
+`.unitypackage`, ne `Samples~/` ne de `Documentation~/` içerir; Unity'nin AssetDatabase'i `~` klasörlerini işlemez. Örnek ile ayrıntılı kılavuzları da istiyorsanız `.tgz`, git URL ya da VPM ile kurun.
 
 ## Dokümantasyon
 

@@ -4,11 +4,11 @@
 
 > To jest wersja przetłumaczona; wersją źródłową jest README w języku angielskim ([English](../../README.md)).
 
-Lekka, **działająca wyłącznie w Edytorze (Editor-only)** podstawa lokalizacji dla rozszerzeń edytora Unity. Tekst interfejsu (etykiety Inspectora, HelpBox, przyciski, logi Console, paski postępu) jest pobierany z katalogów tłumaczeń per scope, indeksowanych według **scope × locale × key**. Aby dodać język, wystarczy dodać plik JSON — bez zmian w C#.
+Lekka, **działająca wyłącznie w Edytorze (Editor-only)** podstawa lokalizacji dla rozszerzeń edytora Unity. Tekst interfejsu (etykiety Inspectora, HelpBox, przyciski, logi Console, paski postępu) jest pobierany z katalogów tłumaczeń per scope, indeksowanych według **scope × locale × key**. Aby dodać język, wystarczy dodać plik JSON z tłumaczeniami i zarejestrować go w manifeście — bez zmian w C#.
 
 - **Tylko Edytor.** Brak zależności od kodu uruchomieniowego, Addressables czy package Unity Localization.
 - **Locale to tagi tekstowe**, deklarowane w manifeście — a nie `enum` w C#. Dodanie locale nigdy nie dotyka C#.
-- **19 języków** dostarczanych jest w UI ustawień i w dołączonym przykładowym katalogu.
+- **19 języków** dostarczanych jest w UI ustawień (dołączony przykładowy katalog zawiera `ja` i `en`).
 - **Pomocniki UI Toolkit** wiążą `Label` / `Button` / `PropertyField` z key i automatycznie podążają za zmianami języka. Dołączono kompaktowe menu locale oraz listę rozwijaną locale.
 - **Przyjazne zależnościom opcjonalnym.** Korzystające packages integrują je jako *opcjonalną* zależność: kompilują się i działają samodzielnie w jednym języku domyślnym, a po zainstalowaniu tego package rozświetlają wielojęzyczne UI i przełącznik locale — bez sztywnego odwołania do assembly.
 - **Narzędzia katalogowe.** Kreator tworzenia generuje manifest i puste tabele. Walidacja sprawdza brakujące key, spójność symboli zastępczych `string.Format` oraz wpisy podejrzane o brak tłumaczenia (uruchamialne w batchmode CI).
@@ -31,7 +31,7 @@ W *Package Manager → Add package from git URL…* wpisz:
 https://github.com/HarukaKajita/UnityEditorLocalization.git?path=Packages/com.kajitaharuka.unity-editor-localization
 ```
 
-Przypnij wersję, dodając tag wydania, np. `#1.2.1`. Ten sam URL możesz też dodać bezpośrednio w `Packages/manifest.json`, w sekcji `dependencies`.
+Przypnij wersję, dodając tag wydania, np. `#<tag>`; w miejsce `<tag>` wstaw nazwę tagu z sekcji Releases repozytorium. Ten sam URL możesz też dodać bezpośrednio w `Packages/manifest.json`, w sekcji `dependencies`.
 
 ### VPM (VCC / ALCOM)
 
@@ -48,6 +48,8 @@ Na Booth dostępny jest spakowany `.zip` (z `.unitypackage` / `.tgz` w środku) 
 ```text
 https://genera.booth.pm/items/8617787
 ```
+
+`.unitypackage` nie zawiera ani `Samples~/`, ani `Documentation~/`, ponieważ AssetDatabase Unity nie obsługuje folderów z `~`. Jeśli potrzebujesz przykładu i szczegółowych przewodników, użyj `.tgz`, git URL albo VPM.
 
 ## Dokumentacja
 

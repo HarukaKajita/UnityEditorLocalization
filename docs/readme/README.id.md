@@ -4,11 +4,11 @@
 
 > Ini adalah versi terjemahan; versi kanonis adalah README bahasa Inggris ([English](../../README.md)).
 
-Fondasi lokalisasi ringan yang **khusus Editor (Editor-only)** untuk ekstensi editor Unity. Teks UI (label Inspector, HelpBox, tombol, log Console, bilah kemajuan) diambil dari katalog terjemahan per scope yang diindeks berdasarkan **scope × locale × key**. Menambahkan sebuah bahasa cukup dengan menambahkan satu berkas JSON — tanpa perubahan C#.
+Fondasi lokalisasi ringan yang **khusus Editor (Editor-only)** untuk ekstensi editor Unity. Teks UI (label Inspector, HelpBox, tombol, log Console, bilah kemajuan) diambil dari katalog terjemahan per scope yang diindeks berdasarkan **scope × locale × key**. Menambahkan sebuah bahasa cukup dengan menambahkan satu berkas JSON terjemahan dan mendaftarkannya di manifest — tanpa perubahan C#.
 
 - **Khusus Editor.** Tidak bergantung pada kode runtime, Addressables, maupun package Unity Localization.
 - **Locale berupa tag string**, dideklarasikan dalam manifest — bukan `enum` C#. Menambahkan locale tidak pernah menyentuh C#.
-- **19 bahasa** disertakan di UI pengaturan dan pada katalog contoh bawaan.
+- **19 bahasa** disertakan di UI pengaturan (katalog contoh bawaan berisi `ja` dan `en`).
 - **Helper UI Toolkit** mengikat `Label` / `Button` / `PropertyField` ke key dan otomatis mengikuti perubahan bahasa. Disertakan menu locale ringkas dan dropdown locale.
 - **Ramah dependensi opsional.** Package yang memakainya mengintegrasikannya sebagai dependensi *opsional*: mereka dikompilasi dan berjalan mandiri dalam satu bahasa default, lalu menyalakan UI multibahasa dan pengalih locale saat package ini terpasang — tanpa referensi assembly yang kaku.
 - **Perkakas katalog.** Wizard pembuatan menyiapkan kerangka manifest dan tabel kosong. Validasi memeriksa key yang hilang, konsistensi placeholder `string.Format`, dan entri yang diduga belum diterjemahkan (dapat dijalankan dalam batchmode CI).
@@ -31,7 +31,7 @@ Di *Package Manager → Add package from git URL…*, masukkan:
 https://github.com/HarukaKajita/UnityEditorLocalization.git?path=Packages/com.kajitaharuka.unity-editor-localization
 ```
 
-Sematkan sebuah versi dengan menambahkan tag rilis, mis. `#1.2.1`. Anda juga dapat menambahkan URL yang sama langsung ke `Packages/manifest.json`, di bawah `dependencies`.
+Sematkan sebuah versi dengan menambahkan tag rilis, mis. `#<tag>`; ganti `<tag>` dengan nama tag dari Releases repositori. Anda juga dapat menambahkan URL yang sama langsung ke `Packages/manifest.json`, di bawah `dependencies`.
 
 ### VPM (VCC / ALCOM)
 
@@ -48,6 +48,8 @@ Sebuah `.zip` terpaket (berisi `.unitypackage` / `.tgz`) tersedia di Booth — g
 ```text
 https://genera.booth.pm/items/8617787
 ```
+
+`.unitypackage` tidak menyertakan `Samples~/` maupun `Documentation~/`, karena AssetDatabase Unity tidak menangani folder ber-`~`. Gunakan `.tgz`, git URL, atau VPM jika Anda membutuhkan contoh dan panduan mendalam.
 
 ## Dokumentasi
 
