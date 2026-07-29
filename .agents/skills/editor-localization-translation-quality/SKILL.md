@@ -43,6 +43,8 @@ Use this skill for EditorLocalization locale work, especially `*.l10n-manifest.j
 
 6. Validate mechanically before reporting done.
    - Run `scripts/validate_locale_quality.py` against the locale directory.
+   - Run `scripts/check_message_identifiers.py` (see "Identifier reality check" below): it catches
+     messages that name a type or attribute **that does not exist**, which no other gate sees.
    - When C# code calls the catalog through a `Tr(...)` facade, also run
      `scripts/check_tr_placeholder_parity.py` (see below): it catches call sites that pass fewer
      format arguments than the catalog template's `{n}` placeholders require — a runtime
@@ -156,6 +158,57 @@ for key, value in values.items():
             print(f"{key} が {label_key} の値『{label}』を文字列で含んでいる")
 CHECK
 ```
+
+## Identifier reality check (2026-07-29 制定)
+
+**文言が名乗っている型名・属性名が、実装に存在するかを機械で確かめる。** 翻訳の質でも placeholder でもないので、`Validate Catalogs` も `validate_locale_quality.py` も**この層を 1 件も見ていない**。
+
+実例（UMPD・2026-07-29）:
+
+- `[UberToggle]` のエラーが自分を `[Toggle]` と名乗っていた。**`[Toggle]` は Unity 標準の別 drawer** で、ShaderLab にそう書いてもこのパッケージの機能にはならない。**利用者を別物へ誘導していた。**
+- `[UberEnum]` のエラーが `MaterialEnum` という型名を出していた。この名前は**リポジトリのどこにも存在しない**。
+
+どちらも 19 ロケール全部へ正しく翻訳されており、**19 言語すべてが誤った名前を伝えていた**。翻訳としては完璧で、内容が嘘だった。
+
+```bash
+python3 scripts/check_message_identifiers.py \
+  --catalog path/to/Locales/<defaultLocale>.json \
+  --src path/to/Packages/<package-root> \
+  [--allow SomeConceptName]
+```
+
+- 角括弧属性 `[Xxx]` / ドット区切り参照 `Xxx.Yyy` / PascalCase の識別子を既定ロケールの値から抜き、`--src` 配下の**実装だけ**（`.cs` / `.shader` / `.cginc` / `.hlsl` / `.asmdef`）を照合する。ヒット 0 件を error にする。
+- **ドキュメントは根拠にしない。** CHANGELOG が「`MaterialEnum` という誤りを直した」と書いているだけで実在扱いになり、肝心の誤りを見逃す（実装中にこれで一度取り逃した）。
+- **部分一致で判定しない。** `[Toggle]` は `UberToggle` の部分文字列なので、素の `in` では実在すると誤判定する（これも一度取り逃した）。角括弧属性は書かれ方（`[X]` / `[X(` / `class XDrawer`）で、それ以外は語境界で照合する。
+- ヒットしても意味が正しいとは限らない。**明らかな嘘の検出器であって、承認器ではない。** 対応型の列挙（「Float / Range / Int にのみ使える」）が実装の判定と一致するかは、別途ソースを読んで確かめる。UMPD ではこれも食い違っていた（実装は `Int` を受け付けるのに「non-float property」と書いていた）。
+
+## 分担して展開するときは、先に変更を分類する（2026-07-29 制定）
+
+正本ロケールの変更を N ロケールへ展開する作業を**複数のエージェント／人で分担すると、グループの境界に沿って方針が割れる。** 各担当は正本を参照して訳すため、正本を書いた人の判断（語の追加・法の選択）がそのまま伝播し、参照したグループにだけ乗るからである。
+
+**着手前に、変更したキーを 2 つに分類して渡す。**
+
+| 分類 | 例 | 他ロケールの扱い |
+|---|---|---|
+| **意味変更** | 「Half のときのみ有効」→「Half のときのみ編集できる」／`[Toggle]`→`[UberToggle]`／対応型の訂正 | **全ロケールが追従必須** |
+| **正本言語だけの文法修正** | `empty or null`→`null or empty`／冠詞の追加／`explicit-deleted`→`deleted explicitly` | **既に同義なら据え置き。**無意味な差分を作らない |
+
+分類を渡さないと、担当ごとに「既に同義なので据え置き」の判断がばらつく。実測（2026-07-29 / TAE・UMPD）では、分類を渡したことで **28 件の無駄な書き換えを回避**できた一方、分類が曖昧だったキーでは判断が割れた。
+
+**正本ロケールを先に確定する。** `defaultLocale` はパッケージごとに違う（TAE は `ja`、UMPD は `en`）。**正本が `en` のパッケージでは `ja` も一般ロケールなので担当に含める。**「ja と en は修正済み」と一律に書くと、`en` 正本のパッケージの `ja` が全員の担当から漏れる（実際に漏れた）。
+
+**書き戻しは行単位のツールで行わせる。** `json.load` → `json.dump` はインデントとエスケープの揺れでファイル全体を差分にする。`scripts/insert_catalog_keys.py`（新規キー）か、既存値の差し替えなら該当する `"value":` の 1 行だけを置換するツールを渡す。
+
+**「訳さない」指定は識別子に限る。** `[UberToggle]` や `Float` は識別子だが、`Sub-Assets` / `Material` は普通名詞で、多くのロケールが自言語の語を使っている。過剰に指定すると訳文の質を下げる方向に働く（実際に 1 グループが既存訳を英語へ戻してしまった）。
+
+### 分担後は必ず横断検証を 1 本走らせる
+
+分担の境界・全キーの placeholder 一致・実装との突き合わせをまとめて見る**独立した検証**を最後に置く。2026-07-29 の実測では、要修正 2 件・改善推奨 7 件が**すべてこの検証でしか出なかった**。境界に出た不整合の型:
+
+- 正本が原文の情報を落とし（「線形に」）、正本を参照したグループだけが落とした（11/19 ロケール）
+- 正本が法を変え（推奨→命令形）、参照したグループだけが追従した（6/19 ロケール）
+- スラブ語で `канале(ах)` のような括弧併記は**語として成立しない**（前置格は単数と複数で語幹末が違い、展開すると `каналеах` になる）。`string.Join` で複数入りうる placeholder は、格変化のある言語では**複数形一本化**が安全
+- 終止符の有無が正本だけずれる。とくに `{0}` がファイルパスのときの末尾ピリオドは、Console 表示が `…/Foo.png.` になり貼り付け事故を招く
 
 ## Review Output
 
