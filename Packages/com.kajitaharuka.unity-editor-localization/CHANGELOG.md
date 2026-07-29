@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.3.2] - 2026-07-30
+
 ### Added
 - `.unitypackage` で導入した場合に `Samples~/`（サンプル `Localized Editor Window`）と `Documentation~/`（開発者向けガイド 3 本）が含まれないことを `README.md` へ明記した。Unity の AssetDatabase が `~` 付きの隠しフォルダを扱わないことによる構造的な差で、基盤の動作に必要なファイルはどちらの形式にも含まれる。1.3.1 の実物（`.tgz` / `.unitypackage`）を突き合わせて確認した差は `Samples~/` 6 ファイルと `Documentation~/` 3 ファイルの計 9 ファイルのみで、残る 66 ファイルは両方に入っている。README は「インストール」に注意節を設け、サンプル節と関連資料節の 2 箇所からも参照するようにした（この 2 つが `.unitypackage` 利用者にとって行き止まりになるため）。
 - 同梱の translation-quality スキルに、文言が名乗っている型名・属性名が実装に存在するかを突き合わせる検査スクリプト（`check_message_identifiers.py`）を追加した。翻訳の質でも placeholder でもないため、`Validate Catalogs` も `validate_locale_quality.py` もこの層を 1 件も見ていない。あわせて SKILL.md へ 3 節を追加した: 文中で UI ラベルを参照するときはそのラベルの訳をプレースホルダで渡すこと、識別子の実在確認、分担して展開するときは変更を「意味変更」と「正本言語だけの文法修正」へ先に分類すること。
