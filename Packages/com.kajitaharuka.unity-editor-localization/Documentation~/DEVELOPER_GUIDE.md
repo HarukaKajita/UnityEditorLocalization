@@ -16,7 +16,7 @@ com.example.my-editor-extension
 
 scopeを分けると、利用者は拡張ごとに表示言語を選べます。
 利用者が全拡張をまとめて切り替えたい場合は、`Preferences > UnityEditorLocalization`のグローバル設定を使えます。
-解決優先順位は scope 個別設定、グローバル設定、scope の`defaultLocale`の順です。Preferences で「グローバル設定に従う」を選ぶと、scope 個別設定を解除できます。
+解決優先順位は scope 個別設定、グローバル設定、システム言語（システム言語フォールバックが有効なとき。既定は有効）、scope の`defaultLocale`の順です。グローバル設定を明示していない環境では、`defaultLocale`より先に OS の言語が使われます。`defaultLocale`で表示させたい場合は、`Preferences > UnityEditorLocalization`でグローバル設定を明示するか、「システム言語フォールバックを使う」を OFF にしてください。Preferences で「グローバル設定に従う」を選ぶと、scope 個別設定を解除できます。
 
 ## key命名
 

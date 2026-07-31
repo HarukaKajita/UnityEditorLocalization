@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Fixed
+- `Documentation~/DEVELOPER_GUIDE.md` の表示ロケール解決順が 1 段抜けていたのを訂正した。「scope 個別設定 → グローバル設定 → scope の `defaultLocale`」の 3 段と書いていたが、実装（`EditorL10n.GetActiveLocale`）は「scope 個別設定 → グローバル設定 → システム言語（システム言語フォールバックが有効なとき。既定は有効）→ scope の `defaultLocale`」の 4 段である。グローバル設定を明示していない環境では `defaultLocale` より先に OS の言語が使われるため、この記述のままでは「なぜ `defaultLocale` にならないのか」の切り分けを誤らせる。`README.md` は元から 4 段で正しく、パッケージ内で記述が食い違っていた。あわせて `defaultLocale` で表示させたい場合の対処（`Preferences > UnityEditorLocalization`でグローバル設定を明示する、または「システム言語フォールバックを使う」を OFF にする）も追記した。
+- サンプル `Localized Editor Window` の `README.md` にある翻訳品質チェックの実行例を、導入形態に依存しない書き方へ改めた。スクリプトのパスを `Packages/com.kajitaharuka.unity-editor-localization/skills/...` と埋め込み導入前提で固定していたが、Git URL / registry / VPM 経由では実体が `Library/PackageCache/com.kajitaharuka.unity-editor-localization@<version>/skills/...` になるため、そのまま実行しても動かない。実体パスの確認先（`Tools > UnityEditorLocalization > AI Agent Skills` が開く Preferences の「AIエージェント連携スキル」節）を示す形にした。
+- 同じサンプルの `README.md` に書いていたサンプル展開先を、Package Manager の実際の挙動へ合わせた。`Assets/Samples/<package-name>/<version>/LocalizedEditorWindow` と書いていたが、Package Manager が使うのは package name ではなくパッケージとサンプルの `displayName` であり、実際の展開先は `Assets/Samples/UnityEditorLocalization/<version>/Localized Editor Window` である（import 済みのプロジェクトで実物を確認した）。スペースを含むためシェルでは引用符が要る点も明記した。
+
+### Changed
+- パッケージ直下の `CLAUDE.md` / `AGENTS.md`（購入者のエージェント向けガイド）の「よくある落とし穴」を上記の訂正に合わせて更新した。「ドキュメントに書かれたパスをそのまま実行しない」は同梱ドキュメントが埋め込み導入前提で書かれていることを前提にした注意だったため、パッケージの実体パスが導入形態で変わる事実と解決済みパスの確認先を示す記述へ改めた。あわせて、Package Manager の Samples 展開先を package name やサンプルのフォルダ名から組み立てないよう注意する項目を追加した。
+
 ## [1.3.2] - 2026-07-30
 
 ### Added

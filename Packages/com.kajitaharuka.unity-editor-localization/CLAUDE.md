@@ -194,7 +194,8 @@ Unity -batchmode -quit -projectPath . \
 - **scope を複数の manifest で重複させない。** 後から見つかった方は警告のみで無視され、症状から原因を追いにくい。
 - **`CreateLocaleDropdown` / `CreateCompactLocaleMenu` が全体設定を変えると思わない。** これらが書き換えるのは**その scope の個別設定**である。全 scope 共通の設定は `EditorL10n.SetGlobalLocale` か Preferences で扱う。
 - **表示言語の設定をプロジェクト資産へ保存し直そうとしない。** 設計上ユーザーごとの `EditorPrefs` であり、チームで共有しない前提である。
-- **ドキュメントに書かれたパスをそのまま実行しない。** 同梱スキルのスクリプトパスは埋め込み導入（`Packages/...`）前提で書かれており、Git URL / registry / VPM 経由では実体が `Library/PackageCache/<パッケージ名>@<version>/...` になる。
+- **パッケージの実体パスを固定値だと思わない。** 同梱スキルのスクリプトを直接叩くときのパスは導入形態で変わり、プロジェクトの `Packages/` へ直接置く埋め込み導入なら `Packages/<パッケージ名>/...`、Git URL / registry / VPM 経由なら `Library/PackageCache/<パッケージ名>@<version>/...` になる。解決済みのパスは `Tools > UnityEditorLocalization > AI Agent Skills` が開く Preferences ペインの表示・コピーするコマンドから得られる。
+- **Package Manager の Samples 展開先をパッケージ名やフォルダ名から組み立てない。** 展開先は `Assets/Samples/<パッケージの displayName>/<パッケージの version>/<サンプルの displayName>/` で、このパッケージなら `Assets/Samples/UnityEditorLocalization/<version>/Localized Editor Window/` になる（package name `com.kajitaharuka.unity-editor-localization` でも、`Samples~/` 内のフォルダ名 `LocalizedEditorWindow` でもない）。スペースを含むのでシェルでは引用符で囲む。
 - **`.unitypackage` で導入した環境で `Samples~/` や `Documentation~/` を探さない。** 含まれていない。必要なら `.tgz` / Git URL / VPM で導入し直す。
 
 ## 7. うまくいかないときの切り分け
