@@ -255,8 +255,22 @@ namespace Kajitaharuka.EditorLocalization.Samples.LocalizedEditorWindow
                 helpBox.text = EditorL10n.Tr(Scope, "validation.help");
             });
             section.Add(helpBox);
-            section.Add(CreateInfoBlock("quality.script.label", "Packages/com.kajitaharuka.unity-editor-localization/skills/editor-localization-translation-quality/scripts/validate_locale_quality.py"));
+            section.Add(CreateInfoBlock("quality.script.label", ResolveQualityScriptPath));
             return section;
+        }
+
+        // 翻訳品質スクリプトの実体パスは導入形態で変わる。プロジェクトの Packages/ へ直接置く埋め込み導入なら
+        // Packages/<package-name>/skills/ だが、Git URL / registry / VPM 経由なら
+        // Library/PackageCache/<package-name>@<hash>/skills/ になる。固定値で書くと、埋め込み以外で導入した
+        // 利用者には存在しないパスを見せてしまう（このスクリプトはシェルから実行するので、
+        // Unity 内でだけ通用する Packages/ の仮想パスでは代用できない）。
+        private static string ResolveQualityScriptPath()
+        {
+            const string relative = "skills/editor-localization-translation-quality/scripts/validate_locale_quality.py";
+            var info = UnityEditor.PackageManager.PackageInfo.FindForAssembly(typeof(EditorL10n).Assembly);
+            return string.IsNullOrEmpty(info?.resolvedPath)
+                ? relative
+                : info.resolvedPath.Replace('\\', '/') + "/" + relative;
         }
 
         private VisualElement CreateDetailsSection()
