@@ -24,7 +24,7 @@
         { "key": "catalogs.count.warnings", "value": "Предупреждений: {0}" },
         { "key": "catalogs.pill.default", "value": "по умолчанию" },
         { "key": "catalogs.more", "value": "Ещё {0} (см. Console)" },
-        { "key": "catalogs.issue.openAsset.tooltip", "value": "Нажмите, чтобы выбрать связанный ресурс" },
+        { "key": "catalogs.issue.openAsset.tooltip", "value": "Нажмите, чтобы выбрать связанный ассет" },
         { "key": "catalogs.table.tooltip", "value": "Щёлкните, чтобы выбрать таблицу перевода." },
         { "key": "catalogs.table.missing.tooltip", "value": "Файл таблицы, объявленный в манифесте, не найден." },
         { "key": "catalogs.entries.tooltip", "value": "Число ключей в этой таблице." },
