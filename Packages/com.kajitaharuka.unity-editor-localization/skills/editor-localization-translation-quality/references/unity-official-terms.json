@@ -1,0 +1,807 @@
+{
+  "$comment": "Unity 公式のエディタ翻訳（Unity Hub で追加する言語モジュールの .po）から抽出した UI 用語の対照表。 official=公式訳。knownWrong=**実測で確認した誤用だけ**（他ロケールの公式訳を機械的に流し込むと 偽陽性しか出ないので入れない）。新しい誤用を見つけたらここへ足す。方針は unity-official-terms.md。",
+  "unityVersion": "2022.3",
+  "terms": {
+    "Asset": {
+      "ja": {
+        "official": "アセット",
+        "knownWrong": [
+          "資産",
+          "素材"
+        ]
+      },
+      "ko": {
+        "official": "에셋",
+        "knownWrong": [
+          "애셋",
+          "자산"
+        ]
+      },
+      "zh-Hans": {
+        "official": "资产",
+        "knownWrong": [
+          "资源"
+        ]
+      },
+      "zh-Hant": {
+        "official": "資源",
+        "knownWrong": [
+          "資產"
+        ]
+      }
+    },
+    "Assets": {
+      "ja": {
+        "official": "アセット",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "에셋",
+        "knownWrong": []
+      },
+      "zh-Hans": {
+        "official": "资产",
+        "knownWrong": [
+          "资源"
+        ]
+      },
+      "zh-Hant": {
+        "official": "資源",
+        "knownWrong": [
+          "資產"
+        ]
+      }
+    },
+    "Asset Database": {
+      "ja": {
+        "official": "アセットデータベース",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "에셋 데이터베이스",
+        "knownWrong": []
+      },
+      "zh-Hans": {
+        "official": "资产数据库",
+        "knownWrong": [
+          "资源数据库"
+        ]
+      },
+      "zh-Hant": {
+        "official": "資源資料庫",
+        "knownWrong": [
+          "資產資料庫"
+        ]
+      }
+    },
+    "Texture": {
+      "ja": {
+        "official": "テクスチャ",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "텍스처",
+        "knownWrong": [
+          "텍스쳐"
+        ]
+      },
+      "zh-Hans": {
+        "official": "纹理",
+        "knownWrong": []
+      },
+      "zh-Hant": {
+        "official": "貼圖",
+        "knownWrong": [
+          "紋理"
+        ]
+      }
+    },
+    "Material": {
+      "ja": {
+        "official": "マテリアル",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "머티리얼",
+        "knownWrong": [
+          "머테리얼",
+          "매터리얼"
+        ]
+      },
+      "zh-Hans": {
+        "official": "材质",
+        "knownWrong": []
+      },
+      "zh-Hant": {
+        "official": "材質",
+        "knownWrong": []
+      }
+    },
+    "Shader": {
+      "ja": {
+        "official": "シェーダー",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "셰이더",
+        "knownWrong": [
+          "쉐이더"
+        ]
+      },
+      "zh-Hans": {
+        "official": "着色器",
+        "knownWrong": []
+      },
+      "zh-Hant": {
+        "official": "著色器",
+        "knownWrong": []
+      }
+    },
+    "Prefab": {
+      "ja": {
+        "official": "プレハブ",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "프리팹",
+        "knownWrong": []
+      },
+      "zh-Hans": {
+        "official": "预制件",
+        "knownWrong": []
+      },
+      "zh-Hant": {
+        "official": "Prefab",
+        "knownWrong": []
+      }
+    },
+    "Scene": {
+      "ja": {
+        "official": "シーン",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "씬",
+        "knownWrong": []
+      },
+      "zh-Hans": {
+        "official": "场景",
+        "knownWrong": []
+      },
+      "zh-Hant": {
+        "official": "場景",
+        "knownWrong": []
+      }
+    },
+    "Project": {
+      "ja": {
+        "official": "プロジェクト",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "프로젝트",
+        "knownWrong": []
+      },
+      "zh-Hans": {
+        "official": "项目",
+        "knownWrong": []
+      },
+      "zh-Hant": {
+        "official": "專案",
+        "knownWrong": []
+      }
+    },
+    "Inspector": {
+      "ja": {
+        "official": "インスペクター",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "인스펙터",
+        "knownWrong": []
+      },
+      "zh-Hans": {
+        "official": "检查器",
+        "knownWrong": []
+      },
+      "zh-Hant": {
+        "official": "檢查器",
+        "knownWrong": []
+      }
+    },
+    "Hierarchy": {
+      "ja": {
+        "official": "ヒエラルキー",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "계층 구조",
+        "knownWrong": []
+      },
+      "zh-Hans": {
+        "official": "层级",
+        "knownWrong": []
+      },
+      "zh-Hant": {
+        "official": "階層",
+        "knownWrong": []
+      }
+    },
+    "Console": {
+      "ja": {
+        "official": "コンソール",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "콘솔",
+        "knownWrong": []
+      },
+      "zh-Hans": {
+        "official": "控制台",
+        "knownWrong": []
+      },
+      "zh-Hant": {
+        "official": "控制台",
+        "knownWrong": []
+      }
+    },
+    "Preferences": {
+      "ja": {
+        "official": "環境設定",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "환경 설정...",
+        "knownWrong": []
+      },
+      "zh-Hans": {
+        "official": "首选项",
+        "knownWrong": []
+      },
+      "zh-Hant": {
+        "official": "偏好設定",
+        "knownWrong": []
+      }
+    },
+    "Editor": {
+      "ja": {
+        "official": "エディター",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "에디터",
+        "knownWrong": []
+      },
+      "zh-Hans": {
+        "official": "编辑器",
+        "knownWrong": []
+      },
+      "zh-Hant": {
+        "official": "編輯器",
+        "knownWrong": []
+      }
+    },
+    "GameObject": {
+      "ja": {
+        "official": "ゲームオブジェクト",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "게임 오브젝트",
+        "knownWrong": []
+      },
+      "zh-Hans": {
+        "official": "游戏对象",
+        "knownWrong": []
+      },
+      "zh-Hant": {
+        "official": "GameObject",
+        "knownWrong": []
+      }
+    },
+    "Component": {
+      "ja": {
+        "official": "コンポーネント",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "컴포넌트",
+        "knownWrong": []
+      },
+      "zh-Hans": {
+        "official": "组件",
+        "knownWrong": []
+      },
+      "zh-Hant": {
+        "official": "元件",
+        "knownWrong": []
+      }
+    },
+    "Property": {
+      "ja": {
+        "official": "プロパティ",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "프로퍼티",
+        "knownWrong": []
+      },
+      "zh-Hans": {
+        "official": "属性",
+        "knownWrong": []
+      },
+      "zh-Hant": {
+        "official": "屬性",
+        "knownWrong": []
+      }
+    },
+    "Import": {
+      "ja": {
+        "official": "インポート",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "임포트",
+        "knownWrong": []
+      },
+      "zh-Hans": {
+        "official": "导入",
+        "knownWrong": []
+      },
+      "zh-Hant": {
+        "official": "匯入",
+        "knownWrong": []
+      }
+    },
+    "Export": {
+      "ja": {
+        "official": "エクスポート",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "익스포트",
+        "knownWrong": []
+      },
+      "zh-Hans": {
+        "official": "导出",
+        "knownWrong": []
+      },
+      "zh-Hant": {
+        "official": "匯出",
+        "knownWrong": []
+      }
+    },
+    "Curve": {
+      "ja": {
+        "official": "カーブ",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "커브",
+        "knownWrong": []
+      },
+      "zh-Hans": {
+        "official": "曲线",
+        "knownWrong": []
+      },
+      "zh-Hant": {
+        "official": "曲線",
+        "knownWrong": []
+      }
+    },
+    "Gradient": {
+      "ja": {
+        "official": "グラデーション",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "그레디언트",
+        "knownWrong": []
+      },
+      "zh-Hans": {
+        "official": "渐变",
+        "knownWrong": []
+      },
+      "zh-Hant": {
+        "official": "漸變",
+        "knownWrong": []
+      }
+    },
+    "Window": {
+      "ja": {
+        "official": "ウィンドウ",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "창",
+        "knownWrong": []
+      },
+      "zh-Hans": {
+        "official": "窗口",
+        "knownWrong": []
+      },
+      "zh-Hant": {
+        "official": "視窗",
+        "knownWrong": []
+      }
+    },
+    "Folder": {
+      "ja": {
+        "official": "フォルダー",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "폴더",
+        "knownWrong": []
+      },
+      "zh-Hans": {
+        "official": "文件夹",
+        "knownWrong": []
+      },
+      "zh-Hant": {
+        "official": "資料夾",
+        "knownWrong": []
+      }
+    },
+    "File": {
+      "ja": {
+        "official": "ファイル",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "파일",
+        "knownWrong": []
+      },
+      "zh-Hans": {
+        "official": "文件",
+        "knownWrong": []
+      },
+      "zh-Hant": {
+        "official": "檔案",
+        "knownWrong": []
+      }
+    },
+    "Path": {
+      "ja": {
+        "official": "パス",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "경로",
+        "knownWrong": []
+      },
+      "zh-Hans": {
+        "official": "路径",
+        "knownWrong": []
+      },
+      "zh-Hant": {
+        "official": "路徑",
+        "knownWrong": []
+      }
+    },
+    "Name": {
+      "ja": {
+        "official": "名前",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "이름",
+        "knownWrong": []
+      },
+      "zh-Hans": {
+        "official": "名称",
+        "knownWrong": []
+      },
+      "zh-Hant": {
+        "official": "名稱",
+        "knownWrong": []
+      }
+    },
+    "Type": {
+      "ja": {
+        "official": "タイプ",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "타입",
+        "knownWrong": []
+      },
+      "zh-Hans": {
+        "official": "类型",
+        "knownWrong": []
+      },
+      "zh-Hant": {
+        "official": "類型",
+        "knownWrong": []
+      }
+    },
+    "Value": {
+      "ja": {
+        "official": "値",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "값",
+        "knownWrong": []
+      },
+      "zh-Hans": {
+        "official": "值",
+        "knownWrong": []
+      },
+      "zh-Hant": {
+        "official": "值",
+        "knownWrong": []
+      }
+    },
+    "Format": {
+      "ja": {
+        "official": "形式",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "포맷",
+        "knownWrong": []
+      },
+      "zh-Hans": {
+        "official": "格式",
+        "knownWrong": []
+      },
+      "zh-Hant": {
+        "official": "格式",
+        "knownWrong": []
+      }
+    },
+    "Size": {
+      "ja": {
+        "official": "サイズ",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "크기",
+        "knownWrong": []
+      },
+      "zh-Hans": {
+        "official": "大小",
+        "knownWrong": []
+      },
+      "zh-Hant": {
+        "official": "大小",
+        "knownWrong": []
+      }
+    },
+    "Width": {
+      "ja": {
+        "official": "幅",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "너비",
+        "knownWrong": []
+      },
+      "zh-Hans": {
+        "official": "宽度",
+        "knownWrong": []
+      },
+      "zh-Hant": {
+        "official": "寬度",
+        "knownWrong": []
+      }
+    },
+    "Height": {
+      "ja": {
+        "official": "高さ",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "높이",
+        "knownWrong": []
+      },
+      "zh-Hans": {
+        "official": "高度",
+        "knownWrong": []
+      },
+      "zh-Hant": {
+        "official": "高度",
+        "knownWrong": []
+      }
+    },
+    "Preview": {
+      "ja": {
+        "official": "プレビュー",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "미리보기",
+        "knownWrong": []
+      },
+      "zh-Hans": {
+        "official": "预览",
+        "knownWrong": []
+      },
+      "zh-Hant": {
+        "official": "預覽",
+        "knownWrong": []
+      }
+    },
+    "Settings": {
+      "ja": {
+        "official": "設定",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "설정",
+        "knownWrong": []
+      },
+      "zh-Hans": {
+        "official": "设置",
+        "knownWrong": []
+      },
+      "zh-Hant": {
+        "official": "設定",
+        "knownWrong": []
+      }
+    },
+    "Language": {
+      "ja": {
+        "official": "言語",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "언어",
+        "knownWrong": []
+      },
+      "zh-Hans": {
+        "official": "语言",
+        "knownWrong": []
+      },
+      "zh-Hant": {
+        "official": "語言",
+        "knownWrong": []
+      }
+    },
+    "Delete": {
+      "ja": {
+        "official": "削除",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "삭제",
+        "knownWrong": []
+      },
+      "zh-Hans": {
+        "official": "删除",
+        "knownWrong": []
+      },
+      "zh-Hant": {
+        "official": "刪除",
+        "knownWrong": []
+      }
+    },
+    "Cancel": {
+      "ja": {
+        "official": "キャンセル",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "취소",
+        "knownWrong": []
+      },
+      "zh-Hans": {
+        "official": "取消",
+        "knownWrong": []
+      },
+      "zh-Hant": {
+        "official": "取消",
+        "knownWrong": []
+      }
+    },
+    "Refresh": {
+      "ja": {
+        "official": "最新情報に更新",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "새로고침",
+        "knownWrong": []
+      },
+      "zh-Hans": {
+        "official": "刷新",
+        "knownWrong": []
+      },
+      "zh-Hant": {
+        "official": "刷新",
+        "knownWrong": []
+      }
+    },
+    "Open": {
+      "ja": {
+        "official": "開く",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "열기",
+        "knownWrong": []
+      },
+      "zh-Hans": {
+        "official": "打开",
+        "knownWrong": []
+      },
+      "zh-Hant": {
+        "official": "開啟",
+        "knownWrong": []
+      }
+    },
+    "Save": {
+      "ja": {
+        "official": "保存",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "저장",
+        "knownWrong": []
+      },
+      "zh-Hans": {
+        "official": "保存",
+        "knownWrong": []
+      },
+      "zh-Hant": {
+        "official": "儲存",
+        "knownWrong": []
+      }
+    },
+    "Create": {
+      "ja": {
+        "official": "作成",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "생성",
+        "knownWrong": []
+      },
+      "zh-Hans": {
+        "official": "创建",
+        "knownWrong": []
+      },
+      "zh-Hant": {
+        "official": "建立",
+        "knownWrong": []
+      }
+    },
+    "Copy": {
+      "ja": {
+        "official": "コピー",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "복사",
+        "knownWrong": []
+      },
+      "zh-Hans": {
+        "official": "复制",
+        "knownWrong": []
+      },
+      "zh-Hant": {
+        "official": "複製",
+        "knownWrong": []
+      }
+    },
+    "Select": {
+      "ja": {
+        "official": "選択",
+        "knownWrong": []
+      },
+      "ko": {
+        "official": "선택",
+        "knownWrong": []
+      },
+      "zh-Hans": {
+        "official": "选择",
+        "knownWrong": []
+      },
+      "zh-Hant": {
+        "official": "選擇",
+        "knownWrong": []
+      }
+    }
+  }
+}

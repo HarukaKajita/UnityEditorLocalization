@@ -6,7 +6,7 @@
         { "key": "header.overview.empty", "value": "カタログ未登録" },
         { "key": "header.overview.fallback", "value": "要求された言語が利用できず、フォールバック表示になっている scope があります。" },
         { "key": "doc.tooltip", "value": "オンラインドキュメントを開く" },
-        { "key": "note", "value": "表示言語は EditorPrefs にユーザー単位で保存され、プロジェクト資産には書き込まれません。解決順は scope 個別設定 → グローバル設定 → システム言語 → 各 scope の既定言語です。" },
+        { "key": "note", "value": "表示言語は EditorPrefs にユーザー単位で保存され、プロジェクトのアセットには書き込まれません。解決順は scope 個別設定 → グローバル設定 → システム言語 → 各 scope の既定言語です。" },
         { "key": "catalogs.reload", "value": "再読み込み" },
         { "key": "catalogs.reload.tooltip", "value": "l10n manifest を再走査し、すべての翻訳テーブルを読み込み直します。" },
         { "key": "catalogs.validate", "value": "検証" },

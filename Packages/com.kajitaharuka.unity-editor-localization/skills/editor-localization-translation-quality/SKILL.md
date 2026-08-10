@@ -20,6 +20,14 @@ Use this skill for EditorLocalization locale work, especially `*.l10n-manifest.j
    - Build a small project-specific glossary from the manifest, default locale, type/class names, menus, docs, and existing UI before editing locale files.
    - Before translating new keys, dump the existing translations of related keys across all locales with `scripts/dump_catalog_terms.py` (see below) and match the catalog's established choices — the settled word for "asset", locales that keep `Editor` as a fixed term, full-width vs half-width colons, the apostrophe character — so new keys do not introduce a terminology split inside the same file.
    - Keep product/type names and file-format identifiers stable unless the current project explicitly has localized names.
+   - **For ja / ko / zh-Hans / zh-Hant, use Unity's own official Editor translation.** Those four are the
+     only languages Unity localizes the Editor UI into, so the term is not a judgement call — run
+     `scripts/check_unity_official_terms.py path/to/Locales` and read `references/unity-official-terms.md`.
+     When Unity's Editor UI and its documentation disagree, **the Editor UI wins**: the extension's text is
+     rendered inside Unity's own window next to Unity's own strings, and the docs are read at a different time
+     on a different screen. This is not hypothetical — Simplified Chinese "Asset" is `资产` in the Editor
+     (245:45) and `资源` in the docs (0 occurrences of `资产`), and 61 strings across four repositories had
+     picked the docs' word.
 
 3. Translate for the UI, not word-for-word.
    - Labels and badges should be short.
@@ -43,6 +51,11 @@ Use this skill for EditorLocalization locale work, especially `*.l10n-manifest.j
 
 6. Validate mechanically before reporting done.
    - Run `scripts/validate_locale_quality.py` against the locale directory.
+   - Run `scripts/check_unity_official_terms.py` against the locale directory: it compares ja / ko /
+     zh-Hans / zh-Hant against Unity's own Editor translation, which no other gate looks at. Run it
+     **across every repository in the product family**, not just the one you edited — the 2026-08-09 sweep
+     found the Traditional Chinese word for "Asset" split three-to-one *between sibling repositories*, which
+     is invisible from inside any single one of them.
    - Run `scripts/check_message_identifiers.py` (see "Identifier reality check" below): it catches
      messages that name a type or attribute **that does not exist**, which no other gate sees.
    - When C# code calls the catalog through a `Tr(...)` facade, also run
@@ -209,6 +222,64 @@ python3 scripts/check_message_identifiers.py \
 - 正本が法を変え（推奨→命令形）、参照したグループだけが追従した（6/19 ロケール）
 - スラブ語で `канале(ах)` のような括弧併記は**語として成立しない**（前置格は単数と複数で語幹末が違い、展開すると `каналеах` になる）。`string.Join` で複数入りうる placeholder は、格変化のある言語では**複数形一本化**が安全
 - 終止符の有無が正本だけずれる。とくに `{0}` がファイルパスのときの末尾ピリオドは、Console 表示が `…/Foo.png.` になり貼り付け事故を招く
+
+## 用語の是非を「調査」で決めるときの作法（2026-08-09 制定）
+
+「この語はその言語のネイティブ開発者が実際にどう書くか」を調べて決める場面がある。
+2026-08-09 に 19 ロケール分を実際に調べて、**調査そのものが壊れる型**が複数出たので手順にする。
+
+### 証拠の序列
+
+1. **Unity 公式のエディタ翻訳**（ja / ko / zh-Hans / zh-Hant のみ）。上記の
+   `references/unity-official-terms.md` を見る。ここに答えがあるなら**それ以上調べない**。
+2. **Unity 公式ドキュメントのその言語版**。エディタ翻訳と食い違ったらエディタ翻訳を採る。
+3. **その言語の用語当局に「その語が無い」こと**。置換語を作っていない＝借用語のままが実態、という
+   強い不在証拠になる。**当局は 1 つで足りない** — フランス語なら本国の Commission d'enrichissement
+   だけでなく**ケベックの OQLF / GDT** まで見る（実測: 本国の用語集 55 語に `asset` は無く、
+   OQLF の `asset` は会計語義だけでゲーム開発語義が存在しなかった。片方だけだと取りこぼす）。
+4. **その言語圏の Unity 記事・フォーラムの実例**。人間が書いたものに限る。
+5. 一般的な借用傾向。**これ単独で結論にしない。**
+
+### 検索結果の要約を根拠にしない
+
+**Web 検索の AI 要約が原文を書き換えている。** 実測（2026-08-09）:
+
+```
+検索要約: Unity'de "varlıklar" (assets), texture, obje...
+実ページ: Unity3D 'de assets'ler texture, obje...      ← assets'ler を varlıklar に置換していた
+
+検索要約: แอสเซท หมายถึงโฟลเดอร์และไฟล์ต่างๆ ...
+実ページ: 4. Project / 5.Assets คือส่วนที่เอาไว้เก็บไฟล์ ...   ← 主語ごと別物
+```
+
+**用語の綴りそのものが争点の調査では、要約は使えない。**原ページを開き、争点のトークンを
+**逐語で**抜き出す。イタリア語の複数形（`asset` か `assets` か）を要約経由で引いて、
+結論を左右する `-s` が落ちた例も出た。
+
+### 機械翻訳のページを実例に数えない
+
+反例として量のあるページが機械翻訳だったことが複数回あった。見分け方:
+
+- ページのメタデータに `ms.translationtype: MT`（Microsoft Learn）
+- 全言語スイッチャがあり、原文へのフッタ帰属がある
+- 本文中に別言語のパスやリンクが漏れている（`/fr/design-patterns/...` が
+  ポーランド語ページに混ざっていた）
+- 同一ページ内で同じ語の訳が 3 通りに揺れる
+
+機械翻訳は**その言語の開発者が書いたもの**ではないので、実例として数えない。
+ただし「その言語には定着した訳語が無い」ことの傍証にはなる。
+
+### 取得できなかった出典を「確認済み」に混ぜない
+
+403 / 404 / 証明書エラーで開けなかった出典は、結論の重みづけから**外す**。
+代わりの一次資料へ振り替える（実測: Accademia della Crusca が 403 だったので
+Treccani の一般規範へ差し替えた）。「出典を挙げたが読んでいない」が一番危ない。
+
+### 調べた結果は必ず対照表へ落とす
+
+調査は高くつく（19 ロケール分で数十の一次資料を当たった）。同じ問いを二度調べないよう、
+結論は `references/unity-official-terms.json` の `knownWrong` か
+`references/terminology-and-style.md` の用語欄へ**その場で書き戻す**。
 
 ## Review Output
 
