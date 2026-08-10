@@ -36,6 +36,10 @@
     "unity-mcp-skill",
     "unity-cli"
   ],
+  "externalSkills": [
+    "unity-cli",
+    "unity-mcp-skill"
+  ],
   "skillSync": {
     "sourceRoots": [
       "Packages/*/skills"
