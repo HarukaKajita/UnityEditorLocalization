@@ -2,7 +2,7 @@
 # 生成物: この内容はテンプレートリポジトリ UnityTemplate_2022_3_22f1 から配布されたコピーです。
 # 編集はテンプレート側で行い、scripts/distribute_standard.py で再配布してください。
 # source: UnityTemplate_2022_3_22f1/scripts/pipeline/verify_repo_guide.py
-# source-sha256: e8af64df077aa3d493a339e46ce3618b95aaa7c872b4dd9312f823137f09e4b9
+# source-sha256: c6cc3bc133516e9da3c3ef5547d0e3a65d36a7b91b104445ff57b4398ac22c34
 """リポジトリガイドと実装の整合を機械検証する（ゴールド標準 §2.10 第2層）。
 
 原則: **文書がリポジトリ自身の状態について主張することは、すべて機械で確かめられる。**
@@ -679,6 +679,19 @@ def _package_has_tests(package_dir: Path) -> bool:
     return bool([path for path in tests.rglob("*.cs") if path.is_file()])
 
 
+def _has_negative_test_claim(line: str) -> bool:
+    """テストの整備状況を否定している文が 1 つでもあるか。
+
+    話題語（テスト・EditMode 等）と否定語が**同じ文の中に**現れたときだけ真とする。
+    行全体で見ると、無関係な 2 つの文に散った語を拾って誤検出する。
+    文の切れ目は句点・改行相当の記号で見る（Markdown の 1 行に複数文が入るため）。
+    """
+    for sentence in re.split(r"[。！？]", line):
+        if TEST_SUBJECT_RE.search(sentence) and NEGATIVE_CLAIM_RE.search(sentence):
+            return True
+    return False
+
+
 def check_04_test_policy(ctx: RepoContext) -> None:
     policies = ctx.config.get("packagePolicies") or {}
 
@@ -705,7 +718,12 @@ def check_04_test_policy(ctx: RepoContext) -> None:
         for doc in collect_doc_files(ctx):
             rel_doc = doc.relative_to(ctx.root).as_posix()
             for number, line in enumerate(doc.read_text(encoding="utf-8").splitlines(), start=1):
-                if not TEST_SUBJECT_RE.search(line) or not NEGATIVE_CLAIM_RE.search(line):
+                # 話題語と否定語を「行」でなく「文」の単位で見る。行で見ると、別々の文に
+                # 散っている 2 語を拾ってしまう。実測（2026-08-14 / UMPD CLAUDE.md:156）:
+                # 「…テストの期待値も実行 OS で割れなくなる。`Environment.NewLine` を使ってよいのは…
+                # OS ごとに中身が変わる理由が無い。」が、「テスト」と「が無い」の同居として鳴った。
+                # どちらの文もテストの整備状況を否定していない。
+                if not _has_negative_test_claim(line):
                     continue
                 if ctx.is_waived("4", line.strip()):
                     continue
