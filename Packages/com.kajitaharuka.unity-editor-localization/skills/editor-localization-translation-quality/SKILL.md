@@ -52,6 +52,12 @@ Use this skill for EditorLocalization locale work, especially `*.l10n-manifest.j
    - When a native speaker or another agent reviews and proposes a change, verify the underlying grammar rule before applying it — reviewers can be confidently wrong. Example: a reviewer may "fix" a Korean particle after a Latin term by its spelling, but particle choice follows pronunciation (`Locale`→로케일 ends in ㄹ, a consonant, so `이`/`과`, not `가`/`와`). Apply only changes you can justify.
 
 6. Validate mechanically before reporting done.
+   - **In a kajitaharuka product repository, run the repository-wide entry point first**:
+     `python3 scripts/pipeline/check_l10n_catalogs.py --require-skill-scripts` from the repository
+     root. It discovers every catalog, facade and package in that repository and runs the whole set
+     (catalog structure, key coverage against the code, and the three scripts below) without Unity.
+     Use the individual scripts below when you are working on one locale directory, or in a
+     repository that does not carry `scripts/pipeline/`.
    - Run `scripts/validate_locale_quality.py` against the locale directory.
    - Run `scripts/check_unity_official_terms.py` against the locale directory: it compares ja / ko /
      zh-Hans / zh-Hant against Unity's own Editor translation, which no other gate looks at. Run it
@@ -159,16 +165,49 @@ For consumers that call the catalog through a facade (e.g. `EpeL10n.Tr`, `TaeL10
 
 ```bash
 python3 scripts/check_tr_placeholder_parity.py \
-  --catalog path/to/Locales/<defaultLocale>.json \
-  --src path/to/Packages/<package-root> \
-  --method UmpdL10n.Tr [--method OtherFacade.Tr]
+  --catalog path/to/Locales/<defaultLocale>.json [--catalog path/to/other-scope/Locales/<tag>.json] \
+  --src path/to/Packages/<package-root> [--src path/to/Packages/<companion-package>] \
+  --method UmpdL10n.Tr [--method OtherFacade.Tr] \
+  [--method-scope-first EditorL10n.Tr]
 ```
+
+Two facade shapes exist and they must not be mixed up: `--method` is for `Tr(key, args)` (every product facade — `EpeL10n.Tr`, `TaeL10n.Tr`, `UmpdL10n.Tr`, `CaptureL10n.Tr`), `--method-scope-first` is for `Tr(scope, key, args)` (the framework's own `EditorL10n.Tr`). Passing a scope-first facade as `--method` reads the scope as the key and checks nothing. `--catalog` is repeatable so that a package holding more than one scope (a `Samples~` catalog beside the main one) can be checked in a single run — otherwise every key of the other scope is reported as missing.
 
 - Fails (exit 1) when a call passes fewer arguments than the template's `max({n})+1`, or uses a key missing from the catalog. Surplus arguments and statically unresolvable keys (dynamic variables) are reported as warnings only.
 - Resolves TextKey constants (`const string Xxx = "...";`) from the `--src` tree automatically; string-literal keys work as-is.
+- `--src` accepts **multiple roots**. In a suite, the key constants and the call sites often live in different packages; pass every package or the resolution silently loses one side. Overlapping roots are de-duplicated per file, so a redundant root never doubles a finding.
+- **A run that checked nothing fails.** Detecting call sites but resolving no key at all (`checked=0`) is an error, and so is a `XxxTextKey.Foo`-shaped argument that is absent from the constant table — that shape means the declaration is outside the scanned roots, not that the key is dynamic. Without this, a wrong `--src` produced `checked=0 / errors=0 / exit 0` and read exactly like a clean run (measured 2026-08-14, 204 call sites reported as warnings).
+- The summary line prints `files= calls= checked= errors= warnings=`. Read `checked` before believing a green result.
 - Placeholder count parity *across locales* is `validate_locale_quality.py`'s job; this script covers the *code side* of the same contract. Run both.
+- Running it per repository by hand is optional: `scripts/pipeline/check_l10n_catalogs.py` in each product repository discovers the catalogs, the facades and the roots and runs this script for you (see "Repository-wide entry point" below).
 
 The per-locale line reports `placeholder=` (placeholder set mismatch vs the default locale) and `gap=` (placeholder numbers that are not consecutive from `0`) as separate counts, mirroring the C# `EditorL10nValidator` so the two gates can cross-check. Add `--report-variant-duplicates` to print (non-failing) the keys whose value is identical across the locales of a regional-variant group (`es-ES`/`es-419`, `pt-BR`/`pt-PT`, `zh-Hans`/`zh-Hant`, grouped by primary subtag), to review for copy-paste left-overs — remembering that identical values are legitimate for terse technical strings.
+
+## Repository-wide entry point (2026-08-14 制定)
+
+`Tools > UnityEditorLocalization > Validate Catalogs` only runs when a human presses it inside a running Editor, but most catalog editing happens outside Unity. Each kajitaharuka product repository therefore carries `scripts/pipeline/check_l10n_catalogs.py`, distributed from the template repository. Run it from the repository root:
+
+```bash
+python3 scripts/pipeline/check_l10n_catalogs.py                        # error があれば非ゼロ終了
+python3 scripts/pipeline/check_l10n_catalogs.py --require-skill-scripts  # 未実行の検査も失敗にする
+```
+
+It holds **no judgement of its own** — it finds the manifests, the default-locale tables, the `Tr` facades and the package roots, then calls the gates below. Which gate owns what:
+
+| 層 | 何を見るか | 正本 | Unity 要否 |
+|---|---|---|---|
+| カタログの構造 | ロケール間の key 集合・placeholder 集合・番号の欠番・既定と同値・孤児テーブル・git 未追跡テーブル・manifest の不備 | `verify_repo_guide.py` 検査 18（C# `EditorL10nValidator` の写し） | 不要 |
+| 同上（Editor 上） | 同じ規則。ただし `Samples~` は Unity が import しないため構造的に見えない | C# `EditorL10nValidator` | **要** |
+| コード側のキー網羅 | `*TextKey` の宣言と `Tr` 呼び出しのキーが既定ロケールに在るか（**全ロケールが等しく欠いているキー**は検査 18 では構造上鳴らない） | `verify_repo_guide.py` 検査 21 | 不要 |
+| 同上（出荷コード経由） | 同じ網羅を `DefaultEditorL10nBridge` 越しに確かめる | `editor-localization-optional-integration` 同梱の EditMode テスト | **要** |
+| `Tr` の引数個数 | 呼び出しの引数が placeholder の `max({n})+1` に足りているか | このスキルの `check_tr_placeholder_parity.py` | 不要 |
+| Unity 公式訳との一致 | ja / ko / zh-Hans / zh-Hant の UI 用語 | このスキルの `check_unity_official_terms.py` | 不要 |
+| 文言中の識別子の実在 | 文言が名乗る型名・属性名が実装にあるか | このスキルの `check_message_identifiers.py` | 不要 |
+| 訳文の質 | 語彙・語調・地域差・固定語の扱い | 人（このスキルの手順 1〜5） | — |
+
+`validate_locale_quality.py` は検査 18 と規則が同じなので入口からは呼ばない。ロケールディレクトリ単体で作業しているとき（リポジトリ外・`scripts/pipeline/` を持たないリポジトリ）に使う。逆に検査 18 のほうが広い点が 2 つある: **manifest を起点に読む**ので「manifest に登録されていないテーブル」「manifest が指すのに実在しないテーブル」を見つけられ、**git 追跡状態を見る**ので配布物に入らないテーブルを見つけられる。`validate_locale_quality.py` はディレクトリを glob するだけなのでどちらも構造的に見えない。
+
+**「検査できなかった」を緑にしない。** 入口はスキル同梱スクリプトを解決できなければ SKIP と明示し、`--require-skill-scripts` を付ければ失敗にする。解決順は `--skill-scripts` → 環境変数 `KAJITAHARUKA_L10N_SKILL_SCRIPTS` → 自リポジトリ同梱の正本 → レジストリ経由の UEL チェックアウト → 兄弟ディレクトリ。**`Library/PackageCache/` は候補に入れない**: 実測（2026-08-14）で 5 リポジトリのキャッシュは版が揃わず、`check_unity_official_terms.py` はどのコピーにも無く、`check_message_identifiers.py` は 1 つにしか無かった。古いコピーを掴んで走らせるのは、走らせないより悪い。
 
 ## UI ラベルを文中で参照するときは、そのラベルの訳を渡す（2026-07-28 制定）
 

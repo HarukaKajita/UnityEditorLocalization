@@ -81,7 +81,23 @@ def exists_in_source(name: str, kind: str, haystack: str) -> bool:
             rf"\bclass\s+{re.escape(name)}\b",
         ]
         return any(re.search(p, haystack) for p in patterns)
-    return re.search(rf"\b{re.escape(name)}\b", haystack) is not None
+
+    if re.search(rf"\b{re.escape(name)}\b", haystack) is not None:
+        return True
+
+    if kind == "dotted":
+        # `型名.メンバー` は、**コード上でその綴りのまま現れるとは限らない。** インスタンス経由で
+        # 書くのが普通だからである（文言の `CaptureOptions.Repaint` に対し、実装は
+        # `focusedTabOptions.Repaint = ...`）。完全一致だけで判定すると、正しい参照を
+        # 「実在しない」と鳴らして検査そのものを信用されなくする（2026-08-14 に UEWCE で実測）。
+        # 型が**宣言として**在り、かつ各メンバー名が在ることを見る。組み合わせの正しさまでは
+        # 保証しない（この検査は明らかな嘘の検出器であって承認器ではない、という前提のまま）。
+        head, *members = name.split(".")
+        if not re.search(rf"\b(?:class|struct|enum|interface|record)\s+{re.escape(head)}\b", haystack):
+            return False
+        return all(re.search(rf"\b{re.escape(member)}\b", haystack) for member in members)
+
+    return False
 
 
 def build_haystack(roots: list[Path]) -> str:
