@@ -2,7 +2,7 @@
 # 生成物: この内容はテンプレートリポジトリ UnityTemplate_2022_3_22f1 から配布されたコピーです。
 # 編集はテンプレート側で行い、scripts/distribute_standard.py で再配布してください。
 # source: UnityTemplate_2022_3_22f1/scripts/pipeline/verify_repo_guide.py
-# source-sha256: 6142d46c5a23af00676cb8618dd45879899cc79a346f7e6e17d1c2425ccb7437
+# source-sha256: e8af64df077aa3d493a339e46ce3618b95aaa7c872b4dd9312f823137f09e4b9
 """リポジトリガイドと実装の整合を機械検証する（ゴールド標準 §2.10 第2層）。
 
 原則: **文書がリポジトリ自身の状態について主張することは、すべて機械で確かめられる。**
@@ -15,6 +15,8 @@
     python3 scripts/pipeline/verify_repo_guide.py            # 検査（error があれば非ゼロ終了）
     python3 scripts/pipeline/verify_repo_guide.py --strict   # warn も失敗として扱う
     python3 scripts/pipeline/verify_repo_guide.py --json     # 機械可読の結果を出力
+    python3 scripts/pipeline/verify_repo_guide.py --separate-untracked
+                                                             # 未追跡ファイル起因の指摘を別枠へ分ける
 
 検査対象の細則:
 - `.meta` 検査はパッケージルート自身を対象にしない（UPM 慣例で root は `.meta` を持たない。
@@ -25,6 +27,19 @@
 - 「同梱物（`.tgz` に入るパス）」は `Packages/<name>/` 配下の git 追跡ファイル全部で、`.meta` も
   `Tests/` も `Samples~` / `Documentation~` も含む（実物の tgz と `git ls-tree` の突き合わせで確認）。
   除くのは npm / `Client.Pack` が既定で落とす OS・VCS 由来の名前だけ。
+
+「自分の変更だけを見る」ための分離（`--separate-untracked`・2026-08-14 追加）:
+- 同じリポジトリで複数のエージェントが並行作業すると、**他の作業が置いた未追跡ファイルで検査 6 が
+  構造的に赤くなる**（実測 2026-08-14: TAE で error 14 件・UMPD で error 26 件が出たが、全件が
+  並行作業の未追跡ファイルで、当人の変更由来は 0 件だった）。赤が常態になると本物の error を見落とす。
+- **絞り込み（`--paths <glob>` 方式）は採らない。** 対象を狭める手段は「見なかったことにする」に
+  転びやすく、しかも狭めた範囲の外に本物の error があっても出力から消えてしまう。代わりに
+  **全件を検査したまま、未追跡ファイル起因の指摘だけを別枠へ寄せて両方見せる**（消さない・隠さない）。
+- 「自分の変更」と「他人の置き土産」を分ける境界は **git の index** に置く。`git add -N`（intent-to-add）
+  したものは追跡済みとして扱われ、通常の集計に戻る。つまり **コミット前に自分の変更を検査したいなら
+  intent-to-add してから走らせる**のが正しい手順で、これは検査 6 に限らず新規ファイルを置く作業全般の
+  前提になる（GOLD_STANDARD §2.10 の検査 6 の項）。
+- 既定（フラグ無し）の挙動は一切変えない。pre-push hook はフラグ無しで呼ぶため、関門は緩まない。
 
 正本: UnityTemplate_2022_3_22f1/scripts/pipeline/verify_repo_guide.py
 各開発リポジトリへは scripts/distribute_standard.py が配布する（配布物は編集しない）。
@@ -143,6 +158,34 @@ class Finding:
     severity: str
     message: str
     path: str | None = None
+    # git がまだ知らない（未追跡の）ファイルに起因する指摘か。並行作業の置き土産と
+    # 自分の変更を切り分けるための属性で、`--separate-untracked` のときだけ出力を分ける。
+    # **判定の強さ（error / warn）は変わらない**。付けるのは指摘を出す側で、
+    # 「その指摘の主語であるアセット自体を git が知らない」ときに限る。
+    untracked: bool = False
+
+
+def finding_payload(finding: Finding) -> dict:
+    """`--json` 出力用の辞書。
+
+    `finding.__dict__` をそのまま出さないのは、**内部の属性を 1 つ足しただけで JSON の
+    キー集合が変わり、読み手の互換が黙って壊れる**ため（`untracked` を足したときに実際に
+    起きかけた）。出力の形はここで明示的に固定する。
+    """
+    return {
+        "check": finding.check,
+        "severity": finding.severity,
+        "message": finding.message,
+        "path": finding.path,
+    }
+
+
+def split_untracked(findings: list[Finding]) -> tuple[list[Finding], list[Finding]]:
+    """(未追跡起因でない指摘, 未追跡起因の指摘) に分ける。順序は元のまま保つ。"""
+    return (
+        [finding for finding in findings if not finding.untracked],
+        [finding for finding in findings if finding.untracked],
+    )
 
 
 def collapse_findings(findings: list[Finding]) -> list[str]:
@@ -179,8 +222,15 @@ class RepoContext:
     packages: list[tuple[str, Path, dict]] = field(default_factory=list)
     findings: list[Finding] = field(default_factory=list)
 
-    def add(self, check: str, severity: str, message: str, path: str | None = None) -> None:
-        self.findings.append(Finding(check, severity, message, path))
+    def add(
+        self,
+        check: str,
+        severity: str,
+        message: str,
+        path: str | None = None,
+        untracked: bool = False,
+    ) -> None:
+        self.findings.append(Finding(check, severity, message, path, untracked))
 
     @property
     def role(self) -> str:
@@ -695,9 +745,17 @@ def check_05_testables(ctx: RepoContext) -> None:
 
 
 def check_06_meta_completeness(ctx: RepoContext) -> None:
+    """パッケージ配下の全ファイル・全サブフォルダに `.meta` があり、git 追跡されていることを見る。
+
+    指摘には「未追跡起因かどうか」の印を付ける（`--separate-untracked` で別枠へ寄せるため）。
+    印を付ける条件は**その指摘の主語であるアセット自体を git が知らないこと**で、
+    「追跡済みのアセットなのに `.meta` が欠けている／追跡されていない」は印を付けない。
+    後者は自分がコミットした内容そのものの不備であり、他人の作業では説明できないため。
+    """
     for _, package_dir, _ in ctx.packages:
         root_meta = package_dir.parent / f"{package_dir.name}.meta"
         if root_meta.exists():
+            # ルートの `.meta` は追跡の有無に関わらず「あること自体」が UPM 慣例違反なので分離しない
             ctx.add(
                 "6",
                 ERROR,
@@ -711,12 +769,22 @@ def check_06_meta_completeness(ctx: RepoContext) -> None:
             for entry, is_dir in entries:
                 rel = entry.relative_to(ctx.root).as_posix()
                 meta_rel = f"{rel}.meta"
+                # git はフォルダを追跡しないので、フォルダは「追跡ファイルを含むか」で見る。
+                # `git add -N`（intent-to-add）したものは index に載るため追跡済みとして扱われ、
+                # 自分の作業中の変更はここで未追跡起因から外れる（これが分離の境界）。
+                asset_untracked = rel not in (ctx.tracked_dirs if is_dir else ctx.tracked)
                 if not (ctx.root / meta_rel).exists():
-                    ctx.add("6", ERROR, "ディスク上に .meta がありません", rel)
+                    ctx.add("6", ERROR, "ディスク上に .meta がありません", rel, untracked=asset_untracked)
                 elif meta_rel not in ctx.tracked:
-                    ctx.add("6", ERROR, ".meta が git 追跡されていません（利用者側でだけ壊れる）", meta_rel)
+                    ctx.add(
+                        "6",
+                        ERROR,
+                        ".meta が git 追跡されていません（利用者側でだけ壊れる）",
+                        meta_rel,
+                        untracked=asset_untracked,
+                    )
                 if not is_dir and rel not in ctx.tracked:
-                    ctx.add("6", ERROR, "アセット本体が git 追跡されていません", rel)
+                    ctx.add("6", ERROR, "アセット本体が git 追跡されていません", rel, untracked=True)
 
 
 # ---------------------------------------------------------------------------
@@ -3281,6 +3349,14 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--root", default=".", help="対象リポジトリのルート（既定: カレント）")
     parser.add_argument("--strict", action="store_true", help="warn も失敗として扱う")
     parser.add_argument("--json", action="store_true", help="結果を JSON で出力する")
+    parser.add_argument(
+        "--separate-untracked",
+        action="store_true",
+        help=(
+            "未追跡ファイル起因の指摘を別枠へ分け、集計と終了コードから外す"
+            "（並行作業の置き土産と自分の変更を切り分ける。指摘自体は消さず必ず表示する）"
+        ),
+    )
     args = parser.parse_args(argv)
 
     root = Path(args.root).resolve()
@@ -3292,31 +3368,62 @@ def main(argv: list[str]) -> int:
     for check in CHECKS:
         check(ctx)
 
-    errors = [f for f in ctx.findings if f.severity == ERROR]
-    warnings = [f for f in ctx.findings if f.severity == WARN]
+    # 既定では分離しない（`untracked` の印は付いていても集計は従来どおり）。
+    # フラグを付けたときだけ 2 つの欄へ分け、終了コードは前者だけで決める。
+    if args.separate_untracked:
+        findings, untracked_findings = split_untracked(ctx.findings)
+    else:
+        findings, untracked_findings = ctx.findings, []
+
+    errors = [f for f in findings if f.severity == ERROR]
+    warnings = [f for f in findings if f.severity == WARN]
 
     if args.json:
-        print(
-            json.dumps(
-                {
-                    "root": str(root),
-                    "role": ctx.role,
-                    "packages": [name for name, _, _ in ctx.packages],
-                    "errors": [f.__dict__ for f in errors],
-                    "warnings": [f.__dict__ for f in warnings],
-                },
-                ensure_ascii=False,
-                indent=2,
-            )
-        )
+        payload = {
+            "root": str(root),
+            "role": ctx.role,
+            "packages": [name for name, _, _ in ctx.packages],
+            "errors": [finding_payload(f) for f in errors],
+            "warnings": [finding_payload(f) for f in warnings],
+        }
+        if args.separate_untracked:
+            # 頼まれたときだけ欄を足す（既定の JSON の形は 1 キーも変えない）
+            payload["untrackedErrors"] = [
+                finding_payload(f) for f in untracked_findings if f.severity == ERROR
+            ]
+            payload["untrackedWarnings"] = [
+                finding_payload(f) for f in untracked_findings if f.severity == WARN
+            ]
+        print(json.dumps(payload, ensure_ascii=False, indent=2))
     else:
         label = ctx.config.get("repository") or root.name
         print(f"== 標準準拠検査: {label}（role={ctx.role}, packages={len(ctx.packages)}）")
-        for line in collapse_findings(ctx.findings):
+        for line in collapse_findings(findings):
             print(line)
-        if not ctx.findings:
-            print("問題は見つかりませんでした。")
-        print(f"-- error {len(errors)} 件 / warn {len(warnings)} 件")
+        if not findings:
+            # 下に別枠が続くときに「問題は見つかりませんでした。」だけを出すと嘘になる
+            print("別枠のもの以外に問題は見つかりませんでした。" if untracked_findings else "問題は見つかりませんでした。")
+        summary = f"-- error {len(errors)} 件 / warn {len(warnings)} 件"
+        if untracked_findings:
+            # 「error 0 件」だけを切り取って読まれないよう、同じ行に分離した件数を必ず添える
+            summary += f"（別枠: 未追跡ファイル起因 {len(untracked_findings)} 件）"
+        print(summary)
+        if untracked_findings:
+            print("")
+            print(
+                f"== 未追跡ファイル起因 {len(untracked_findings)} 件"
+                "（git がまだ知らないファイルが原因。上の集計と終了コードには含めていません）"
+            )
+            for line in collapse_findings(untracked_findings):
+                print(line)
+            print(
+                "-- 自分が置いたファイルなら `git add -N <path>`（intent-to-add）してから検査し直してください"
+                "（上の集計へ戻ります）。"
+            )
+            print(
+                "   残る分は他の作業が置いたファイルです。**この欄が空でないリポジトリはリリースできません**"
+                "（利用者側でだけ壊れます）。分離は自分の変更を切り分けるためのもので、消してよい理由ではありません。"
+            )
 
     if errors:
         return 1
