@@ -2,7 +2,7 @@
 # 生成物: この内容はテンプレートリポジトリ UnityTemplate_2022_3_22f1 から配布されたコピーです。
 # 編集はテンプレート側で行い、scripts/distribute_standard.py で再配布してください。
 # source: UnityTemplate_2022_3_22f1/scripts/pipeline/verify_repo_guide.py
-# source-sha256: 54d21040ec6497932217638037aec63f333f7eb8adf8db5fac11e15a20097ae0
+# source-sha256: 6142d46c5a23af00676cb8618dd45879899cc79a346f7e6e17d1c2425ccb7437
 """リポジトリガイドと実装の整合を機械検証する（ゴールド標準 §2.10 第2層）。
 
 原則: **文書がリポジトリ自身の状態について主張することは、すべて機械で確かめられる。**
@@ -126,7 +126,7 @@ KNOWN_CONFIG_KEYS = frozenset({
 
 VALID_CHECK_IDS = {
     "1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
-    "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "+",
+    "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "+",
 }
 VALID_ROLES = {"standard", "product", "site", "content", "infra", "sandbox"}
 ARTIFACT_KINDS = {"sale-zip", "tgz", "unitypackage", "vpm-zip", "pdf"}
@@ -2232,12 +2232,14 @@ def check_18_l10n_catalogs(ctx: RepoContext) -> None:
     # manifest ごとに独立して判定すると、1 つの `Locales/` フォルダを 2 つの manifest が
     # 分け合う構成（scope を分けた本体と拡張など）で、互いのテーブルを孤児として偽 warn する。
     registered_rels: set[str] = set()
+    # scope → 先にその scope を宣言した manifest。C# は 2 つめ以降の manifest を**丸ごと**捨てる。
+    seen_scopes: dict[str, str] = {}
     for manifest_rel in manifests:
-        registered_rels |= _check_l10n_manifest(ctx, manifest_rel)
+        registered_rels |= _check_l10n_manifest(ctx, manifest_rel, seen_scopes)
     _check_l10n_orphan_tables(ctx, registered_rels)
 
 
-def _check_l10n_manifest(ctx: RepoContext, manifest_rel: str) -> set[str]:
+def _check_l10n_manifest(ctx: RepoContext, manifest_rel: str, seen_scopes: dict[str, str]) -> set[str]:
     """1 つの manifest を検証し、**登録済み tablePath の集合**を返す（孤児判定は呼び出し元が行う）。"""
     manifest_path = ctx.root / manifest_rel
     if ctx.is_waived("18", manifest_rel):
@@ -2266,6 +2268,22 @@ def _check_l10n_manifest(ctx: RepoContext, manifest_rel: str) -> set[str]:
             manifest_rel,
         )
         return set()
+
+    # 同じ scope を 2 つの manifest が名乗ると、C# は**後から読んだ manifest を丸ごと無視する**
+    # （`EditorL10nCatalog.TryAddManifest` の重複判定）。無視された側のテーブルは表示にも検証にも
+    # 現れないので、そちらの不備は永久に見えない。重複タグ（下）と同じ理由で error にする。
+    if scope in seen_scopes:
+        ctx.add(
+            "18",
+            ERROR,
+            f"{scope}: この scope は `{seen_scopes[scope]}` が既に宣言しています。Unity 側は"
+            f"先に読んだ manifest だけを採用し、後の manifest を**丸ごと**無視するため、"
+            f"こちらのテーブルは表示にも検証にも現れません。scope を分けるか manifest を"
+            f"統合してください",
+            manifest_rel,
+        )
+        return set()
+    seen_scopes[scope] = manifest_rel
 
     default_locale = normalize_locale_tag(str(document.get("defaultLocale") or ""))
     fixed_terms = {item for item in (document.get("fixedTerms") or []) if isinstance(item, str)}
@@ -2342,6 +2360,20 @@ def _check_l10n_manifest(ctx: RepoContext, manifest_rel: str) -> set[str]:
                 table_rel,
             )
             continue
+        # テーブル自身が名乗る `locale` と manifest の `tag` の食い違い（C# の `LoadEntries` が
+        # 同じ条件で警告を出す）。読み込みは manifest の tag で行われるので表示は壊れないが、
+        # 「別ロケールのテーブルを取り違えて登録した」ときの唯一の手掛かりがこれになる。
+        # `load_l10n_table` は entries しか返さないので、この 1 フィールドだけ読み直す。
+        declared_tag = normalize_locale_tag(str((load_json(table_path) or {}).get("locale") or ""))
+        if declared_tag and declared_tag != tag:
+            ctx.add(
+                "18",
+                WARN,
+                f"{scope}/{tag}: テーブルが名乗るロケール `{declared_tag}` が manifest の tag と"
+                f"違います。Unity 側は manifest の tag で登録するため表示は壊れませんが、"
+                f"別ロケールのテーブルを取り違えて登録している疑いがあります",
+                table_rel,
+            )
         tables[tag] = entries
         table_rels[tag] = table_rel
 
@@ -2765,6 +2797,357 @@ def check_20_skills_under_version_control(ctx: RepoContext) -> None:
         )
 
 
+# ---------------------------------------------------------------------------
+# 検査 21: コードが宣言・参照する翻訳キーが、既定ロケールのカタログに載っていること
+#
+# 検査 18 が見るのは**ロケール同士の一致**だけである。全ロケールが等しく欠いているキーは、
+# 集合が揃っているので構造上まったく鳴らない。実際にそれで抜けた（2026-08-14 / UMPD）:
+# `UmpdTextKey` へ 13 キーを足して 19 ロケールの JSON を 1 つも更新しないままリリース直前まで
+# 進み、`Rendering (Mixed)` と出ていたグループ見出しが `group.header.mixed` に化けた。
+# `Tr` はキーが未登録のとき**キー文字列をそのまま返し、書式引数を捨てる**ため、例外は出ず、
+# 機能テストも緑のままになる。人の目でしか気付けない位置にあるので機械で塞ぐ。
+#
+# 同じ穴は EditMode テスト（`editor-localization-optional-integration` 同梱の
+# `TextKeyCatalogCoverage.cs.txt`）でも塞げるが、**それは Unity を起動しないと走らない**。
+# カタログを編集する作業の大半は Unity の外（エージェントによる翻訳追加・複数リポジトリ跨ぎ・
+# 他プロジェクトで Editor がロックを持っている場合）で起きるので、同じ判定を Unity 非依存で
+# 持つ。二重管理に見えるが、片方は「出荷コードの探索経路をそのまま使う」ことに価値があり、
+# こちらは「Unity 無しで push 前に落とせる」ことに価値がある。判定規則が食い違うと困るのは
+# **キーの網羅**という 1 点だけで、そこは両方とも「defaultLocale のテーブルに在るか」で同じ。
+#
+# 走査は git 追跡された `Packages/**/*.cs` のみ。未追跡のコードは配布物に入らないため、
+# 追跡外の宣言を根拠に「在る／無い」を判定すると手元だけで通る検査になる。
+# ---------------------------------------------------------------------------
+
+# `internal const string Foo = "bar";` / `public const string ...`。UEL 同梱スキルの
+# `check_tr_placeholder_parity.py` と同じ抽出規則。
+L10N_CONST_RE = re.compile(r"const\s+string\s+(?P<name>\w+)\s*=\s*\"(?P<value>(?:[^\"\\]|\\.)*)\"\s*;")
+# 翻訳キーを集約するクラス。`EpeTextKey` / `UmpdTextKey` / `TaeTextKey` のように接尾辞で名乗る。
+L10N_TEXTKEY_CLASS_RE = re.compile(r"\bclass\s+(?P<name>\w*TextKey)\b")
+# ファサードの `Tr` 宣言。`static string Tr(string key, params object[] args)` のような形。
+L10N_TR_DECL_RE = re.compile(r"\bstatic\s+string\s+Tr\s*\((?P<params>[^)]*)\)")
+L10N_CLASS_RE = re.compile(r"\b(?:static\s+|sealed\s+|partial\s+|abstract\s+)*class\s+(?P<name>\w+)")
+# `Tr` の第 1 引数が翻訳キー定数の参照らしい形か。この形で解決できないのは「動的なキー」ではなく
+# 走査範囲か命名の問題なので、警告ではなく error にする（黙って検査から抜けるのを防ぐ）。
+L10N_KEY_CONST_REF_RE = re.compile(r"^\w*(?:TextKey|Keys?)\.\w+$")
+
+
+@dataclass
+class L10nScopeTable:
+    """1 つの scope の既定ロケールテーブル（検査 21 と入口スクリプトが共有する最小の情報）。"""
+
+    scope: str
+    default_locale: str
+    table_rel: str
+    entries: dict[str, str]
+
+
+@dataclass
+class L10nFacade:
+    """`Tr` を提供するファサード 1 つぶん。呼び出し規約（scope 引数の有無）と既定 scope を持つ。"""
+
+    class_name: str
+    key_index: int
+    scope: str | None
+    declared_in: str
+
+
+def collect_l10n_default_tables(ctx: RepoContext) -> list[L10nScopeTable]:
+    """各 scope の**既定ロケールのテーブルだけ**を読む軽量な読み込み。
+
+    manifest とテーブルの不備（tablePath 欠落・重複タグ・未追跡・壊れた JSON）を判定するのは
+    検査 18 の責務で、ここは判定を一切持たない。読めなかった scope は黙って落とす
+    （落ちた理由は検査 18 が同じ実行の中で必ず報告する）。
+    """
+    tables: list[L10nScopeTable] = []
+    for manifest_rel in sorted(rel for rel in ctx.tracked
+                               if rel.startswith("Packages/") and is_l10n_manifest_path(rel)):
+        manifest_path = ctx.root / manifest_rel
+        document = load_json(manifest_path)
+        if document is None:
+            continue
+        scope = str(document.get("scope") or "").strip()
+        default_locale = normalize_locale_tag(str(document.get("defaultLocale") or ""))
+        if not scope or not default_locale:
+            continue
+        for locale in document.get("locales") or []:
+            if not isinstance(locale, dict):
+                continue
+            if normalize_locale_tag(str(locale.get("tag") or "")) != default_locale:
+                continue
+            table_path = manifest_path.parent / str(locale.get("tablePath") or "")
+            entries = load_l10n_table(table_path) if table_path.is_file() else None
+            if entries is None:
+                break
+            table_rel = os.path.relpath(table_path, ctx.root).replace(os.sep, "/")
+            tables.append(L10nScopeTable(scope, default_locale, table_rel, entries))
+            break
+    return tables
+
+
+def _enclosing_class(content: str, position: int) -> str | None:
+    """`position` より前にある直近の `class X` 宣言の名前（ファサードの所属を決めるのに使う）。"""
+    last = None
+    for match in L10N_CLASS_RE.finditer(content, 0, position):
+        last = match.group("name")
+    return last
+
+
+def _l10n_source_files(ctx: RepoContext) -> list[tuple[str, str]]:
+    """git 追跡された `Packages/**/*.cs` を (相対パス, 本文) で返す（読めないものは飛ばす）。"""
+    files: list[tuple[str, str]] = []
+    for rel in sorted(rel for rel in ctx.tracked
+                      if rel.startswith("Packages/") and rel.endswith(".cs")):
+        try:
+            files.append((rel, (ctx.root / rel).read_text(encoding="utf-8")))
+        except (OSError, UnicodeDecodeError):
+            continue
+    return files
+
+
+def collect_l10n_facades(ctx: RepoContext, sources: list[tuple[str, str]] | None = None) -> list[L10nFacade]:
+    """`Tr` を提供するクラスを宣言から見つけ、呼び出し規約と既定 scope を決める。
+
+    設定ファイルへ書かせず宣言から読むのは、ファサード名を変えたときに設定だけが古くなって
+    「検査しているつもりで 0 件」になるのを避けるため。第 1 引数が `scope` という名前なら
+    scope 先頭型（基盤の `EditorL10n.Tr(scope, key, args)`）、そうでなければ key 先頭型
+    （各製品の `XxxL10n.Tr(key, args)`）と解釈する。
+    """
+    facades: dict[str, L10nFacade] = {}
+    for rel, content in (sources if sources is not None else _l10n_source_files(ctx)):
+        for match in L10N_TR_DECL_RE.finditer(content):
+            class_name = _enclosing_class(content, match.start())
+            if not class_name or class_name in facades:
+                continue
+            params = [part.strip() for part in match.group("params").split(",") if part.strip()]
+            first_name = params[0].split()[-1].lstrip("@") if params else ""
+            key_index = 1 if first_name == "scope" else 0
+            scope_match = re.search(
+                r"const\s+string\s+Scope\s*=\s*\"(?P<value>[^\"]*)\"\s*;", content)
+            facades[class_name] = L10nFacade(
+                class_name=class_name,
+                key_index=key_index,
+                scope=scope_match.group("value") if scope_match else None,
+                declared_in=rel,
+            )
+    return sorted(facades.values(), key=lambda facade: facade.class_name)
+
+
+def _l10n_find_calls(content: str, needle: str) -> list[tuple[int, str]]:
+    """`Class.Tr(` の各出現について (行番号, 引数文字列) を返す（括弧・文字列リテラルを考慮）。"""
+    results: list[tuple[int, str]] = []
+    start = 0
+    while True:
+        index = content.find(needle, start)
+        if index == -1:
+            return results
+        if index > 0 and (content[index - 1].isalnum() or content[index - 1] in "._"):
+            start = index + 1  # `XxxEpeL10n.Tr` のような部分一致を除く
+            continue
+        depth, in_string, escaped = 0, False, False
+        for position in range(index + len(needle) - 1, len(content)):
+            char = content[position]
+            if in_string:
+                if escaped:
+                    escaped = False
+                elif char == "\\":
+                    escaped = True
+                elif char == '"':
+                    in_string = False
+                continue
+            if char == '"':
+                in_string = True
+            elif char == "(":
+                depth += 1
+            elif char == ")":
+                depth -= 1
+                if depth == 0:
+                    results.append((content.count("\n", 0, index) + 1,
+                                    content[index + len(needle):position]))
+                    start = position + 1
+                    break
+        else:
+            return results
+
+
+def _l10n_split_args(text: str) -> list[str]:
+    """トップレベルのカンマで引数を分割する（入れ子の括弧と文字列リテラルは無視する）。"""
+    args: list[str] = []
+    depth, in_string, escaped = 0, False, False
+    current: list[str] = []
+    for char in text:
+        if in_string:
+            current.append(char)
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == '"':
+                in_string = False
+            continue
+        if char == '"':
+            in_string = True
+            current.append(char)
+        elif char in "([{":
+            depth += 1
+            current.append(char)
+        elif char in ")]}":
+            depth -= 1
+            current.append(char)
+        elif char == "," and depth == 0:
+            args.append("".join(current).strip())
+            current = []
+        else:
+            current.append(char)
+    tail = "".join(current).strip()
+    if tail:
+        args.append(tail)
+    return args
+
+
+def check_21_l10n_key_coverage(ctx: RepoContext) -> None:
+    tables = collect_l10n_default_tables(ctx)
+    if not tables:
+        return  # 翻訳カタログを持たないリポジトリでは何も言わない（検査 18 と同じ方針）
+    sources = _l10n_source_files(ctx)
+    if not sources:
+        return
+    by_scope = {table.scope: table for table in tables}
+    # scope を 1 つしか持たないリポジトリでは、どのキーもその scope の話でしかない。
+    # 複数 scope（本体＋ Samples~ など）では、どの scope に属すかを静的に決められない宣言が
+    # あるため「どれか 1 つに在れば良い」で判定する。取りこぼす側（別 scope に在るキーを
+    # 正しいとみなす）へ倒すのは、誤検出で検査ごと無効化されるより軽いと判断した。
+    all_keys: set[str] = set()
+    for table in tables:
+        all_keys |= set(table.entries)
+
+    def known(key: str, scope: str | None) -> bool:
+        table = by_scope.get(scope or "")
+        return key in table.entries if table else key in all_keys
+
+    scope_label = tables[0].scope if len(tables) == 1 else "全 scope"
+
+    # --- ① TextKey クラスが宣言するキー（出荷コードが参照するか否かに関わらず全件） -------
+    for rel, content in sources:
+        for class_match in L10N_TEXTKEY_CLASS_RE.finditer(content):
+            class_name = class_match.group("name")
+            if ctx.is_waived("21", class_name):
+                continue
+            body = _class_body(content, class_match.end())
+            declared = [(match.group("name"), match.group("value"))
+                        for match in L10N_CONST_RE.finditer(body)]
+            if not declared:
+                ctx.add(
+                    "21",
+                    ERROR,
+                    f"`{class_name}` から翻訳キーの宣言を 1 件も拾えていません。クラスは在るのに"
+                    f"0 件という状態は、宣言の書き方が変わって**この検査が何も見ていない**ことを"
+                    f"意味します（0 件のまま緑になるのが一番危ない）。宣言の形を戻すか、"
+                    f"検査側の抽出規則を合わせてください",
+                    rel,
+                )
+                continue
+            # 指摘には定数名とキー文字列の**両方**を出す。定数名だけではカタログ側で検索できず、
+            # キーだけではコード側で検索できないので、片方だけだと必ず往復が要る。
+            missing = sorted(
+                f'{name}="{value}"'
+                for name, value in declared
+                if not known(value, None) and not ctx.is_waived("21", value)
+            )
+            if missing:
+                ctx.add(
+                    "21",
+                    ERROR,
+                    f"`{class_name}` が宣言する翻訳キーのうち {len(missing)} 件が既定ロケールの"
+                    f"カタログ（{scope_label}）にありません（{_l10n_sample(missing)}）。"
+                    f"`Tr` は未登録のキーを**キー文字列のまま返し、書式引数を捨てる**ため、"
+                    f"訳が出ないのではなく画面にキー名が出て埋め込むはずの値ごと消えます。"
+                    f"全ロケールが等しく欠いていると検査 18 では構造上鳴りません",
+                    rel,
+                )
+
+    # --- ② `Tr` 呼び出しが参照するキー（文字列リテラル・定数のどちらも） ------------------
+    consts: dict[str, str] = {}
+    for _, content in sources:
+        for match in L10N_CONST_RE.finditer(content):
+            consts[match.group("name")] = match.group("value")
+
+    facades = collect_l10n_facades(ctx, sources)
+    calls = resolved = 0
+    for facade in facades:
+        needle = f"{facade.class_name}.Tr("
+        for rel, content in sources:
+            for line, argtext in _l10n_find_calls(content, needle):
+                args = _l10n_split_args(argtext)
+                if len(args) <= facade.key_index:
+                    continue
+                calls += 1
+                scope = facade.scope
+                if facade.key_index == 1:
+                    scope_arg = args[0]
+                    if scope_arg.startswith('"') and scope_arg.endswith('"'):
+                        scope = scope_arg[1:-1]
+                    else:
+                        scope = consts.get(scope_arg.split(".")[-1].strip(), facade.scope)
+                raw = args[facade.key_index]
+                if raw.startswith('"') and raw.endswith('"'):
+                    key = raw[1:-1]
+                else:
+                    key = consts.get(raw.split(".")[-1].strip())
+                    if key is None:
+                        if L10N_KEY_CONST_REF_RE.match(raw) and not ctx.is_waived("21", rel):
+                            ctx.add(
+                                "21",
+                                ERROR,
+                                f"{rel}:{line}: 翻訳キー定数 `{raw}` を解決できません。定数の宣言が"
+                                f"git 追跡された `Packages/` の外にあるか、消えています。"
+                                f"解決できない呼び出しは検査から黙って抜けます",
+                                rel,
+                            )
+                        continue  # 変数で組み立てるキーは静的に決まらない（正当な形）
+                resolved += 1
+                if not known(key, scope) and not ctx.is_waived("21", key):
+                    ctx.add(
+                        "21",
+                        ERROR,
+                        f"{rel}:{line}: `{facade.class_name}.Tr` が参照するキー `{key}` が既定"
+                        f"ロケールのカタログ（{scope or scope_label}）にありません。画面には訳文の"
+                        f"代わりにキー名が出ます",
+                        rel,
+                    )
+
+    # 「呼び出しは在るのに 1 件も解決できなかった」を成功として返さない。検査 0 件の緑と、
+    # 検査して問題が無かった緑が見分けられないと、この検査は在るだけで何も守らない。
+    if calls > 0 and resolved == 0:
+        ctx.add(
+            "21",
+            ERROR,
+            f"`Tr` の呼び出しを {calls} 件検出しましたが、キーを 1 つも解決できていません"
+            f"（ファサード: {', '.join(facade.class_name for facade in facades) or 'なし'}）。"
+            f"この状態の緑は「問題が無い」ではなく「何も見ていない」です",
+        )
+
+
+def _class_body(content: str, position: int) -> str:
+    """`class X` 宣言の直後から、対応する閉じ波括弧までの本文を返す。
+
+    ファイル単位で定数を拾うと、同じファイルに翻訳キー以外の定数を持つクラスが同居していた
+    場合にそれらまで「カタログに無いキー」と誤検出する。クラスの境界で切る。
+    """
+    start = content.find("{", position)
+    if start == -1:
+        return ""
+    depth = 0
+    for index in range(start, len(content)):
+        if content[index] == "{":
+            depth += 1
+        elif content[index] == "}":
+            depth -= 1
+            if depth == 0:
+                return content[start + 1:index]
+    return content[start + 1:]
+
+
 def check_extra(ctx: RepoContext) -> None:
     for name, package_dir, meta in ctx.packages:
         rel = (package_dir / "package.json").relative_to(ctx.root).as_posix()
@@ -2888,6 +3271,7 @@ CHECKS = (
     check_18_l10n_catalogs,
     check_19_translation_doc_naming,
     check_20_skills_under_version_control,
+    check_21_l10n_key_coverage,
     check_extra,
 )
 
