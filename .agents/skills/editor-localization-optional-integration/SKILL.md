@@ -51,7 +51,8 @@ Derived automatically:
 6. Do **not** add `com.kajitaharuka.unity-editor-localization` to the main `package.json` `dependencies`. Document it as a recommended optional add-on in the README instead.
 7. Place the catalog-coverage EditMode test. **This step is not optional** — see
    「翻訳キーの網羅を機械で見る EditMode テストを必ず置く」below for what it catches, the prerequisites to
-   check first, and what to do when a package does not meet them.
+   check first, the destination repo's test conventions to match **before** writing the file, and the
+   standards-check pitfalls that hit every existing repo this test was retrofitted into.
 8. Verify (see below).
 
 ## File mapping (templates → output)
@@ -177,9 +178,58 @@ seam の形（`{{PREFIX}}TextKey` + `DefaultEditorL10nBridge`）は消費側パ�
    `EditorL10n.Tr(scope, key)` を直接呼ぶため、この seam ベースのテストは当てはまらない。基盤自身のカタログは
    `Validate Catalogs` と `validate_locale_quality.py` が受け持つ。
 
-テストクラス名・テストメソッド名は日本語／英語のどちらでもよく、そのリポジトリの既存テストの流儀に合わせる
-（実測 2026-08-14: UEWCE と UMPD は日本語のテストメソッド名、EPE と TAE は英語）。テンプレートは日本語の
-メソッド名で書いてあるので、英語で揃えているリポジトリでは改名すること。アサーションとコメントが本体である。
+### 置く前に移植先の既存テストを読む（トークン置換では吸収できない差）
+
+テンプレートは `{{TOKEN}}` を置換すればコンパイルは通るが、**それだけでは移植先で 1 ファイルだけ流儀の違う
+テストになる**。ファイルを書く前に移植先の `Tests/Editor/*.cs` を実際に開き、次の 2 点を数えて合わせること。
+
+| 合わせる対象 | 見方 | 実測（2026-08-14） |
+| --- | --- | --- |
+| アサーションの書き方 | `grep -c 'Assert\.That'` と `grep -c 'Assert\.AreEqual'` を既存テスト全体に当て、**多数派ではなく「一度でも混在しているか」**を見る | UMPD は constraint model（`Assert.That` / `Is.EqualTo` / `Is.Empty`）。EPE は classic（`Assert.AreEqual` / `Assert.IsEmpty` / `Assert.IsNotEmpty`）で、**既存 7 ファイルが `Assert.That` を 1 度も使っていなかった**。TAE も classic（`Assert.AreEqual` 37 / `Assert.IsTrue` 6、`Assert.That` は 0） |
+| テストメソッド名 | 既存の `public void` の名前を数語読む | UEWCE と UMPD は日本語のメソッド名。EPE と TAE は英語の `Method_Behavior`（例 `Resolve_ClampsToMaxTextWidth`） |
+
+テンプレートは constraint model・日本語メソッド名で書いてあるので、**どちらかに固定して配らないこと**。
+classic で揃っているリポジトリでは対応表のとおり読み替える。
+
+| テンプレート（constraint model） | classic での書き方 |
+| --- | --- |
+| `Assert.That(actual, Is.EqualTo(expected), message)` | `Assert.AreEqual(expected, actual, message)`（**引数の順が逆**） |
+| `Assert.That(collection, Is.Not.Empty, message)` | `Assert.IsNotEmpty(collection, message)` |
+| `Assert.That(collection, Is.Empty, message)` | `Assert.IsEmpty(collection, message)` |
+
+`[TestFixture]` を既存テストが全部付けているなら付ける、といった細部も同じ扱い。アサーションの中身と
+コメントがこのテストの本体であり、**流儀を合わせても検出力は 1 ミリも変わらない**。逆に流儀が違うと、
+そのリポジトリを次に触る人が「ここだけ別の規約がある」と誤読する。
+
+### 既存リポジトリへ後から配るときに踏む落とし穴（標準準拠検査）
+
+新規スキャフォールドでは起きず、**既にある製品リポジトリへ配るときだけ**踏む。3 つとも実際に踏んだ
+（2026-08-14 / EPE）。`python3 scripts/pipeline/verify_repo_guide.py` を通す前に潰しておくこと。
+
+1. **新規テストファイルは `git add -N`（intent-to-add）してから検査を回す。**
+   検査 6（`.meta` 完全性と git 追跡）は `git ls-files` を真実源にして「アセット本体が git 追跡されていない」
+   「`.meta` が git 追跡されていない」を **error** で出す。コミットしない段階で検査だけ通したいときは
+   `git add -N <test>.cs <test>.cs.meta` を打つ。`.meta` は忘れやすいが、本体と `.meta` の**両方**が対象。
+2. **ガイド（リポジトリ直下の `CLAUDE.md` / `AGENTS.md` / `README.md`）へ、バッククォート付きの
+   `scripts/...` 形式のパスを書かない。** 検査 2 は、これらのガイドの中でバッククォートに囲まれ
+   `Packages/` `Assets/` `docs/` `scripts/` `.claude/` などで始まる語を**そのリポジトリ内の実在パス**として
+   解決し、無ければ error を出す。カタログ側の検査へ誘導するとき
+   `` `scripts/insert_catalog_keys.py` `` と書くと、そのスクリプトは実際にはこのスキル群の側にあるため
+   自リポジトリでは見つからず落ちる。**スクリプト名だけを書く**（`` `insert_catalog_keys.py` ``）か、
+   スキル名（`editor-localization-translation-quality`）で参照する。
+3. **否定表現を、テスト整備の話題と同じ行に置かない。**
+   検査 4 は補助的な検出として、テスト整備を否定する記述を **warn** で拾う。判定は次の 2 群が
+   同一行に同居するかどうかだけなので、**内容として正しい説明でも引っかかる**。
+   - 話題側: `EditMode` / `テスト` / `Tests` / `testables`
+   - 否定側: `未整備` / `未登録` / `未導入` / `存在しない` / `ありません` / `は無い` / `はない` / `が無い` / `がない`
+
+   例:「キーがカタログに未登録のとき `Tr` はキー文字列を返す」という説明が warn になる。
+   「カタログに載っていないとき」のような肯定形へ寄せれば消える。error ではないが、
+   warn を残すと本物の警告が埋もれる（この SKILL.md 自身も同じ規則で書いてある）。
+
+なお、`Tests/` 配下は `.tgz` に同梱されるため、テストファイルの新規追加は検査 16（CHANGELOG 網羅）から見て
+**購入者に届く同梱物の追加**である。移植先の `CHANGELOG.md` の `[Unreleased]` に「追加」節が無いと warn が
+出る。テストを置いたら同じコミットで CHANGELOG にも 1 項目立てること。
 
 ## Verify
 
@@ -188,6 +238,15 @@ seam の形（`{{PREFIX}}TextKey` + `DefaultEditorL10nBridge`）は消費側パ�
 - **Catalog coverage**: `Window > General > Test Runner` の `EditMode` で `{{TESTS_ASMDEF}}` を実行し、
   `{{PREFIX}}TextKeyCatalogCoverageTests` の 2 件が通ること。**土台テストが単独で緑になることも確かめる**
   （網羅テストだけを見ていると、土台が壊れたときに静かに緑へ変わったことに気付けない）。
+- **緑が空振りでないことを 1 回だけ変異で確かめる。** 導入直後に何も落ちないと、「カタログが揃っている」のか
+  「テストが何も見ていない」のか区別が付かない。**変異はテストファイルの中だけで完結させる**のがコツで、
+  `bridge.Tr({{PREFIX}}L10n.Scope, ...)` の scope 引数を存在しない文字列（例 `"mutation.bogus.scope"`）へ
+  一時的に差し替えて 1 回走らせる。宣言キーの全件が「テーブルに無い」と報告されて落ちれば、
+  **列挙が何件効いているか（報告される件数）と失敗メッセージの読みやすさが同時に確かめられる**。
+  確認したら必ず元へ戻して再度緑にすること。`{{PREFIX}}TextKey` へダミー定数を足す変異でも同じことができるが、
+  他の作業と並行しているときは触ってよいファイルの範囲を越えやすいので、scope 差し替えのほうが安全。
+  実測 2026-08-14 / TAE: 宣言 37 件が 37 件とも報告され、`ToString()` のおかげで NUnit 既定の
+  `But was: < ... >` 側にも `TextureSectionSettings = "texture.section.settings", ...` と定数名つきで並んだ。
   導入直後に網羅テストが落ちるなら、それは既存のカタログ取りこぼしを拾ったということなので、
   `editor-localization-translation-quality` スキルの `scripts/insert_catalog_keys.py` で全ロケールへ一括投入する。
 - If the switcher does not appear, check that the base package version satisfies `{{MIN_VERSION}}` (a stale git cache can resolve an older version below the minimum).

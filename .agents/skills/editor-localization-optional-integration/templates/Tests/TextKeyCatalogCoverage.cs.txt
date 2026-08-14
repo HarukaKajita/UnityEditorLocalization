@@ -144,6 +144,15 @@ namespace {{TESTS_NAMESPACE}}
             public string FieldName { get; }
 
             public string Key { get; }
+
+            /// <summary>
+            /// 失敗時の読みやすさのためだけに置く。NUnit は空でないコレクションを落とすとき
+            /// 既定の書式で中身を並べるので、これが無いと型名（<c>&lt;...+DeclaredKey&gt;</c>）が
+            /// 並ぶだけになり、どのキーの話か分からない。
+            /// 失敗の本体は <see cref="BuildFailureMessage"/> のカスタムメッセージ側にあるが、
+            /// 目に入る順序は NUnit の既定書式のほうが先である。
+            /// </summary>
+            public override string ToString() => $"{FieldName} = \"{Key}\"";
         }
     }
 }
