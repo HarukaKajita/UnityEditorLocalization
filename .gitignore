@@ -125,3 +125,8 @@ InitTestScene*.unity*
 # 参照先 .claude/mysite も公開リポジトリには存在しないため追跡しない）。
 /.claude/launch.json
 /.claude/mysite/
+
+# 検査スクリプトを走らせると Python が作るバイトコード。
+# check_l10n_catalogs.py が verify_repo_guide を import するため、検査するだけで生える。
+__pycache__/
+*.pyc
