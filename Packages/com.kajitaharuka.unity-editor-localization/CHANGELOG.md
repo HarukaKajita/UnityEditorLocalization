@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+### Added
+- **同梱スキル `editor-localization-optional-integration` の雛形に、翻訳キーの網羅を機械で見る
+  EditMode テストを追加した。** `templates/Tests/TextKeyCatalogCoverage.cs.txt` を新設し、SKILL.md の
+  手順へ「必ず置く」ステップとして組み込んである。`Tr` はキーが未登録のとき**キー文字列をそのまま返し、
+  しかも書式引数を捨てる**ため、コード側だけが先に進むと「訳が出ない」ではなく**表示がキー名に化け、
+  埋め込むはずだった値ごと消える**。例外は出ないので機能テストも目視も緑のまま通り抜ける
+  （実測 2026-08-14: ある消費側パッケージで TextKey へ 13 キーを足して 19 ロケールの JSON を 1 つも
+  更新しないままリリース直前まで進み、`Rendering (Mixed)` というグループ見出しが `group.header.mixed` に
+  化けてグループ名ごと消えた）。テストは出荷コードの `DefaultEditorL10nBridge` をそのまま使って
+  defaultLocale のテーブルだけを見る（カタログの探索をテストへ書き写すと、出荷側の探索がずれても
+  テストだけが通る二重管理になるため）。あわせて SKILL.md へ、置く前に満たすべき前提
+  （TextKey クラス・Tests asmdef・`InternalsVisibleTo`・単一 scope）と、満たさない構成での扱いを明記した。
+  ソフトウェアの動作は変わらない。
+
 ### Changed
 - **同梱スキル `editor-localization-translation-quality` に、屈折語で「訳さない語」を
   文中へ置くときの作法を追加した。** ロシア語・ウクライナ語・ポーランド語などでは、

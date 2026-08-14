@@ -1,0 +1,150 @@
+#if UNITY_EDITOR
+using System.Collections.Generic;
+using System.Reflection;
+using System.Text;
+using NUnit.Framework;
+using {{ROOT_NAMESPACE}};
+
+namespace {{TESTS_NAMESPACE}}
+{
+    /// <summary>
+    /// <see cref="{{PREFIX}}TextKey"/> が宣言する翻訳キーが、すべて defaultLocale の翻訳テーブルへ
+    /// 載っていることを固定する。
+    ///
+    /// 塞ぐ穴: コード側だけが先に進んで翻訳カタログが取り残されると、新しく足したキーがどのロケールにも
+    /// 無い状態のまま通ってしまう。<see cref="{{PREFIX}}L10n.Tr"/> はキーが未登録のとき
+    /// <b>キー文字列をそのまま返し、しかも書式引数を捨てる</b>。起きるのは「訳が出ない」ではなく
+    /// 「表示がキー名に化け、埋め込むはずだった値ごと消える」ことで、例外は出ないため個々の機能テストは
+    /// 緑のままになる。人の目に頼らず落とせるようにここで機械的に見る。
+    /// 実測 2026-08-14 / UberMaterialPropertyDrawer: TextKey へ 13 キーを足して 19 ロケールの JSON を
+    /// 1 つも更新しないままリリース直前まで進み、<c>Rendering (Mixed)</c> と出ていたグループ見出しが
+    /// <c>group.header.mixed</c> に化けてグループ名ごと消えた（置き換える前のハードコード英語より悪い）。
+    ///
+    /// 判定には出荷コードの <see cref="DefaultEditorL10nBridge"/> をそのまま使う。狙いは2つ。
+    /// 1つは、多言語基盤(UnityEditorLocalization)の有無や、いま選ばれている表示言語に左右されず
+    /// defaultLocale のテーブルだけを見られること（テストの結果が環境で揺れない）。
+    /// もう1つは、カタログの探索と解釈をテスト側へ書き写さずに済むこと。書き写すと、
+    /// 出荷コード側の探索がずれてもテストだけが通る二重管理になる。
+    ///
+    /// <b>このテストが見るのは defaultLocale のテーブルだけ</b>である。「defaultLocale には在るが
+    /// 他のロケールに無い」という半分は捕まえられない。そちらはロケール間の key 集合の一致を見る
+    /// 検査（<c>Tools &gt; UnityEditorLocalization &gt; Validate Catalogs</c> と、
+    /// <c>editor-localization-translation-quality</c> スキル同梱の <c>scripts/validate_locale_quality.py</c>）の
+    /// 担当で、あえて二重に持たない。上と同じ理由で、全ロケールの JSON をテストから直接読み始めると、
+    /// 出荷コードの探索と食い違っても気付けなくなる。
+    ///
+    /// scope をパッケージ間で単一に集約している構成（suite の core + companion など）では、
+    /// キーも <see cref="{{PREFIX}}TextKey"/> 1 クラスへ集まるため、このテスト 1 本で全パッケージ分を覆う。
+    /// assembly ごとに TextKey クラスを分けている場合のみ、クラスの数だけこのテストを増やすこと。
+    /// </summary>
+    public sealed class {{PREFIX}}TextKeyCatalogCoverageTests
+    {
+        /// <summary>
+        /// 網羅テストは「キーが欠けていると <see cref="{{PREFIX}}L10n.Tr"/> がキー文字列を返す」ことを
+        /// 判定の土台にしている。その土台自体をここで固定する。
+        /// これが変わると網羅テストは何も検出せず静かに緑になるため、先に落ちてもらう必要がある。
+        /// </summary>
+        [Test]
+        public void カタログに無いキーはキー文字列がそのまま返る()
+        {
+            var bridge = new DefaultEditorL10nBridge();
+            const string missingKey = "{{SCOPE}}.tests.thisKeyIsNeverInTheCatalog";
+
+            Assert.That(bridge.Tr({{PREFIX}}L10n.Scope, missingKey, null), Is.EqualTo(missingKey),
+                "欠けたキーの表れ方が変わっている。網羅テストの判定方法も併せて見直すこと。");
+        }
+
+        [Test]
+        public void 宣言した全ての翻訳キーがdefaultLocaleのテーブルに存在する()
+        {
+            var bridge = new DefaultEditorL10nBridge();
+            var declaredKeys = CollectDeclaredKeys();
+
+            // 列挙に失敗して0件になると、以下のループが1度も回らずテストが空振りで緑になる。
+            Assert.That(declaredKeys, Is.Not.Empty, $"{nameof({{PREFIX}}TextKey)} から翻訳キーを1件も拾えていない。");
+
+            var missing = new List<DeclaredKey>();
+            foreach (var declaredKey in declaredKeys)
+            {
+                // 空文字はキーとして成立しない。Tr へ渡す前にここで落とす（null は Dictionary が例外を出す）。
+                if (string.IsNullOrEmpty(declaredKey.Key))
+                {
+                    missing.Add(declaredKey);
+                    continue;
+                }
+
+                if (bridge.Tr({{PREFIX}}L10n.Scope, declaredKey.Key, null) == declaredKey.Key)
+                    missing.Add(declaredKey);
+            }
+
+            var message = missing.Count == 0 ? string.Empty : BuildFailureMessage(missing, declaredKeys.Count);
+            Assert.That(missing, Is.Empty, message);
+        }
+
+        /// <summary>
+        /// <see cref="{{PREFIX}}TextKey"/> が宣言する static な文字列定数を、名前で絞り込まずに全件拾う。
+        /// このクラスの責務は「翻訳キーを集約する」ことだけなので、翻訳キーでない定数が紛れ込んだら
+        /// それ自体を検出したい（カタログへ載せるか、置き場所を変えるかの判断を強制する）。
+        /// 逆に接頭辞などの命名規則で除外すると、規則から外れた名前を付けた瞬間に本物のキーが
+        /// 検査から静かに抜け落ちる。今回塞ぎたい穴と同じ形なので、規則に頼らない側へ倒している。
+        ///
+        /// <c>NonPublic</c> を含めるのは、TextKey クラスの可視性がパッケージによって変わるため。
+        /// 単一パッケージなら internal（= リフレクション上は NonPublic）、別パッケージの companion から
+        /// 引く必要がある場合は public になる。どちらでも同じテストが効くように両方を指定する。
+        /// </summary>
+        private static List<DeclaredKey> CollectDeclaredKeys()
+        {
+            var keys = new List<DeclaredKey>();
+            foreach (var field in typeof({{PREFIX}}TextKey).GetFields(
+                         BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static))
+            {
+                if (field.FieldType != typeof(string))
+                    continue;
+
+                // const は実体を持たないので GetValue ではなく定数値を読む。
+                // 将来 static readonly での宣言が混ざっても拾えるようにしておく。
+                var value = field.IsLiteral
+                    ? (string)field.GetRawConstantValue()
+                    : (string)field.GetValue(null);
+                keys.Add(new DeclaredKey(field.Name, value));
+            }
+
+            return keys;
+        }
+
+        /// <summary>
+        /// 欠けたキーを一覧にする。宣言した全件が欠けているときはキーの追加漏れではなく
+        /// テーブル自体を読めていない可能性が高く、直し方が変わるのでその見分けも添える。
+        /// </summary>
+        private static string BuildFailureMessage(List<DeclaredKey> missing, int declaredCount)
+        {
+            var builder = new StringBuilder();
+            builder.Append($"defaultLocale のテーブルに無い翻訳キーが {missing.Count} 件ある（宣言は {declaredCount} 件）。");
+            if (missing.Count == declaredCount)
+                builder.Append("全件欠けているため、キーの追加漏れではなくテーブル自体を読めていない可能性が高い。");
+            builder.AppendLine();
+
+            foreach (var declaredKey in missing)
+                builder.AppendLine($"  {declaredKey.FieldName} = \"{declaredKey.Key}\"");
+
+            return builder.ToString();
+        }
+
+        /// <summary>
+        /// 宣言1件ぶん。失敗時にどの定数を直せばよいか分かるよう、キー文字列と定数名を組で持つ。
+        /// </summary>
+        private readonly struct DeclaredKey
+        {
+            public DeclaredKey(string fieldName, string key)
+            {
+                FieldName = fieldName;
+                Key = key;
+            }
+
+            public string FieldName { get; }
+
+            public string Key { get; }
+        }
+    }
+}
+#endif

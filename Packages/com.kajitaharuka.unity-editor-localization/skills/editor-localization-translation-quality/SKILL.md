@@ -35,6 +35,8 @@ Use this skill for EditorLocalization locale work, especially `*.l10n-manifest.j
    - Errors should state what failed and what the user can change.
    - Logs can be slightly more explicit than UI labels.
    - Prefer natural editor/tool wording over literal dictionary output.
+   - **Adding keys is a separate mechanical step, not part of translating.** Whenever the change introduces new keys, write them into every locale with `scripts/insert_catalog_keys.py` ("Bulk key insertion" below) — never by hand, never with a one-off script written for this task. Reach for it the moment you know the key list, before you start editing any locale file.
+   - Code that starts calling `Tr` for a string it used to hard-code must land in the **same commit** as the catalog entries ("補間文字列を `Tr` へ置き換える変更…" below).
 
 4. Preserve machine-sensitive text.
    - Keep placeholder numbers exactly aligned with the default locale: `{0}`, `{1}`, etc.
@@ -91,6 +93,38 @@ python3 scripts/insert_catalog_keys.py \
 - `--data` is a translation JSON file of the form `{"key": {"locale": "value", ...}, ...}`. Keys are inserted in file order, into every locale file, immediately after `--anchor`.
 - The script auto-detects each file's formatting and fails closed: a file matching neither supported format aborts the whole run with an example of that file's formatting. Follow the abort message (extend the script or normalize the file deliberately); do not hand-edit around it in a way that silently breaks the file's formatting.
 - Before writing it verifies that the anchor exists, the keys do not, and the data covers every locale; after inserting it re-verifies JSON validity, zero duplicate keys, identical key sets, and identical placeholder number sets across locales. Run with `--dry-run` first, then without.
+
+## 補間文字列を `Tr` へ置き換える変更は、カタログ追加と同一コミットにする（2026-08-14 制定）
+
+ハードコードされた文字列（とくに補間 `$"..."`）を `Tr` 呼び出しへ替える変更では、**コード側のキー宣言と
+`Locales/*.json` への追加を必ず同じコミットに入れる。** 片方だけが進んだ状態を経由してはいけない。
+
+`Tr` はキーが未登録のとき**キー文字列をそのまま返し、しかも書式引数を捨てる**。片肺の状態で起きるのは
+「訳が出ない」ではなく、**表示がキー名に化け、埋め込むはずだった値ごと消える**ことである。
+
+実測（2026-08-14 / UMPD）: コード側だけが先に進み、`UmpdTextKey.cs` へ 13 キーが足されたのに
+19 ロケールの JSON が 1 つも更新されない状態になった。`Rendering (Mixed)` と出ていたグループ見出しが
+`group.header.mixed` に化け、**グループ名が丸ごと消えた**。置き換える前のハードコード英語より確実に悪い。
+コードとカタログを別の担当が並行して触るときに、この型が起きやすい。
+
+### 同じ事故を機械で落とす（消費側パッケージの EditMode テスト）
+
+「宣言した全キーが defaultLocale のテーブルに在ること」を見る EditMode テストを、カタログを消費する側の
+パッケージへ置く。実装例は UMPD の
+`Packages/com.kajitaharuka.uber-material-property-drawer/Tests/Editor/UmpdTextKeyCatalogCoverageTests.cs`。
+
+- **判定には出荷コードのブリッジ（`DefaultEditorL10nBridge`）をそのまま使う。** カタログの探索と解釈を
+  テストへ書き写すと二重管理になり、**出荷側の探索がずれてもテストだけが通る**。ブリッジ経由なら、
+  多言語基盤（UnityEditorLocalization）の有無や現在の表示言語にも結果が左右されない。
+- **キー定数の列挙を命名規則で絞らない。** 接頭辞などで除外すると、規則から外れた名前を付けた瞬間に
+  本物のキーが静かに検査から抜ける（いま塞ぎたい穴と同じ形）。`public static` な string 定数を全件拾う。
+- **判定の土台を別テストで固定する。**「欠けたキーは `Tr` がキー文字列を返す」が前提なので、
+  この表れ方が変わると網羅テストは何も検出せず静かに緑になる。土台側が先に落ちるようにしておく。
+- **列挙が 0 件のときに落とす。** リフレクションが空振りすると、ループが 1 度も回らないまま緑になる。
+- **このテストが見るのは defaultLocale のテーブルだけ**である。「en には在るが他 18 ロケールに無い」
+  半分は対象外で、そちらはロケール間の key 集合一致を見る検査（`Tools > Editor Localization >
+  Validate Catalogs` と `scripts/validate_locale_quality.py`）の担当。あえて二重に持たない —
+  全ロケールの JSON をテストから直接読み始めると、上と同じ二重管理になる。
 
 ## Terminology dump
 
