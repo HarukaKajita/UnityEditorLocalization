@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### ドキュメント
+
+- **同梱 `README.md` に「対応環境」節を追加した。** 商品ページ・`publish.json`・販売所の説明文は
+  いずれも動作確認済みの環境（Unity 2022.3.22f1 / macOS / Windows 11）を名乗っているのに、
+  **購入者の手元へ届く README にはその記載が 1 行も無かった**。売り場の主張を同梱物で確かめられない
+  状態だったので、README を基準の側へ揃えた。記載内容は他の面と同一で、対応範囲そのものは変えていない。
+
 ### Added
 - **同梱スキル `editor-localization-optional-integration` の雛形に、翻訳キーの網羅を機械で見る
   EditMode テストを追加した。** `templates/Tests/TextKeyCatalogCoverage.cs.txt` を新設し、SKILL.md の

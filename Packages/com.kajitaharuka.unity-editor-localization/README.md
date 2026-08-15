@@ -12,6 +12,13 @@ Unity Editor拡張向けの軽量な多言語化基盤です。Editor上のInspe
 - manifestや翻訳テーブルJSONの変更を検知し、カタログを自動リロードします。
 - 欠落キーと`string.Format` placeholderの不一致を検証できます。
 
+## 対応環境
+
+- Unity 2022.3.0f1 以降
+- 外部パッケージへの依存はありません
+- エディター専用です（ランタイムでは動作しません）
+- 動作確認は **Unity 2022.3.22f1 / macOS / Windows 11** で行っています
+
 ## インストール
 
 このパッケージはリポジトリの`Packages/com.kajitaharuka.unity-editor-localization/`配下にあるため、git URLでインストールする際は`?path=`でサブフォルダを指定します。
