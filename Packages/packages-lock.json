@@ -24,6 +24,13 @@
       "dependencies": {},
       "hash": "068b8c41a60f116fd4e8b9dbe18526f5a34b94fb"
     },
+    "com.kajitaharuka.misc-pack": {
+      "version": "git@github.com:HarukaKajita/MiscPack.git?path=Packages/com.kajitaharuka.misc-pack",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "983a0454c2e51f584378528e62613f15b0c7fea1"
+    },
     "com.kajitaharuka.unity-editor-localization": {
       "version": "file:com.kajitaharuka.unity-editor-localization",
       "depth": 0,
