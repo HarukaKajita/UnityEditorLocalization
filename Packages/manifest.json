@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "com.coplaydev.unity-mcp": "https://github.com/CoplayDev/unity-mcp.git?path=/MCPForUnity#main",
+    "com.coplaydev.unity-mcp": "https://github.com/CoplayDev/unity-mcp.git?path=/MCPForUnity#v10.1.2",
     "com.kajitaharuka.export-package-extension": "git@github.com:HarukaKajita/ExportPackageExtension.git?path=Packages/com.kajitaharuka.export-package-extension",
     "com.kajitaharuka.misc-pack": "git@github.com:HarukaKajita/MiscPack.git?path=Packages/com.kajitaharuka.misc-pack",
     "com.kajitaharuka.unity-editor-window-capture-extension": "git@github.com:HarukaKajita/UnityEditorWindowCaptureExtension.git?path=Packages/com.kajitaharuka.unity-editor-window-capture-extension",

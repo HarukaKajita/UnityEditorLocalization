@@ -130,3 +130,8 @@ InitTestScene*.unity*
 # check_l10n_catalogs.py が verify_repo_guide を import するため、検査するだけで生える。
 __pycache__/
 *.pyc
+
+# MCP for Unity の execute_code 用 Roslyn（開発専用ツール。UPM ウィンドウのボタンで再取得できる）
+# 各プロジェクトが自分の GUID で meta を生成するのが正規の状態なので追跡しない。
+Assets/Plugins/Roslyn/
+Assets/Plugins/Roslyn.meta
