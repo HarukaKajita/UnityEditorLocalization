@@ -2,7 +2,7 @@
 # 生成物: この内容はテンプレートリポジトリ UnityTemplate_2022_3_22f1 から配布されたコピーです。
 # 編集はテンプレート側で行い、scripts/distribute_standard.py で再配布してください。
 # source: UnityTemplate_2022_3_22f1/scripts/pipeline/emit_release_manifest.py
-# source-sha256: 1e87a8a184919ff8269c0e0d8127d2e2290d355c5a3572cb4c1bdf5e820fd125
+# source-sha256: 2facc86dfb31bb81f4eed7b626f6facad0d1a8a117cf70bb6388200e43ec8c58
 """リリース契約ファイル `release-<version>.json` を決定的に生成する（ゴールド標準 第3層）。
 
 `pipeline/repo.json` の宣言と `package.json` / `CHANGELOG.md` / `Publish/` / `git` だけを入力に
@@ -21,7 +21,7 @@
 使い方（対象リポジトリのルートで実行）:
     python3 scripts/pipeline/emit_release_manifest.py                     # 現在の version で生成
     python3 scripts/pipeline/emit_release_manifest.py --version 1.3.1   # 版の一致を明示的に確認する
-    python3 scripts/pipeline/emit_release_manifest.py --check             # 書かずに差分だけ検査
+    python3 scripts/pipeline/emit_release_manifest.py --check             # 書かずに差分と「各書き出し先がコミット済みか」を検査
     python3 scripts/pipeline/emit_release_manifest.py --external-content <path>
 
 正本: UnityTemplate_2022_3_22f1/scripts/pipeline/emit_release_manifest.py
@@ -77,6 +77,30 @@ def sha256_file(path: Path) -> str:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def committed_state(path: Path) -> str:
+    """ファイルが属する git リポジトリの HEAD に、現在の内容でコミット済みかを判定する。
+
+    戻り値: "clean"（HEAD に在り内容一致）/ "untracked"（HEAD に無い）/
+    "modified"（HEAD に在るが内容が違う）/ "unknown"（git リポジトリでない等、判定不能）。
+    external-content は開発リポジトリと別の git リポジトリなので、ファイルの置き場所から
+    `git -C` で属するリポジトリを引く（pathspec は cwd 相対で解決される）。
+    """
+    parent = str(path.parent)
+    tree = subprocess.run(
+        ["git", "-C", parent, "ls-tree", "HEAD", "--", path.name],
+        capture_output=True, text=True, check=False,
+    )
+    if tree.returncode != 0:
+        return "unknown"
+    if not tree.stdout.strip():
+        return "untracked"
+    diff = subprocess.run(
+        ["git", "-C", parent, "diff", "--quiet", "HEAD", "--", path.name],
+        capture_output=True, check=False,
+    )
+    return "clean" if diff.returncode == 0 else "modified"
 
 
 def discover_packages(root: Path) -> list[tuple[str, Path, dict]]:
@@ -613,6 +637,23 @@ def main(argv: list[str]) -> int:
             destination.parent.mkdir(parents=True, exist_ok=True)
             destination.write_text(content, encoding="utf-8")
 
+    # 契約ファイルは「書けた」だけでは届かない — コミットされて初めて MySite 側の検証の入力になる。
+    # 実測（TAE 2.3.1 / 2026-08-20）: external-content 側へ書かれた契約が未コミットのまま放置され、
+    # 商品側の反映（publish.json / changelog ページ / 契約）が丸ごと抜けた。--check は各書き出し先が
+    # HEAD へ現在の内容でコミット済みであることまで検査する。書き込み直後の実行（--check なし）では
+    # 未コミットが正常な中間状態なので、コミットを促す WARN に留める。
+    uncommitted: list[str] = []
+    for destination in destinations:
+        state = committed_state(destination)
+        if state == "clean":
+            continue
+        label = {
+            "untracked": "コミットされていません",
+            "modified": "HEAD の内容と異なります（コミット漏れ）",
+            "unknown": "コミット状態を判定できません（git リポジトリ外？）",
+        }[state]
+        uncommitted.append(f"{destination}: {label}")
+
     for note in notes:
         print(f"WARN: {note}")
     if changed:
@@ -621,8 +662,13 @@ def main(argv: list[str]) -> int:
             print(f"{verb}: {path}")
     else:
         print(f"最新: release-{version}.json（{len(destinations)} 箇所）")
+    for line in uncommitted:
+        if args.check:
+            print(f"ERROR: {line}", file=sys.stderr)
+        else:
+            print(f"WARN: {line}（この後の工程で必ずコミットする。--check はコミット済みでないと失敗します）")
 
-    return 1 if (args.check and changed) else 0
+    return 1 if (args.check and (changed or uncommitted)) else 0
 
 
 if __name__ == "__main__":
