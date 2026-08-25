@@ -107,7 +107,7 @@
         { "key": "skills.status.installed", "value": "Đã cài" },
         { "key": "skills.status.notInstalled", "value": "Chưa cài" },
         { "key": "skills.status.reinstall", "value": "Cần cài lại" },
-        { "key": "skills.status.tooltip", "value": "Trạng thái đăng ký tại đích này (kiểm tra symlink của kỹ năng)." },
+        { "key": "skills.status.tooltip", "value": "Trạng thái đăng ký tại đích này (kiểm tra symlink và, nếu là bản sao thực, xem nội dung có khớp với package không)." },
         { "key": "skills.cli.note", "value": "Để đăng ký qua CLI, hãy chạy lệnh bên dưới." },
         { "key": "skills.cli.foldout", "value": "Đăng ký qua lệnh CLI" },
         { "key": "skills.cli.copy", "value": "Sao chép" },

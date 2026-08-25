@@ -107,7 +107,7 @@
         { "key": "skills.status.installed", "value": "Installato" },
         { "key": "skills.status.notInstalled", "value": "Non installato" },
         { "key": "skills.status.reinstall", "value": "Reinstallazione necessaria" },
-        { "key": "skills.status.tooltip", "value": "Stato di registrazione in questa destinazione (controlla i symlink degli skill)." },
+        { "key": "skills.status.tooltip", "value": "Stato di registrazione in questa destinazione (controlla i symlink e, per una copia reale, se il contenuto corrisponde al pacchetto)." },
         { "key": "skills.cli.note", "value": "Per registrare via CLI, esegui il comando qui sotto." },
         { "key": "skills.cli.foldout", "value": "Registra tramite comando CLI" },
         { "key": "skills.cli.copy", "value": "Copia" },

@@ -107,7 +107,7 @@
         { "key": "skills.status.installed", "value": "Установлено" },
         { "key": "skills.status.notInstalled", "value": "Не установлено" },
         { "key": "skills.status.reinstall", "value": "Нужна переустановка" },
-        { "key": "skills.status.tooltip", "value": "Состояние регистрации в этом расположении (проверяются symlink навыков)." },
+        { "key": "skills.status.tooltip", "value": "Состояние регистрации в этом расположении (проверяются symlink и, для реальной копии, совпадает ли её содержимое с пакетом)." },
         { "key": "skills.cli.note", "value": "Чтобы зарегистрировать через CLI, выполните команду ниже." },
         { "key": "skills.cli.foldout", "value": "Регистрация через команду CLI" },
         { "key": "skills.cli.copy", "value": "Копировать" },

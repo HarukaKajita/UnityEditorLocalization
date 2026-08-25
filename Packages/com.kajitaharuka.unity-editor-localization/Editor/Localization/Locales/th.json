@@ -107,7 +107,7 @@
         { "key": "skills.status.installed", "value": "ติดตั้งแล้ว" },
         { "key": "skills.status.notInstalled", "value": "ยังไม่ได้ติดตั้ง" },
         { "key": "skills.status.reinstall", "value": "ต้องติดตั้งใหม่" },
-        { "key": "skills.status.tooltip", "value": "สถานะการลงทะเบียนที่ปลายทางนี้ (ตรวจสอบ symlink ของสกิล)" },
+        { "key": "skills.status.tooltip", "value": "สถานะการลงทะเบียนที่ปลายทางนี้ (ตรวจสอบ symlink และหากเป็นสำเนาจริงจะตรวจว่าเนื้อหาตรงกับแพ็กเกจหรือไม่)" },
         { "key": "skills.cli.note", "value": "หากต้องการลงทะเบียนผ่าน CLI ให้รันคำสั่งด้านล่าง" },
         { "key": "skills.cli.foldout", "value": "ลงทะเบียนผ่านคำสั่ง CLI" },
         { "key": "skills.cli.copy", "value": "คัดลอก" },

@@ -107,7 +107,7 @@
         { "key": "skills.status.installed", "value": "已註冊" },
         { "key": "skills.status.notInstalled", "value": "未註冊" },
         { "key": "skills.status.reinstall", "value": "需重新註冊" },
-        { "key": "skills.status.tooltip", "value": "此註冊位置的註冊狀態（檢查技能 symlink）。" },
+        { "key": "skills.status.tooltip", "value": "此註冊位置的註冊狀態（檢查 symlink，以及實體副本的內容是否與套件一致）。" },
         { "key": "skills.cli.note", "value": "若要透過 CLI 註冊，請執行下面的指令。" },
         { "key": "skills.cli.foldout", "value": "透過 CLI 指令註冊" },
         { "key": "skills.cli.copy", "value": "複製" },
