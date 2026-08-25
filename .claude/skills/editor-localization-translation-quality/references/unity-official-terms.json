@@ -885,7 +885,7 @@
         "official": "ターゲット",
         "knownWrong": [],
         "evidence": "po",
-        "note": "家の用語は 対象（familyTerms 参照）。意図的な逸脱なので knownWrong は空にする"
+        "note": "家の用語は 対象（familyTerms 参照）。意図的な逸脱なので knownWrong は空にする。UEWCE の `既定ターゲット` は公式訳どおりで、家の用語の例外として維持する（familyTerms を参照）"
       },
       "ko": {
         "official": "타겟",
@@ -1553,7 +1553,10 @@
         "avoid": [
           "ターゲット"
         ],
-        "why": "指しているのは Build Target のような Unity の固有機能名ではなく「操作の対象」。6 リポジトリ 46 件が 対象 で一貫している（2026-08-26 実測。外れは UEWCE の 2 件だけ）"
+        "why": "指しているのは Build Target のような Unity の固有機能名ではなく「操作の対象」。6 リポジトリ 46 件が 対象 で一貫している（2026-08-26 実測。外れは UEWCE の 2 件だけ）。**例外: UEWCE の `既定ターゲット`（`capture.defaultTargetLabel`）はそのまま。**公式訳は ターゲット なのでこのラベルは誤りではなく、変えると商品ページと BOOTH ギャラリーの画像 2 枚（Project Settings を写したもの）が実物と食い違う。画像は macOS の Retina 2x で撮られており（ppp=2.0 / 2000x1364）、Windows 機は ppp=1 で UEWCE が拡大を拒否する仕様なので同等の撮り直しができない。文言の統一より画像の鮮度を採った（2026-08-26 判断）",
+        "exceptWithin": [
+          "既定ターゲット"
+        ]
       },
       "ko": {
         "preferred": "대상",
