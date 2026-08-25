@@ -45,6 +45,25 @@ def load_catalog(path: pathlib.Path) -> tuple[str, dict[str, str]]:
     return document.get("locale", path.stem), entries
 
 
+def is_real_hit(value: str, wrong: str, preferred: str, except_within: list[str]) -> bool:
+    """誤用形が本当に単独で使われているかを判定する。
+
+    CJK には語境界が無いので素の部分一致は偽陽性を出す。実測例: ko の `리셋`（Reset の誤用形）は
+    `프리셋`（Preset）の一部として 8 件現れる。`exceptWithin` に長い語を挙げると、その中に
+    収まっている分は数えない。
+    """
+    count = value.count(wrong)
+    if count == 0:
+        return False
+    # 正しい訳が誤用形を内包する場合（例: 公式 `資源資料庫` と誤用 `資源`）は、その分を差し引く。
+    if preferred != wrong and wrong in preferred:
+        count -= value.count(preferred) * preferred.count(wrong)
+    for longer in except_within or []:
+        if wrong in longer:
+            count -= value.count(longer) * longer.count(wrong)
+    return count > 0
+
+
 def check_family_terms(locales_dir: pathlib.Path, glossary: dict, only: set[str] | None) -> list[dict]:
     """家で決めた用語（familyTerms）から外れた語を探す。全ロケールが対象。"""
     findings = []
@@ -61,12 +80,10 @@ def check_family_terms(locales_dir: pathlib.Path, glossary: dict, only: set[str]
             if not info:
                 continue
             preferred = info["preferred"]
+            except_within = info.get("exceptWithin", [])
             for wrong in info.get("avoid", []):
                 for key, value in entries.items():
-                    if wrong not in value:
-                        continue
-                    # 家の語が誤用形を内包する場合（例: 家 `対象一覧` と avoid `一覧`）は二重に数えない。
-                    if preferred != wrong and wrong in preferred and value.count(wrong) <= value.count(preferred):
+                    if not is_real_hit(value, wrong, preferred, except_within):
                         continue
                     findings.append({
                         "file": table.name,
@@ -94,13 +111,10 @@ def check(locales_dir: pathlib.Path, glossary: dict, only: set[str] | None) -> l
             if not info:
                 continue
             official = info["official"]
+            except_within = info.get("exceptWithin", [])
             for wrong in info.get("knownWrong", []):
                 for key, value in entries.items():
-                    if wrong not in value:
-                        continue
-                    # 公式訳が誤用形を含む場合（例: 公式 `資源資料庫` と誤用 `資源`）は、
-                    # 公式訳の一部として現れた分を誤用と数えない。
-                    if official != wrong and wrong in official and value.count(wrong) <= value.count(official):
+                    if not is_real_hit(value, wrong, official, except_within):
                         continue
                     findings.append({
                         "file": table.name,

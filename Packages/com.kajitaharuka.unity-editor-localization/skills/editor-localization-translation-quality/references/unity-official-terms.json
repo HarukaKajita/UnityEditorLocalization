@@ -1,5 +1,5 @@
 {
-  "$comment": "Unity 公式のエディタ翻訳（Unity Hub で追加する言語モジュールの .po）から抽出した UI 用語の対照表。 official=公式訳。knownWrong=**実測で確認した誤用だけ**（他ロケールの公式訳を機械的に流し込むと 偽陽性しか出ないので入れない）。新しい誤用を見つけたらここへ足す。方針は unity-official-terms.md。",
+  "$comment": "Unity 公式のエディタ翻訳（Unity Hub で追加する言語モジュールの .po）から抽出した UI 用語の対照表。 official=公式訳。knownWrong=**実測で確認した誤用だけ**（他ロケールの公式訳を機械的に流し込むと 偽陽性しか出ないので入れない）。新しい誤用を見つけたらここへ足す。方針は unity-official-terms.md。 evidence=その行の証拠の出所（po=言語モジュール実測 / docs=公式ローカライズ版ドキュメント / shipped=Unity 出荷物の実測。Hub の locale バンドル・同梱 .po・Plastic の zh-Hant）。 evidence が po 以外の行は、.po を実測できたら上書きする。 exceptWithin=誤用形がその語の一部として現れる場合は数えない（例: ko の 리셋 は 프리셋 の一部）。",
   "unityVersion": "2022.3",
   "terms": {
     "Asset": {
@@ -802,6 +802,313 @@
         "official": "選擇",
         "knownWrong": []
       }
+    },
+    "Row": {
+      "ja": {
+        "official": "行",
+        "knownWrong": [],
+        "evidence": "docs"
+      },
+      "ko": {
+        "official": "행",
+        "knownWrong": [],
+        "evidence": "docs"
+      },
+      "zh-Hans": {
+        "official": "行",
+        "knownWrong": [],
+        "evidence": "docs"
+      },
+      "zh-Hant": {
+        "official": "列",
+        "knownWrong": [],
+        "evidence": "shipped",
+        "note": "台湾は row=列 / column=欄 で、大陸の row=行 / column=列 と対応が入れ替わる。zh-Hans を字体変換して zh-Hant を作ると必ず取り違える。Unity Hub zh-TW の PROJECT_TABLE_ROW_ARIA_LABEL で実測"
+      }
+    },
+    "Column": {
+      "ja": {
+        "official": "列",
+        "knownWrong": [],
+        "evidence": "docs"
+      },
+      "ko": {
+        "official": "열",
+        "knownWrong": [],
+        "evidence": "docs"
+      },
+      "zh-Hans": {
+        "official": "列",
+        "knownWrong": [],
+        "evidence": "docs"
+      },
+      "zh-Hant": {
+        "official": "欄",
+        "knownWrong": [],
+        "evidence": "shipped",
+        "note": "Row と対で運用する。Plastic zh-Hant の EditorOptionsColumnGuides=欄輔助線 で実測。zh-Hant では 欄位 が field の意味にも使われるので機械置換はしない"
+      }
+    },
+    "Reset": {
+      "ja": {
+        "official": "リセット",
+        "knownWrong": [],
+        "evidence": "docs"
+      },
+      "ko": {
+        "official": "재설정",
+        "knownWrong": [
+          "리셋"
+        ],
+        "exceptWithin": [
+          "프리셋"
+        ],
+        "evidence": "docs",
+        "note": "리셋 は実測した逸脱（プリセットの 프리셋 は別語なので exceptWithin で除外する）。エディタ UI の実ラベルは .po 未実測"
+      },
+      "zh-Hans": {
+        "official": "重置",
+        "knownWrong": [],
+        "evidence": "docs"
+      },
+      "zh-Hant": {
+        "official": "重設",
+        "knownWrong": [],
+        "evidence": "shipped",
+        "note": "Unity Hub zh-TW の common.RESET=重設、Plastic zh-Hant の ResetQueryButton=重設查詢 で実測"
+      }
+    },
+    "Target": {
+      "ja": {
+        "official": "ターゲット",
+        "knownWrong": [],
+        "evidence": "docs",
+        "note": "家の用語は 対象（familyTerms 参照）。意図的な逸脱なので knownWrong は空にする"
+      },
+      "ko": {
+        "official": "타겟",
+        "knownWrong": [],
+        "evidence": "docs",
+        "note": "家の用語は 대상（familyTerms 参照）"
+      },
+      "zh-Hans": {
+        "official": "目标",
+        "knownWrong": [],
+        "evidence": "docs"
+      },
+      "zh-Hant": {
+        "official": "目標",
+        "knownWrong": [],
+        "evidence": "shipped"
+      }
+    },
+    "Default": {
+      "ja": {
+        "official": "デフォルト",
+        "knownWrong": [],
+        "evidence": "docs",
+        "note": "家の用語は 既定（familyTerms 参照）"
+      },
+      "ko": {
+        "official": "기본",
+        "knownWrong": [],
+        "evidence": "docs"
+      },
+      "zh-Hans": {
+        "official": "默认",
+        "knownWrong": [],
+        "evidence": "docs"
+      },
+      "zh-Hant": {
+        "official": "預設",
+        "knownWrong": [],
+        "evidence": "shipped",
+        "note": "Unity Hub zh-TW の source-control.DEFAULT=預設 で実測。大陸語彙の 默認 が混ざらないよう注意"
+      }
+    },
+    "Undo": {
+      "ja": {
+        "official": "元に戻す",
+        "knownWrong": [],
+        "evidence": "docs"
+      },
+      "ko": {
+        "official": "실행 취소",
+        "knownWrong": [],
+        "evidence": "docs"
+      },
+      "zh-Hans": {
+        "official": "撤销",
+        "knownWrong": [],
+        "evidence": "docs"
+      },
+      "zh-Hant": {
+        "official": "復原",
+        "knownWrong": [],
+        "evidence": "shipped",
+        "note": "Plastic zh-Hant の UndoButton=復原 と Unity Hub zh-TW の 3 系統で一致"
+      }
+    },
+    "Enabled": {
+      "ja": {
+        "official": "有効",
+        "knownWrong": [],
+        "evidence": "docs"
+      },
+      "ko": {
+        "official": "활성화",
+        "knownWrong": [],
+        "evidence": "docs"
+      },
+      "zh-Hans": {
+        "official": "启用",
+        "knownWrong": [],
+        "evidence": "docs"
+      },
+      "zh-Hant": {
+        "official": "啟用",
+        "knownWrong": [],
+        "evidence": "shipped",
+        "note": "台湾標準は 啟。Unity 公式内にも異体字 啓 の混入があるが揃えない"
+      }
+    },
+    "Angle": {
+      "ja": {
+        "official": "角度",
+        "knownWrong": [],
+        "evidence": "docs"
+      },
+      "ko": {
+        "official": "각도",
+        "knownWrong": [],
+        "evidence": "docs"
+      },
+      "zh-Hans": {
+        "official": "角度",
+        "knownWrong": [],
+        "evidence": "docs"
+      },
+      "zh-Hant": {
+        "official": "角度",
+        "knownWrong": [],
+        "evidence": "shipped"
+      }
+    },
+    "Global": {
+      "ja": {
+        "official": "グローバル",
+        "knownWrong": [],
+        "evidence": "docs"
+      },
+      "ko": {
+        "official": "글로벌",
+        "knownWrong": [],
+        "evidence": "docs"
+      },
+      "zh-Hans": {
+        "official": "全局",
+        "knownWrong": [],
+        "evidence": "docs"
+      },
+      "zh-Hant": {
+        "official": "全域",
+        "knownWrong": [],
+        "evidence": "shipped",
+        "note": "台湾は 全域、大陸は 全局。座標系の Global と設定の global（全体設定）は別義なので文脈で判断する"
+      }
+    },
+    "Play Mode": {
+      "ja": {
+        "official": "再生モード",
+        "knownWrong": [],
+        "evidence": "docs",
+        "note": "家の用語は原語維持（familyTerms 参照）"
+      },
+      "ko": {
+        "official": "플레이 모드",
+        "knownWrong": [],
+        "evidence": "docs"
+      },
+      "zh-Hans": {
+        "official": "运行模式",
+        "knownWrong": [],
+        "evidence": "docs"
+      },
+      "zh-Hant": {
+        "official": "Play Mode",
+        "knownWrong": [],
+        "evidence": "shipped",
+        "note": "Unity Hub zh-TW の EDITOR_STATE_PLAY_MODE は英語のまま。公式 zh-TW 自体が訳していない"
+      }
+    },
+    "Position": {
+      "ja": {
+        "official": "位置",
+        "knownWrong": [],
+        "evidence": "docs"
+      },
+      "ko": {
+        "official": "포지션",
+        "knownWrong": [],
+        "evidence": "docs",
+        "note": "公式ドキュメントは Transform のフィールドを指すとき一貫して 포지션。ただしカタログ 5 リポジトリは 위치 を 29 件使い、위치 も自然で誤りではない。エディタ UI が 위치 の可能性が高いので .po 実測まで knownWrong は空"
+      },
+      "zh-Hans": {
+        "official": "位置",
+        "knownWrong": [],
+        "evidence": "docs"
+      },
+      "zh-Hant": {
+        "official": "位置",
+        "knownWrong": [],
+        "evidence": "shipped"
+      }
+    },
+    "Rotation": {
+      "ja": {
+        "official": "回転",
+        "knownWrong": [],
+        "evidence": "docs",
+        "note": "家の用語では 回転（回転量）と 向き（どちらを向くか）を文脈で使い分ける（familyTerms 参照）"
+      },
+      "ko": {
+        "official": "회전",
+        "knownWrong": [],
+        "evidence": "docs"
+      },
+      "zh-Hans": {
+        "official": "旋转",
+        "knownWrong": [],
+        "evidence": "docs"
+      },
+      "zh-Hant": {
+        "official": "旋轉",
+        "knownWrong": [],
+        "evidence": "docs",
+        "note": "orientation の意味では 朝向 が自然。Unity 出荷物での実測は未取得"
+      }
+    },
+    "Axis": {
+      "ja": {
+        "official": "軸",
+        "knownWrong": [],
+        "evidence": "docs"
+      },
+      "ko": {
+        "official": "축",
+        "knownWrong": [],
+        "evidence": "docs"
+      },
+      "zh-Hans": {
+        "official": "轴",
+        "knownWrong": [],
+        "evidence": "docs"
+      },
+      "zh-Hant": {
+        "official": "軸",
+        "knownWrong": [],
+        "evidence": "docs"
+      }
     }
   },
   "familyTerms": {
@@ -827,7 +1134,7 @@
         "avoid": [
           "デフォルト"
         ],
-        "why": "日本語 IT 文書の標準表記。6 リポジトリ 22 件が 既定 で一貫（2026-08-26 実測）"
+        "why": "日本語 IT 文書の標準表記。4 リポジトリ 22 件（UEL 11・UEWCE 5・MiscPack 3・TAE 3）が 既定 で、デフォルト は 0 件。EPE / UMPD には当該概念の用例が無い（2026-08-26 実測）"
       }
     },
     "Index": {

@@ -75,12 +75,44 @@ python3 scripts/check_unity_official_terms.py path/to/Locales
 
 MiscPack の整列コンポーネントで、`Local`（ローカル位置を 0 に戻す）の訳が決められずに止まった。
 当時の対照表は Asset〜Window の 43 語で、**Transform 周辺の基本語が 1 語も入っていなかった**。
-そこで 4 言語 × 35 語を一次資料から調べ直し、対照表へ足した。対象語:
+そこで 4 言語 × 35 語を一次資料から調べ直した。**調べた 35 語のうち、対照表（`terms`）へ入れたのは
+横断検証を通った 13 語だけ**である（下記「反映した語と、保留した語」）。調べた語:
 
 Local / Global / World / Reset / Position / Rotation / Scale / Parent / Child / Children /
 Origin / Pivot / Transform / Axis / Grid / Cell / Row / Column / Spacing / Offset / Target /
 Order / Preview / Gizmo / Play Mode / Undo / Default / Index / Radius / Angle / Direction /
 Anchor / Interpolation / Space / Enabled
+
+### 反映した語と、保留した語
+
+**`terms` に入れた 13 語**（`evidence` フィールドで出所を持つ）:
+Row / Column / Reset / Target / Default / Undo / Enabled / Angle / Global / Play Mode /
+Position / Rotation / Axis
+
+**保留した 22 語**とその理由:
+
+| 保留の理由 | 語 |
+|---|---|
+| zh-Hant 側に Unity 出荷物の実測が無い（人手記事のみ） | Local / Cell / Origin / Anchor / Pivot / Gizmo / Spacing / Offset / Radius / Interpolation |
+| 語義が文脈で三分する（座標空間 / 設定スコープ / 余白） | Space |
+| Unity 出荷物の証拠が値と食い違う（`上層` / `下層`） | Parent / Child / Children |
+| 既存 43 語に `.po` 由来で入っており値も一致（二重定義を避ける） | Preview |
+| 6 リポジトリで実使用 0 件のため突き合わせができない | World / Grid / Index / Direction / Transform / Order |
+
+**保留した語は「訳が分からない」ではなく「対照表として強制するだけの証拠が無い」という意味である。**
+カタログ側は現状維持でよい。`.po` を実測できたら格上げする。
+
+#### 最重要の 1 件: 繁簡で row / column の対応が入れ替わる
+
+| | row | column |
+|---|---|---|
+| zh-Hans（大陸） | `行` | `列` |
+| **zh-Hant（台湾）** | **`列`** | **`欄`** |
+
+**zh-Hans を字体変換して zh-Hant を作ると必ず取り違える。** zh-Hant は Unity 出荷物で実測済み
+（Unity Hub zh-TW の `PROJECT_TABLE_ROW_ARIA_LABEL` = 「…的專案列」、Plastic zh-Hant の
+`EditorOptionsColumnGuides` = `欄輔助線`）。レビューで「zh-Hans と揃っていない」と見えても直さないこと。
+zh-Hant の `欄位` は field の意味でも使うので、機械置換は禁止。
 
 ### 証拠の等級（重要）
 
@@ -100,6 +132,29 @@ Unity Hub のキャッシュにも `.po` が無かった。既存 43 語は `.po
   訳語を採るときは、その語が実際に中国語で書かれている箇所を選ぶこと。
 - 韓国語マニュアルは実在する（`docs.unity3d.com/kr/2022.3/Manual/`）。
 
+### 出典の作法（2026-08-26 に実際に踏んだ事故から）
+
+- **未翻訳の英語段落を出典にしない。** 公式ローカライズ版のページでも、段落単位で英語のまま残る。
+  そこを「公式訳」として引くと、**英語を訳し戻したものが公式訳として記録される**（実測: zh-Hans の
+  `Scale` で 1 件発生し、横断検証で捕まった）。引用はその言語で書かれている箇所からだけ採る。
+- **`docs.unity3d.com/cn/2022.3/` の Manual は翻訳されていない。** 見出しと一部の語だけ中国語で、
+  本文・属性表は英語のまま。**完全翻訳された最後の CN Manual は 2019.4〜2021.3**。簡体字の証拠は
+  この版から採る（ScriptReference も `/cn/2019.4/` は翻訳済み）。
+- **韓国語マニュアルは Inspector のプロパティ名・ボタン名を英語太字のまま残す**方針（Position /
+  Rotation / Scale / Reset が実例）。**UI ラベルそのものの韓国語は docs から取れない**ので、
+  説明文の語彙を採るしかない。ko の confidence が上がりにくい構造的な理由である。
+- **取得層（WebFetch 等）の整形が引用へ混ざる。** markdown の `**` 付与、表セル境界の ` - ` 挿入、
+  Glossary 見出しの書き換え、版番号の脱落を実測した（253 件中 16 件）。**生 HTML を取ってタグを
+  落とし、逐語で入れる。** 要約経由の引用は、内容が合っていても後から grep で照合できない。
+- **`WebFetch` は原文に無い引用を返すことがある。** 実測 2 件（存在しない「原点に戻す」、英語のみの
+  ページに対する中国語の作文）。**争点の語は必ず逐語で取り直す。**
+- **403 を返す出典**（例: `ithelp.ithome.com.tw`）は、引用に加えて取得日時と取得手段を残す。
+  後から機械監査できないので、tier 4 の個人記事だけに依存する語は対照表へ載せない。
+- **`catalogUsage` には突き合わせた commit hash と件数の単位を書く。** 未コミットの作業ツリーで
+  数えると結論が腐る（実測: 03:33 に数えた `本地` 4 件は、03:49 のコミットでは `局部` 5 件だった）。
+  件数は「キー本数（出現回数）」の形にし、数えた対象（`Packages/` 配下の正本のみ、
+  `Library/PackageCache` は除外）も添える。
+
 ## 家の用語（familyTerms）— 公式訳とわざと違える語
 
 **公式訳に揃えるべきでない語がある。** kajitaharuka の 6 リポジトリは、次の語について
@@ -110,7 +165,7 @@ Unity 公式訳とは違う語を意図的に使っている。理由が無い�
 | 語 | 公式訳 | 家の用語 | わざと違える理由 |
 |---|---|---|---|
 | Target | ja `ターゲット` / ko `타겟` | ja `対象` / ko `대상` | 指しているのは Build Target のような Unity の固有機能名ではなく「操作の対象」。6 リポジトリ 46 件が `対象` で一貫している |
-| Default | ja `デフォルト` | ja `既定` | 日本語 IT 文書の標準表記。6 リポジトリ 22 件が `既定` |
+| Default | ja `デフォルト` | ja `既定` | 日本語 IT 文書の標準表記。4 リポジトリ 22 件（UEL 11・UEWCE 5・MiscPack 3・TAE 3）が `既定`、`デフォルト` は 0 件。EPE / UMPD には当該概念の用例が無い |
 | Index | ja `インデックス` / zh-Hans `索引` | ja `要素番号` / zh-Hans `序号` | 利用者が数える「何番目か」であり、配列の添字という実装語ではない |
 | Origin / Anchor | ja `原点` / `アンカー` | ja `基準点` / `基準点の位置` | 原文（`ja`）が `基準点` で、Unity の Origin フィールドとは別概念。訳は原文に従う |
 | Grid | ja `グリッド` | ja `格子` | 整列の形を指す普通名詞として使っており、Unity の Grid コンポーネントを指していない |
