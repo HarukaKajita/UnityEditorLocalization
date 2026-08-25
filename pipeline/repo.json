@@ -50,5 +50,24 @@
     ],
     "syncCommand": "node scripts/sync-agent-skills.mjs"
   },
-  "waivers": []
+  "waivers": [
+    {
+      "checkId": "23",
+      "target": "products/unity-editor-localization/assets",
+      "reason": "2026-08-26 の Editor/ 変更は、スキル登録の判定ロジックと登録状態 tooltip の文言・Console の要約だけで、Preferences ペインの見た目は 1 ピクセルも変わっていない（tooltip は hover でしか出ず、既存の画像にも写っていない）。撮り直しても同じ画像になるため見送る。次のリリースで UI を触ったら、この waiver を消して撮り直しから判断する。",
+      "expiresAt": "2026-09-30"
+    },
+    {
+      "checkId": "23",
+      "target": "products/unity-editor-localization/publish-assets",
+      "reason": "2026-08-26 の Editor/ 変更は、スキル登録の判定ロジックと登録状態 tooltip の文言・Console の要約だけで、Preferences ペインの見た目は 1 ピクセルも変わっていない（tooltip は hover でしか出ず、既存の画像にも写っていない）。撮り直しても同じ画像になるため見送る。次のリリースで UI を触ったら、この waiver を消して撮り直しから判断する。",
+      "expiresAt": "2026-09-30"
+    },
+    {
+      "checkId": "23",
+      "target": "products/unity-editor-localization/assets/install-vcc-manage-project.png",
+      "reason": "2026-08-26 に画像を開いて確認した。VCC のプロジェクト一覧を写した画像で、写っている版数は Unity の 2022.3.22f1 だけ。パッケージの版数はどこにも無いので、版を上げても撮り直す必要がない。同じ組の install-vcc-add-package.png はパッケージ版数 1.2.0 が焼き込まれているので waiver に入れず、撮り直すまで鳴らし続ける。",
+      "expiresAt": "2027-08-31"
+    }
+  ]
 }
