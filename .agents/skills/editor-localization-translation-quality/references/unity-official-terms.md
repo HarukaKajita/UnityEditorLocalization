@@ -75,32 +75,47 @@ python3 scripts/check_unity_official_terms.py path/to/Locales
 
 MiscPack の整列コンポーネントで、`Local`（ローカル位置を 0 に戻す）の訳が決められずに止まった。
 当時の対照表は Asset〜Window の 43 語で、**Transform 周辺の基本語が 1 語も入っていなかった**。
-そこで 4 言語 × 35 語を一次資料から調べ直した。**調べた 35 語のうち、対照表（`terms`）へ入れたのは
-横断検証を通った 13 語だけ**である（下記「反映した語と、保留した語」）。調べた語:
+そこで 4 言語 × 35 語を調べ直し、**最終的に言語モジュール（`.po`）で実測して確定した**。
+対照表は 43 語から **74 語**になった。調べた語:
 
 Local / Global / World / Reset / Position / Rotation / Scale / Parent / Child / Children /
 Origin / Pivot / Transform / Axis / Grid / Cell / Row / Column / Spacing / Offset / Target /
 Order / Preview / Gizmo / Play Mode / Undo / Default / Index / Radius / Angle / Direction /
 Anchor / Interpolation / Space / Enabled
 
-### 反映した語と、保留した語
+### `.po` 実測で、ドキュメント由来の推定が 8 語ぶんひっくり返った
 
-**`terms` に入れた 13 語**（`evidence` フィールドで出所を持つ）:
-Row / Column / Reset / Target / Default / Undo / Enabled / Angle / Global / Play Mode /
-Position / Rotation / Axis
+言語モジュールを入れて `scripts/extract_unity_po_terms.py` で測り直すと、**ドキュメントから推定した値の
+うち 8 語ぶんが実際のエディタと違っていた。** 推定のまま対照表へ載せていたら、そのまま強制していた。
 
-**保留した 22 語**とその理由:
+| 語 | ドキュメント由来の推定 | **エディタの実測** |
+|---|---|---|
+| Reset (ko) | `재설정` | **`초기화`**（Reset All / Reset Size も 초기화。재설정 は Reset Color の 1 件だけ） |
+| Play Mode (zh-Hant) | `Play Mode`（Hub が英語のまま） | **`播放模式`** |
+| Undo (zh-Hans) | `撤销` | **`撤消`**（字が違う） |
+| Global (ko) | `글로벌` | **`전역`** |
+| Enabled (ko / zh-Hans / zh-Hant) | `활성화` / `启用` / `啟用` | **`사용` / `已启用` / `已啟用`** |
 
-| 保留の理由 | 語 |
-|---|---|
-| zh-Hant 側に Unity 出荷物の実測が無い（人手記事のみ） | Local / Cell / Origin / Anchor / Pivot / Gizmo / Spacing / Offset / Radius / Interpolation |
-| 語義が文脈で三分する（座標空間 / 設定スコープ / 余白） | Space |
-| Unity 出荷物の証拠が値と食い違う（`上層` / `下層`） | Parent / Child / Children |
-| 既存 43 語に `.po` 由来で入っており値も一致（二重定義を避ける） | Preview |
-| 6 リポジトリで実使用 0 件のため突き合わせができない | World / Grid / Index / Direction / Transform / Order |
+**Unity Hub の locale バンドルはエディタの代わりにならない**（Hub とエディタは別プロダクト）。
+`Play Mode` は Hub では英語のままだが、エディタは訳している。`.po` が最優先という序列は正しかった。
 
-**保留した語は「訳が分からない」ではなく「対照表として強制するだけの証拠が無い」という意味である。**
-カタログ側は現状維持でよい。`.po` を実測できたら格上げする。
+### 実測でしか出なかった、繁體中文の 4 語
+
+| 語 | 公式（`.po`） | やりがちな誤り |
+|---|---|---|
+| Local | `局部`（繁簡とも同じ） | `區域`（座標空間の意味では誤り。ただし 區域 単独は「領域」の正用法なので、誤用形は `區域軸` のような複合で持つ） |
+| Cell | `儲存格`（Cell Size = 儲存格大小） | `格子`（`網格`＝Grid と紛れる）、`單元格`（大陸語彙） |
+| Parent | `父級` | `父物件`。**Child は `子物件`** なので親子で語形が揃わない |
+| Interpolation | `內插`（Rotation Interpolation = 旋轉內插） | `插值`（大陸語彙） |
+
+### そのほか実測で分かったこと
+
+- **`Asset` と `Assets` でエディタの訳が違う。** zh-Hans は `Asset` / `New Asset` / `Asset Path` が
+  すべて `资产` なのに、`Assets` と `assets` だけ `资源`（Project ウィンドウの Assets フォルダを指す用法）。
+  単数・複合は `资产` で正しいので既存の判定は変えていない。**同じ語の単複で訳が分かれることがある。**
+- **ja の `Direction` はエディタでは `向き`**（公式ドキュメントは `方向`）。家の用語で `向き` と `方向` を
+  使い分けているのは、エディタ側と整合していた。
+- 単独の msgid が無い語もある（`Cell` / `Order` / `Interpolation`）。`Cell Size` のような複合から採る。
 
 #### 最重要の 1 件: 繁簡で row / column の対応が入れ替わる
 
@@ -114,20 +129,30 @@ Position / Rotation / Axis
 `EditorOptionsColumnGuides` = `欄輔助線`）。レビューで「zh-Hans と揃っていない」と見えても直さないこと。
 zh-Hant の `欄位` は field の意味でも使うので、機械置換は禁止。
 
-### 証拠の等級（重要）
+### 証拠の等級（`evidence` フィールド）
 
-**この 35 語は Tier 2（公式ローカライズ版ドキュメント）で確定した。Tier 1（言語モジュールの `.po`）は未実測。**
-検証機（`C:\UnityEditors` の 2022.3.22f1 / 6000.0.60f1 / 6000.3.5f1）に言語モジュールが入っておらず、
-Unity Hub のキャッシュにも `.po` が無かった。既存 43 語は `.po` 実測なので、**同じ表の中に等級の違う行が混ざる。**
+行ごとに出所を持つ。`po` が最強で、それ以外は暫定である。
 
-- `.po` を実測できたら、**エディタ UI の訳を優先して上書きする**（エディタとドキュメントは実際に割れる。
-  簡体字の Asset が `资产`（エディタ）と `资源`（ドキュメント）で割れていた前例がある）。
-- 上書きするときは**カタログ側も同時に直す**。片方だけ直すと家の中で割れる。
+| `evidence` | 意味 |
+|---|---|
+| `po` | 言語モジュールの `.po` で msgid が語と完全一致するエントリの msgstr（**この表の既定**） |
+| `docs` | 公式ローカライズ版ドキュメントからの推定。**8 語ぶんが実測でひっくり返った**ので暫定扱い |
+| `shipped` | Unity 出荷物（Hub の locale バンドル・同梱 `.po`・Plastic の zh-Hant）。`.po` の代わりにはならない |
+
+実測は次のコマンドで再現できる（言語モジュールが入っている必要がある）:
+
+```bash
+python3 scripts/extract_unity_po_terms.py --editor "C:/UnityEditors/2022.3.22f1" --compare
+python3 scripts/extract_unity_po_terms.py --editor <path> --terms Local,Cell --context
+```
+
+上書きするときは**カタログ側も同時に直す**。片方だけ直すと家の中で割れる。
 
 ### 調べて分かった、この 4 言語の性格
 
 - **繁體中文には Unity 公式のドキュメントが無い。** 公式ローカライズはエディタ UI だけなので、
-  `.po` を取れない限り繁體中文は Tier 2 の証拠が原理的に存在しない。台湾の実例（Tier 4）で補うことになる。
+  `.po` を取れない限り繁體中文は Tier 2 の証拠が原理的に存在しない（台湾の実例＝Tier 4 で補うしかない）。
+  **繁體中文こそ `.po` を入れて測る価値が一番大きい。**実測でしか出なかった 4 語はすべて繁體中文だった。
 - **2022.3 の簡体字マニュアルは全訳ではない。** ページによって本文が英語のまま残る。
   訳語を採るときは、その語が実際に中国語で書かれている箇所を選ぶこと。
 - 韓国語マニュアルは実在する（`docs.unity3d.com/kr/2022.3/Manual/`）。
@@ -195,7 +220,16 @@ Unity 公式訳とは違う語を意図的に使っている。理由が無い�
 
 ## 対照表を更新するとき
 
-Unity の言語モジュールの `.po`（Unity Hub → Add modules → 言語）を取得し、
-`msgid` が語と完全一致するエントリの `msgstr` を数え直す。版を上げたら `unityVersion` も直す。
+Unity の言語モジュール（Unity Hub → Add modules → 言語）を入れると
+`<Unity>/Editor/Data/Localization/{ja,ko,zh-hans,zh-hant}.po` が出来る。**手で grep せず
+`scripts/extract_unity_po_terms.py` を使う**（`msgid` の完全一致・大文字小文字・複数形の変種を
+まとめて見て、対照表との食い違いだけを出す）。版を上げたら `unityVersion` も直す。
+
+```bash
+# 対照表の全語を実測して、食い違いだけ出す（食い違いがあれば exit 1）
+python3 scripts/extract_unity_po_terms.py --editor "C:/UnityEditors/2022.3.22f1" --compare
+# 単独 msgid が無い語は複合語から採る
+python3 scripts/extract_unity_po_terms.py --editor <path> --terms Cell,Order --context
+```
 **Unity 6 で訳が変わっている語がある**（実測: `Asset Store` が 2022.3 の `资源商店` から
 Unity 6 で `资产商店` へ反転していた）ので、対象バージョンの `.po` を見ること。

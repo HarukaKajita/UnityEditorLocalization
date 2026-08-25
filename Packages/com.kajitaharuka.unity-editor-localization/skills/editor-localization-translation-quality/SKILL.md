@@ -59,6 +59,12 @@ Use this skill for EditorLocalization locale work, especially `*.l10n-manifest.j
      Use the individual scripts below when you are working on one locale directory, or in a
      repository that does not carry `scripts/pipeline/`.
    - Run `scripts/validate_locale_quality.py` against the locale directory.
+   - For ja / ko / zh-Hans / zh-Hant, when the Unity language modules are installed, measure the
+     editor's own translations with `scripts/extract_unity_po_terms.py --editor <unity> --compare`
+     before trusting any documentation-derived term. Measured on 2026-08-26, **8 term/locale pairs
+     derived from official documentation turned out to differ from the editor** (ko Reset was
+     `초기화`, not the docs' `재설정`; zh-Hant Play Mode was `播放模式`, not the Hub bundle's
+     untranslated `Play Mode`). `.po` outranks docs, Hub bundles, and everything else.
    - Run `scripts/check_unity_official_terms.py` against the locale directory: it compares ja / ko /
      zh-Hans / zh-Hant against Unity's own Editor translation, which no other gate looks at. Run it
      **across every repository in the product family**, not just the one you edited — the 2026-08-09 sweep

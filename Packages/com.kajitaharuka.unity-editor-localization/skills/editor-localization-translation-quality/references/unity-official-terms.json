@@ -43,7 +43,9 @@
         "official": "资产",
         "knownWrong": [
           "资源"
-        ]
+        ],
+        "note": "msgid Asset / New Asset / Asset Path はすべて 资产。一方 msgid Assets と assets だけは 资源（Project ウィンドウの Assets フォルダを指す用法）。複合語・単数は 资产 で正しい",
+        "evidence": "po"
       },
       "zh-Hant": {
         "official": "資源",
@@ -807,22 +809,22 @@
       "ja": {
         "official": "行",
         "knownWrong": [],
-        "evidence": "docs"
+        "evidence": "po"
       },
       "ko": {
         "official": "행",
         "knownWrong": [],
-        "evidence": "docs"
+        "evidence": "po"
       },
       "zh-Hans": {
         "official": "行",
         "knownWrong": [],
-        "evidence": "docs"
+        "evidence": "po"
       },
       "zh-Hant": {
         "official": "列",
         "knownWrong": [],
-        "evidence": "shipped",
+        "evidence": "po",
         "note": "台湾は row=列 / column=欄 で、大陸の row=行 / column=列 と対応が入れ替わる。zh-Hans を字体変換して zh-Hant を作ると必ず取り違える。Unity Hub zh-TW の PROJECT_TABLE_ROW_ARIA_LABEL で実測"
       }
     },
@@ -830,22 +832,22 @@
       "ja": {
         "official": "列",
         "knownWrong": [],
-        "evidence": "docs"
+        "evidence": "po"
       },
       "ko": {
         "official": "열",
         "knownWrong": [],
-        "evidence": "docs"
+        "evidence": "po"
       },
       "zh-Hans": {
         "official": "列",
         "knownWrong": [],
-        "evidence": "docs"
+        "evidence": "po"
       },
       "zh-Hant": {
         "official": "欄",
         "knownWrong": [],
-        "evidence": "shipped",
+        "evidence": "po",
         "note": "Row と対で運用する。Plastic zh-Hant の EditorOptionsColumnGuides=欄輔助線 で実測。zh-Hant では 欄位 が field の意味にも使われるので機械置換はしない"
       }
     },
@@ -853,28 +855,28 @@
       "ja": {
         "official": "リセット",
         "knownWrong": [],
-        "evidence": "docs"
+        "evidence": "po"
       },
       "ko": {
-        "official": "재설정",
+        "official": "초기화",
         "knownWrong": [
           "리셋"
         ],
         "exceptWithin": [
           "프리셋"
         ],
-        "evidence": "docs",
-        "note": "리셋 は実測した逸脱（プリセットの 프리셋 は別語なので exceptWithin で除外する）。エディタ UI の実ラベルは .po 未実測"
+        "evidence": "po",
+        "note": "エディタは Reset / Reset All / Reset Size をすべて 초기화。재설정 は Reset Color の 1 件だけで、公式ドキュメントの語。리셋 は実測した誤用（프리셋 は別語なので exceptWithin で除外）"
       },
       "zh-Hans": {
         "official": "重置",
         "knownWrong": [],
-        "evidence": "docs"
+        "evidence": "po"
       },
       "zh-Hant": {
         "official": "重設",
         "knownWrong": [],
-        "evidence": "shipped",
+        "evidence": "po",
         "note": "Unity Hub zh-TW の common.RESET=重設、Plastic zh-Hant の ResetQueryButton=重設查詢 で実測"
       }
     },
@@ -882,47 +884,47 @@
       "ja": {
         "official": "ターゲット",
         "knownWrong": [],
-        "evidence": "docs",
+        "evidence": "po",
         "note": "家の用語は 対象（familyTerms 参照）。意図的な逸脱なので knownWrong は空にする"
       },
       "ko": {
         "official": "타겟",
         "knownWrong": [],
-        "evidence": "docs",
+        "evidence": "po",
         "note": "家の用語は 대상（familyTerms 参照）"
       },
       "zh-Hans": {
         "official": "目标",
         "knownWrong": [],
-        "evidence": "docs"
+        "evidence": "po"
       },
       "zh-Hant": {
         "official": "目標",
         "knownWrong": [],
-        "evidence": "shipped"
+        "evidence": "po"
       }
     },
     "Default": {
       "ja": {
         "official": "デフォルト",
         "knownWrong": [],
-        "evidence": "docs",
+        "evidence": "po",
         "note": "家の用語は 既定（familyTerms 参照）"
       },
       "ko": {
         "official": "기본",
         "knownWrong": [],
-        "evidence": "docs"
+        "evidence": "po"
       },
       "zh-Hans": {
         "official": "默认",
         "knownWrong": [],
-        "evidence": "docs"
+        "evidence": "po"
       },
       "zh-Hant": {
         "official": "預設",
         "knownWrong": [],
-        "evidence": "shipped",
+        "evidence": "po",
         "note": "Unity Hub zh-TW の source-control.DEFAULT=預設 で実測。大陸語彙の 默認 が混ざらないよう注意"
       }
     },
@@ -930,22 +932,23 @@
       "ja": {
         "official": "元に戻す",
         "knownWrong": [],
-        "evidence": "docs"
+        "evidence": "po"
       },
       "ko": {
         "official": "실행 취소",
         "knownWrong": [],
-        "evidence": "docs"
+        "evidence": "po"
       },
       "zh-Hans": {
-        "official": "撤销",
+        "official": "撤消",
         "knownWrong": [],
-        "evidence": "docs"
+        "evidence": "po",
+        "note": "エディタは 撤消。公式ドキュメントは 撤销 で字が違う（エディタ優先）"
       },
       "zh-Hant": {
         "official": "復原",
         "knownWrong": [],
-        "evidence": "shipped",
+        "evidence": "po",
         "note": "Plastic zh-Hant の UndoButton=復原 と Unity Hub zh-TW の 3 系統で一致"
       }
     },
@@ -953,67 +956,70 @@
       "ja": {
         "official": "有効",
         "knownWrong": [],
-        "evidence": "docs"
+        "evidence": "po"
       },
       "ko": {
-        "official": "활성화",
+        "official": "사용",
         "knownWrong": [],
-        "evidence": "docs"
+        "evidence": "po",
+        "note": "msgid Enabled は 사용、enabled は 활성화됨。複合では Icon Enabled = 아이콘 사용 중"
       },
       "zh-Hans": {
-        "official": "启用",
+        "official": "已启用",
         "knownWrong": [],
-        "evidence": "docs"
+        "evidence": "po",
+        "note": "単独ラベルは 已启用。複合では Icon Enabled = 图标启用 のように 启用"
       },
       "zh-Hant": {
-        "official": "啟用",
+        "official": "已啟用",
         "knownWrong": [],
-        "evidence": "shipped",
-        "note": "台湾標準は 啟。Unity 公式内にも異体字 啓 の混入があるが揃えない"
+        "evidence": "po",
+        "note": "単独ラベルは 已啟用。複合では 啟用"
       }
     },
     "Angle": {
       "ja": {
         "official": "角度",
         "knownWrong": [],
-        "evidence": "docs"
+        "evidence": "po"
       },
       "ko": {
         "official": "각도",
         "knownWrong": [],
-        "evidence": "docs"
+        "evidence": "po"
       },
       "zh-Hans": {
         "official": "角度",
         "knownWrong": [],
-        "evidence": "docs"
+        "evidence": "po"
       },
       "zh-Hant": {
         "official": "角度",
         "knownWrong": [],
-        "evidence": "shipped"
+        "evidence": "po"
       }
     },
     "Global": {
       "ja": {
         "official": "グローバル",
         "knownWrong": [],
-        "evidence": "docs"
+        "evidence": "po"
       },
       "ko": {
-        "official": "글로벌",
+        "official": "전역",
         "knownWrong": [],
-        "evidence": "docs"
+        "evidence": "po",
+        "note": "Global Scale / Global Speed も 전역。글로벌 はエディタでは Global Key の 1 件だけ"
       },
       "zh-Hans": {
         "official": "全局",
         "knownWrong": [],
-        "evidence": "docs"
+        "evidence": "po"
       },
       "zh-Hant": {
         "official": "全域",
         "knownWrong": [],
-        "evidence": "shipped",
+        "evidence": "po",
         "note": "台湾は 全域、大陸は 全局。座標系の Global と設定の global（全体設定）は別義なので文脈で判断する"
       }
     },
@@ -1021,70 +1027,70 @@
       "ja": {
         "official": "再生モード",
         "knownWrong": [],
-        "evidence": "docs",
+        "evidence": "po",
         "note": "家の用語は原語維持（familyTerms 参照）"
       },
       "ko": {
         "official": "플레이 모드",
         "knownWrong": [],
-        "evidence": "docs"
+        "evidence": "po"
       },
       "zh-Hans": {
         "official": "运行模式",
         "knownWrong": [],
-        "evidence": "docs"
+        "evidence": "po"
       },
       "zh-Hant": {
-        "official": "Play Mode",
+        "official": "播放模式",
         "knownWrong": [],
-        "evidence": "shipped",
-        "note": "Unity Hub zh-TW の EDITOR_STATE_PLAY_MODE は英語のまま。公式 zh-TW 自体が訳していない"
+        "evidence": "po",
+        "note": "Unity Hub の zh-TW バンドルは英語のままだったが、エディタは 播放模式 と訳している。Hub とエディタは別プロダクトなので .po が優先"
       }
     },
     "Position": {
       "ja": {
         "official": "位置",
         "knownWrong": [],
-        "evidence": "docs"
+        "evidence": "po"
       },
       "ko": {
         "official": "포지션",
         "knownWrong": [],
-        "evidence": "docs",
+        "evidence": "po",
         "note": "公式ドキュメントは Transform のフィールドを指すとき一貫して 포지션。ただしカタログ 5 リポジトリは 위치 を 29 件使い、위치 も自然で誤りではない。エディタ UI が 위치 の可能性が高いので .po 実測まで knownWrong は空"
       },
       "zh-Hans": {
         "official": "位置",
         "knownWrong": [],
-        "evidence": "docs"
+        "evidence": "po"
       },
       "zh-Hant": {
         "official": "位置",
         "knownWrong": [],
-        "evidence": "shipped"
+        "evidence": "po"
       }
     },
     "Rotation": {
       "ja": {
         "official": "回転",
         "knownWrong": [],
-        "evidence": "docs",
+        "evidence": "po",
         "note": "家の用語では 回転（回転量）と 向き（どちらを向くか）を文脈で使い分ける（familyTerms 参照）"
       },
       "ko": {
         "official": "회전",
         "knownWrong": [],
-        "evidence": "docs"
+        "evidence": "po"
       },
       "zh-Hans": {
         "official": "旋转",
         "knownWrong": [],
-        "evidence": "docs"
+        "evidence": "po"
       },
       "zh-Hant": {
         "official": "旋轉",
         "knownWrong": [],
-        "evidence": "docs",
+        "evidence": "po",
         "note": "orientation の意味では 朝向 が自然。Unity 出荷物での実測は未取得"
       }
     },
@@ -1092,22 +1098,451 @@
       "ja": {
         "official": "軸",
         "knownWrong": [],
-        "evidence": "docs"
+        "evidence": "po"
       },
       "ko": {
         "official": "축",
         "knownWrong": [],
-        "evidence": "docs"
+        "evidence": "po"
       },
       "zh-Hans": {
         "official": "轴",
         "knownWrong": [],
-        "evidence": "docs"
+        "evidence": "po"
       },
       "zh-Hant": {
         "official": "軸",
         "knownWrong": [],
-        "evidence": "docs"
+        "evidence": "po"
+      }
+    },
+    "Local": {
+      "ja": {
+        "official": "ローカル",
+        "knownWrong": [],
+        "evidence": "po"
+      },
+      "ko": {
+        "official": "로컬",
+        "knownWrong": [],
+        "evidence": "po"
+      },
+      "zh-Hans": {
+        "official": "局部",
+        "knownWrong": [],
+        "evidence": "po",
+        "note": "本地 は「このマシン」の意でも使われるため knownWrong には入れない。座標空間の Local は 局部"
+      },
+      "zh-Hant": {
+        "official": "局部",
+        "knownWrong": [
+          "區域軸",
+          "區域位置",
+          "區域旋轉",
+          "區域座標",
+          "區域空間"
+        ],
+        "evidence": "po",
+        "note": "區域 は実測した誤用だが、區域 単独は「領域」の正しい用法でも出る（UEWCE の 內容區域 で偽陽性を確認）。そのため座標語との複合だけを誤用形として持つ。繁簡で同じ 局部 になる語なので字体変換の勘に頼ると外す"
+      }
+    },
+    "Parent": {
+      "ja": {
+        "official": "親",
+        "knownWrong": [],
+        "evidence": "po"
+      },
+      "ko": {
+        "official": "부모",
+        "knownWrong": [],
+        "evidence": "po"
+      },
+      "zh-Hans": {
+        "official": "父级",
+        "knownWrong": [],
+        "evidence": "po",
+        "note": "父对象 も通じるがエディタは 父级"
+      },
+      "zh-Hant": {
+        "official": "父級",
+        "knownWrong": [
+          "父物件"
+        ],
+        "evidence": "po",
+        "note": "父物件 は実測した誤用。Child は 子物件 なので、親子で語形が揃わない点に注意"
+      }
+    },
+    "Child": {
+      "ja": {
+        "official": "子",
+        "knownWrong": [],
+        "evidence": "po"
+      },
+      "ko": {
+        "official": "자식",
+        "knownWrong": [],
+        "evidence": "po"
+      },
+      "zh-Hans": {
+        "official": "子对象",
+        "knownWrong": [],
+        "evidence": "po"
+      },
+      "zh-Hant": {
+        "official": "子物件",
+        "knownWrong": [],
+        "evidence": "po"
+      }
+    },
+    "World": {
+      "ja": {
+        "official": "ワールド",
+        "knownWrong": [],
+        "evidence": "po"
+      },
+      "ko": {
+        "official": "월드",
+        "knownWrong": [],
+        "evidence": "po"
+      },
+      "zh-Hans": {
+        "official": "世界",
+        "knownWrong": [],
+        "evidence": "po"
+      },
+      "zh-Hant": {
+        "official": "世界",
+        "knownWrong": [],
+        "evidence": "po"
+      }
+    },
+    "Origin": {
+      "ja": {
+        "official": "原点",
+        "knownWrong": [],
+        "evidence": "po",
+        "note": "家の用語は 基準点（familyTerms 参照）"
+      },
+      "ko": {
+        "official": "원점",
+        "knownWrong": [],
+        "evidence": "po"
+      },
+      "zh-Hans": {
+        "official": "起始位置",
+        "knownWrong": [],
+        "evidence": "po",
+        "note": "原点 ではなく 起始位置。家の用語は 基准点"
+      },
+      "zh-Hant": {
+        "official": "起始位置",
+        "knownWrong": [],
+        "evidence": "po",
+        "note": "原點 ではなく 起始位置。家の用語は 基準點"
+      }
+    },
+    "Anchor": {
+      "ja": {
+        "official": "アンカー",
+        "knownWrong": [],
+        "evidence": "po",
+        "note": "家の用語は 基準点の位置（familyTerms 参照）"
+      },
+      "ko": {
+        "official": "앵커",
+        "knownWrong": [],
+        "evidence": "po"
+      },
+      "zh-Hans": {
+        "official": "锚点",
+        "knownWrong": [],
+        "evidence": "po"
+      },
+      "zh-Hant": {
+        "official": "錨點",
+        "knownWrong": [],
+        "evidence": "po"
+      }
+    },
+    "Pivot": {
+      "ja": {
+        "official": "ピボット",
+        "knownWrong": [],
+        "evidence": "po"
+      },
+      "ko": {
+        "official": "피벗",
+        "knownWrong": [],
+        "evidence": "po"
+      },
+      "zh-Hans": {
+        "official": "轴心",
+        "knownWrong": [],
+        "evidence": "po"
+      },
+      "zh-Hant": {
+        "official": "軸心",
+        "knownWrong": [],
+        "evidence": "po",
+        "note": "ノイズの基準値のような別概念には使わない（TAE の contrastPivot は 基準值 のままが正しい）"
+      }
+    },
+    "Spacing": {
+      "ja": {
+        "official": "間隔",
+        "knownWrong": [],
+        "evidence": "po"
+      },
+      "ko": {
+        "official": "간격",
+        "knownWrong": [],
+        "evidence": "po"
+      },
+      "zh-Hans": {
+        "official": "间距",
+        "knownWrong": [],
+        "evidence": "po"
+      },
+      "zh-Hant": {
+        "official": "間距",
+        "knownWrong": [],
+        "evidence": "po"
+      }
+    },
+    "Offset": {
+      "ja": {
+        "official": "オフセット",
+        "knownWrong": [],
+        "evidence": "po"
+      },
+      "ko": {
+        "official": "오프셋",
+        "knownWrong": [],
+        "evidence": "po"
+      },
+      "zh-Hans": {
+        "official": "偏移",
+        "knownWrong": [],
+        "evidence": "po"
+      },
+      "zh-Hant": {
+        "official": "偏移",
+        "knownWrong": [],
+        "evidence": "po"
+      }
+    },
+    "Radius": {
+      "ja": {
+        "official": "半径",
+        "knownWrong": [],
+        "evidence": "po"
+      },
+      "ko": {
+        "official": "반지름",
+        "knownWrong": [],
+        "evidence": "po"
+      },
+      "zh-Hans": {
+        "official": "半径",
+        "knownWrong": [],
+        "evidence": "po"
+      },
+      "zh-Hant": {
+        "official": "半徑",
+        "knownWrong": [],
+        "evidence": "po"
+      }
+    },
+    "Space": {
+      "ja": {
+        "official": "空間",
+        "knownWrong": [],
+        "evidence": "po"
+      },
+      "ko": {
+        "official": "공간",
+        "knownWrong": [],
+        "evidence": "po"
+      },
+      "zh-Hans": {
+        "official": "空间",
+        "knownWrong": [],
+        "evidence": "po"
+      },
+      "zh-Hant": {
+        "official": "空間",
+        "knownWrong": [],
+        "evidence": "po"
+      }
+    },
+    "Grid": {
+      "ja": {
+        "official": "グリッド",
+        "knownWrong": [],
+        "evidence": "po",
+        "note": "家の用語は 格子（familyTerms 参照）"
+      },
+      "ko": {
+        "official": "그리드",
+        "knownWrong": [],
+        "evidence": "po"
+      },
+      "zh-Hans": {
+        "official": "网格",
+        "knownWrong": [],
+        "evidence": "po"
+      },
+      "zh-Hant": {
+        "official": "網格",
+        "knownWrong": [],
+        "evidence": "po"
+      }
+    },
+    "Cell": {
+      "ja": {
+        "official": "セル",
+        "knownWrong": [],
+        "evidence": "po",
+        "note": "単独の msgid は無く、Cell Size = セルサイズ などの複合から採った"
+      },
+      "ko": {
+        "official": "셀",
+        "knownWrong": [],
+        "evidence": "po"
+      },
+      "zh-Hans": {
+        "official": "单元格",
+        "knownWrong": [],
+        "evidence": "po"
+      },
+      "zh-Hant": {
+        "official": "儲存格",
+        "knownWrong": [
+          "格子"
+        ],
+        "evidence": "po",
+        "note": "Cell Size = 儲存格大小。格子 は 網格（Grid）と紛れるので誤用。ただしノイズの格子点のような別概念には 單元格 を使ってよい（TAE は 平鋪單元 と衝突しないようこちらを採用）"
+      }
+    },
+    "Index": {
+      "ja": {
+        "official": "インデックス",
+        "knownWrong": [],
+        "evidence": "po",
+        "note": "家の用語は 要素番号（familyTerms 参照）"
+      },
+      "ko": {
+        "official": "인덱스",
+        "knownWrong": [],
+        "evidence": "po"
+      },
+      "zh-Hans": {
+        "official": "索引",
+        "knownWrong": [],
+        "evidence": "po",
+        "note": "家の用語は 序号（familyTerms 参照）"
+      },
+      "zh-Hant": {
+        "official": "索引",
+        "knownWrong": [],
+        "evidence": "po",
+        "note": "台湾では 索引標籤 が Tab の意味でも使われるので、機械置換はしない"
+      }
+    },
+    "Direction": {
+      "ja": {
+        "official": "向き",
+        "knownWrong": [],
+        "evidence": "po",
+        "note": "エディタは Direction を 向き と訳す（公式ドキュメントは 方向）。家の用語で 向き と 方向 を使い分けているのはエディタ側と整合する"
+      },
+      "ko": {
+        "official": "방향",
+        "knownWrong": [],
+        "evidence": "po"
+      },
+      "zh-Hans": {
+        "official": "方向",
+        "knownWrong": [],
+        "evidence": "po"
+      },
+      "zh-Hant": {
+        "official": "方向",
+        "knownWrong": [],
+        "evidence": "po"
+      }
+    },
+    "Transform": {
+      "ja": {
+        "official": "トランスフォーム",
+        "knownWrong": [],
+        "evidence": "po",
+        "note": "コンポーネント名として原語 Transform を出す箇所も多い。型名は訳さない"
+      },
+      "ko": {
+        "official": "트랜스폼",
+        "knownWrong": [],
+        "evidence": "po"
+      },
+      "zh-Hans": {
+        "official": "变换",
+        "knownWrong": [],
+        "evidence": "po"
+      },
+      "zh-Hant": {
+        "official": "轉換",
+        "knownWrong": [],
+        "evidence": "po"
+      }
+    },
+    "Interpolation": {
+      "ja": {
+        "official": "補間",
+        "knownWrong": [],
+        "evidence": "po",
+        "note": "単独の msgid は無く、Rotation Interpolation = 回転補間 などの複合から採った"
+      },
+      "ko": {
+        "official": "보간",
+        "knownWrong": [],
+        "evidence": "po"
+      },
+      "zh-Hans": {
+        "official": "插值",
+        "knownWrong": [],
+        "evidence": "po"
+      },
+      "zh-Hant": {
+        "official": "內插",
+        "knownWrong": [
+          "插值"
+        ],
+        "evidence": "po",
+        "note": "插值 は大陸語彙。エディタ zh-Hant は 內插（Rotation Interpolation = 旋轉內插）"
+      }
+    },
+    "Order": {
+      "ja": {
+        "official": "順序",
+        "knownWrong": [],
+        "evidence": "po",
+        "note": "単独の msgid は無く、Light Order = ライトの順序 / Sort Order = ソート順 から採った"
+      },
+      "ko": {
+        "official": "순서",
+        "knownWrong": [],
+        "evidence": "po"
+      },
+      "zh-Hans": {
+        "official": "顺序",
+        "knownWrong": [],
+        "evidence": "po",
+        "note": "Sort Order は 排序次序。並べ替えの意味では 排序 を使う"
+      },
+      "zh-Hant": {
+        "official": "順序",
+        "knownWrong": [],
+        "evidence": "po"
       }
     }
   },
