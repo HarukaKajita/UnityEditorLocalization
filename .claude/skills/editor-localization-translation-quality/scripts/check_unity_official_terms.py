@@ -9,6 +9,11 @@ Unity がエディタ UI を公式にローカライズしているのは **ja /
 対照表の正本は `references/unity-official-terms.json`。判定方針と出所は
 `references/unity-official-terms.md` に書いてある。
 
+同じ対照表の `familyTerms` は、**Unity 公式訳とは違う語を意図的に使うと決めた「家の用語」**を持つ
+（例: Target は公式 `ターゲット` だが、6 リポジトリ 46 件が `対象` を使う。文脈が Unity の固有機能名
+ではなく「操作の対象」だからである）。ここで `avoid` に挙げた語を使っていると、公式訳と同じ扱いで
+指摘する。**公式訳へ揃える語と、家で決めた語の両方を 1 つの検査で守る**ための仕組みである。
+
 使い方:
     python3 scripts/check_unity_official_terms.py path/to/Locales
     python3 scripts/check_unity_official_terms.py path/to/Locales --terms Asset,Texture
@@ -38,6 +43,42 @@ def load_catalog(path: pathlib.Path) -> tuple[str, dict[str, str]]:
     document = json.loads(path.read_text(encoding="utf-8"))
     entries = {entry["key"]: entry["value"] for entry in document.get("entries", [])}
     return document.get("locale", path.stem), entries
+
+
+def check_family_terms(locales_dir: pathlib.Path, glossary: dict, only: set[str] | None) -> list[dict]:
+    """家で決めた用語（familyTerms）から外れた語を探す。全ロケールが対象。"""
+    findings = []
+    family = glossary.get("familyTerms") or {}
+    if not family:
+        return findings
+
+    for table in sorted(locales_dir.glob("*.json")):
+        locale, entries = load_catalog(table)
+        for term, per_locale in family.items():
+            if only and term not in only:
+                continue
+            info = per_locale.get(locale)
+            if not info:
+                continue
+            preferred = info["preferred"]
+            for wrong in info.get("avoid", []):
+                for key, value in entries.items():
+                    if wrong not in value:
+                        continue
+                    # 家の語が誤用形を内包する場合（例: 家 `対象一覧` と avoid `一覧`）は二重に数えない。
+                    if preferred != wrong and wrong in preferred and value.count(wrong) <= value.count(preferred):
+                        continue
+                    findings.append({
+                        "file": table.name,
+                        "locale": locale,
+                        "key": key,
+                        "term": term,
+                        "official": preferred,
+                        "found": wrong,
+                        "value": value,
+                        "kind": "family",
+                    })
+    return findings
 
 
 def check(locales_dir: pathlib.Path, glossary: dict, only: set[str] | None) -> list[dict]:
@@ -88,21 +129,25 @@ def main() -> int:
     only = {t.strip() for t in args.terms.split(",")} if args.terms else None
 
     findings = check(args.locales_dir, glossary, only)
+    findings += check_family_terms(args.locales_dir, glossary, only)
 
     if args.json:
         print(json.dumps(findings, ensure_ascii=False, indent=2))
     elif not findings:
-        print(f"[unity-terms] Unity 公式訳と食い違う UI 用語はありません（{args.locales_dir}）")
+        print(f"[unity-terms] 公式訳・家の用語と食い違う UI 用語はありません（{args.locales_dir}）")
     else:
-        print(f"[unity-terms] Unity 公式のエディタ翻訳と食い違う UI 用語: {len(findings)} 件", file=sys.stderr)
+        print(f"[unity-terms] 公式訳・家の用語と食い違う UI 用語: {len(findings)} 件", file=sys.stderr)
         for f in findings:
             print(f"  {f['file']}: {f['key']}", file=sys.stderr)
-            print(f"    {f['term']} は公式では `{f['official']}`。`{f['found']}` を使っています", file=sys.stderr)
+            label = "家の用語では" if f.get("kind") == "family" else "は公式では"
+            print(f"    {f['term']} {label} `{f['official']}`。`{f['found']}` を使っています", file=sys.stderr)
             print(f"    {f['value'][:100]}", file=sys.stderr)
         print("", file=sys.stderr)
-        print("  Unity の公式訳へ揃えてください。ドキュメントと公式エディタ翻訳で訳語が割れている語は、", file=sys.stderr)
-        print("  **開発者が実際に目にするエディタ UI の訳語を優先します**（references/unity-official-terms.md）。", file=sys.stderr)
-        print("  文脈上その語が Unity の概念でないなら（中国語の `文件`＝文書 など）例外です。", file=sys.stderr)
+        print("  公式訳の指摘: Unity の公式訳へ揃えてください。ドキュメントと公式エディタ翻訳で訳語が", file=sys.stderr)
+        print("  割れている語は、**開発者が実際に目にするエディタ UI の訳語を優先します**。", file=sys.stderr)
+        print("  家の用語の指摘: 6 リポジトリで決めた語へ揃えてください（公式訳とわざと違える理由は", file=sys.stderr)
+        print("  references/unity-official-terms.md の familyTerms 節にあります）。", file=sys.stderr)
+        print("  文脈上その語が Unity の概念でないなら（中国語の `文件`＝文書 など）どちらも例外です。", file=sys.stderr)
     return 1 if findings else 0
 
 
