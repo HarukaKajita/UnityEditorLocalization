@@ -28,7 +28,8 @@ Unity Editor 上で開発・検証するための器に過ぎません。実装�
 > 未発売製品名・出品戦略といった公開前提でない内容が含まれるためです。同じ理由で `docs/REPOSITORY_MAP.md`
 > も公開向けに縮約されており、非公開リポジトリの行と URL・ローカルパスは載りません。
 > **このリポジトリで開発するときは、標準の正本（テンプレートリポジトリ）と運用の正本（サイトリポジトリ）も
-> 併せてセッションから読める状態にしてください。** ここにあるファイルだけでは全体像が分かりません。
+> 併せてセッションから読める状態にしてください**（下の「パイプライン整合性の 3 層」の末尾に同じ注意があります。
+> 公開リポジトリである本リポジトリは、標準本体が手元に無いぶんこの制約が強く効きます）。
 
 本リポジトリ固有の逸脱は次のとおりです。
 
@@ -83,6 +84,7 @@ Unity Editor 上で開発・検証するための器に過ぎません。実装�
 | `docs/REPOSITORY_MAP.md` | パイプラインのリポジトリ地図（**公開向けに縮約**。正本は運用リポジトリ側） |
 | `scripts/pipeline/verify_repo_guide.py` | 標準準拠検査（第 2 層） |
 | `scripts/pipeline/emit_release_manifest.py` | リリース契約ファイルの生成（第 3 層） |
+| `.githooks/` / `.github/workflows/pipeline-verify.yml` | commit / push / CI の関門 |
 | `pipeline/repo.json` | **このリポジトリの手書き宣言**（配布物ではない） |
 
 ```bash
@@ -90,9 +92,17 @@ python3 scripts/pipeline/verify_repo_guide.py       # 標準準拠検査。error
 python3 scripts/pipeline/emit_release_manifest.py   # リリース後に契約ファイルを 2 箇所へ書く
 ```
 
-- 検査はリリース工程で**省略不可**（`release-unity-package` の検証ゲート 1.5）。日常の実行は任意です。
-- ヒューリスティックな検査（文書内のパス参照・テスト整備の記述・スキル名）の誤検出は、`pipeline/repo.json` の `waivers` へ**理由を添えて**登録します。検査そのものを消さないでください。
+Windows で `python3` が Microsoft Store のエイリアスへ解決される環境では `python` を使ってください（hook 側はフォールバック済みです）。
+
+- 検査は `git push` の前に `.githooks/pre-push` が走り、**error が 1 件でもあれば push を止めます**（fail-closed）。**`core.hooksPath` は git が追跡できない設定なので、clone のたびに `git config core.hooksPath .githooks` が要ります。** 忘れると配られた hook が一度も走りません。
+- リリース工程では**省略不可**です（`release-unity-package` の検証ゲート 1.5）。日常の実行は任意です。
+- 誤検出や、この対象には筋が通らない指摘は、**検査そのものを消さず** `pipeline/repo.json` の `waivers` へ**理由を添えて**登録します。**期限の型が 3 つあり、どれを選ぶかが「その例外は何を約束しているか」の宣言**になります（スキーマの正本は GOLD_STANDARD §2.10）。
+  - `expiresAt`: 「次のリリースまでに必ず片付ける」。**期日を過ぎると error になり push が止まります。**
+  - 期限を書かない: 「この対象にこの指摘は筋が通らない」が将来も変わらないとき。
+  - `reviewedAt` ＋ `reviewEveryMonths`: 「今は直さなくてよいが、十分に時間が経ったらもう一度考えたい」。期日が来ても止めず **warn で促すだけ**で、見直したら `reviewedAt` を当日へ更新します（その更新が「もう一度考えた」記録になります）。
 - `pipeline/repo.json` の `saleUnit.exporterAssets` は販売単位の成果物を作る Exporter 設定アセットの宣言です。Exporter を増減したら合わせて更新します。
+
+**このリポジトリ 1 つでは全体像が分かりません。** 標準の正本はテンプレートリポジトリ、運用（レジストリ・商品情報・出品）の正本はサイトリポジトリ（`MySite` ＋ `external-content`）にあります。開発から販売まで回す作業は、**両方をセッションから読める状態にしてから**始めてください（GOLD_STANDARD §2.10。片方しか見えないと「書いてあるか」しか確かめられません）。パイプラインに乗っている全リポジトリの一覧と remote は MySite の `pipeline/repositories.json` が正本で、ローカルパスは機械ごとに違うため `npm run pipeline:repos` で解決結果を確認します。
 
 ## よく使う操作
 
