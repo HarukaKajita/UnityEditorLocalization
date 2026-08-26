@@ -66,8 +66,16 @@
     {
       "checkId": "23",
       "target": "products/unity-editor-localization/assets/install-vcc-manage-project.png",
-      "reason": "2026-08-26 に画像を開いて確認した。VCC のプロジェクト一覧を写した画像で、写っている版数は Unity の 2022.3.22f1 だけ。パッケージの版数はどこにも無いので、版を上げても撮り直す必要がない。同じ組の install-vcc-add-package.png はパッケージ版数 1.2.0 が焼き込まれているので waiver に入れず、撮り直すまで鳴らし続ける。",
-      "expiresAt": "2027-08-31"
+      "reason": "2026-08-26 に画像を開いて確認した。VCC のプロジェクト一覧を写した画像で、写っている版数は Unity の 2022.3.22f1 だけ。パッケージの版数はどこにも無いので、版を上げても撮り直す必要がない。当初は expiresAt で 1 年後の再確認を狙ったが、その型は期日に error で push を止めてしまう（止めたいのではなく、もう一度考えたいだけである）。2026-08-27 に見直し周期へ移した。",
+      "reviewedAt": "2026-08-27",
+      "reviewEveryMonths": 18
+    },
+    {
+      "checkId": "23",
+      "target": "products/unity-editor-localization/assets/install-vcc-add-package.png",
+      "reason": "この画像が示しているのは「VCC の Manage Packages で ＋ を押して追加する」手順であり、一覧の Latest Version 欄に写る版数は付随物にすぎない（一覧に出るのはその時点の最新版なので、画像の版数と一致しない方がむしろ普通である）。版を上げるたびに手作業の撮り直しを迫るのは手間だけを生み、放っておけば包括 waiver で黙らされて本命の事故ごと見えなくなる。そこで 2026-08-27 に、導入方法ページ 19 言語へ「画像の版数は撮影時のもので、実際にはその時点の最新版か必要な版を入れる」旨の但し書きを入れた上で、版数軸を逃がすことにした。VCC / ALCOM 自体の UI が作り直されれば撮り直しは要るので、18 か月ごとに見直す。",
+      "reviewedAt": "2026-08-27",
+      "reviewEveryMonths": 18
     }
   ]
 }
